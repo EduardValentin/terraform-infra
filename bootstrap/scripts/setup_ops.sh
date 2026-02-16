@@ -38,8 +38,15 @@ copy_static_files() {
 
   cp "$SCRIPT_DIR/../compose/ops/grafana/provisioning/datasources/datasources.yml" /srv/ops/grafana/provisioning/datasources/datasources.yml
   cp "$SCRIPT_DIR/../compose/ops/grafana/provisioning/dashboards/dashboards.yml" /srv/ops/grafana/provisioning/dashboards/dashboards.yml
-  cp "$SCRIPT_DIR/../compose/ops/grafana/dashboards/TEST/courseplatform-overview.json" /srv/ops/grafana/dashboards/TEST/courseplatform-overview.json
-  cp "$SCRIPT_DIR/../compose/ops/grafana/dashboards/PROD/courseplatform-overview.json" /srv/ops/grafana/dashboards/PROD/courseplatform-overview.json
+  for env_folder in TEST PROD; do
+    src_dir="$SCRIPT_DIR/../compose/ops/grafana/dashboards/$env_folder"
+    dst_dir="/srv/ops/grafana/dashboards/$env_folder"
+    find "$dst_dir" -maxdepth 1 -type f -name '*.json' -delete
+    for dashboard in "$src_dir"/*.json; do
+      [ -f "$dashboard" ] || continue
+      cp "$dashboard" "$dst_dir/$(basename "$dashboard")"
+    done
+  done
 
   cp "$SCRIPT_DIR/../compose/ops/prometheus/prometheus.yml" /srv/ops/prometheus/prometheus.yml
   cp "$SCRIPT_DIR/../compose/ops/prometheus/alerts.yml" /srv/ops/prometheus/alerts.yml
