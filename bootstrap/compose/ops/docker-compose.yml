@@ -43,6 +43,23 @@ services:
       - /srv/ops/prometheus/targets:/etc/prometheus/targets:ro
       - /srv/ops/prometheus/data:/prometheus
 
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: ops-alertmanager
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    labels:
+      logging: promtail
+      env: ops
+      app: ${APP_NAME}
+      service: alertmanager
+      host: ${HOST_LABEL}
+    volumes:
+      - /srv/ops/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - /srv/ops/alertmanager/data:/alertmanager
+
   loki:
     image: grafana/loki:3.2.1
     container_name: ops-loki

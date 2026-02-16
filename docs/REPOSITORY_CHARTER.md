@@ -112,6 +112,7 @@ Out of scope for this repository:
 
 - `bootstrap/compose/ops/docker-compose.yml`
 - `bootstrap/compose/ops/prometheus/*`
+- `bootstrap/compose/ops/alertmanager/*`
 - `bootstrap/compose/ops/loki/*`
 - `bootstrap/compose/ops/tempo/*`
 - `bootstrap/compose/ops/grafana/*`
@@ -162,8 +163,9 @@ Out of scope for this repository:
 1. Apphost/edge containers are discovered by promtail.
 2. Logs ship to Loki in OPS with labels `env/app/service/host`.
 3. Node/container metrics are scraped by OPS Prometheus.
-4. Application traces ship via OTLP to Tempo in OPS.
-5. Grafana reads Prometheus/Loki/Tempo with TEST/PROD folder separation.
+4. Prometheus sends alerts to Alertmanager with env-aware route labels.
+5. Application traces ship via OTLP to Tempo in OPS.
+6. Grafana reads Prometheus/Loki/Tempo with TEST/PROD folder separation.
 
 ## Cost and Scale Strategy
 
