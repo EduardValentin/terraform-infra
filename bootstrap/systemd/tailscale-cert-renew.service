@@ -1,6 +1,6 @@
 [Unit]
 Description=Renew tailscale certificates for configured hostnames
-After=network-online.target tailscaled.service
+After=network-online.target tailscaled.service docker.service
 Wants=network-online.target
 
 [Service]

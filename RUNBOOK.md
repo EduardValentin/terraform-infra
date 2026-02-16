@@ -80,6 +80,11 @@ cat /srv/apps/observability/promtail.yml
 ls -la /srv/edge/certs/courseplatform-test.longhair-eagle.ts.net
 cat /srv/edge/dynamic/tls-certs.yml
 curl -kI https://courseplatform-test.longhair-eagle.ts.net
+systemctl status tailscale-cert-renew.timer --no-pager
+systemctl start tailscale-cert-renew.service
+journalctl -u tailscale-cert-renew.service -n 20 --no-pager
+stat -c '%y %n' /srv/edge/dynamic/tls-certs.yml /srv/edge/certs/courseplatform-test.longhair-eagle.ts.net/cert.pem /srv/edge/certs/courseplatform-test.longhair-eagle.ts.net/key.pem
+echo | openssl s_client -connect courseplatform-test.longhair-eagle.ts.net:443 -servername courseplatform-test.longhair-eagle.ts.net 2>/dev/null | openssl x509 -noout -subject -issuer -enddate
 tailscale ip -4
 ss -ltnp | egrep '(:80|:443|:9100|:8080)'
 ```
@@ -89,6 +94,9 @@ Expected:
 - `/srv/edge/.env` contains `TRAEFIK_BIND_IP=<tailscale-ipv4>`.
 - `/srv/apps/observability/.env` contains `METRICS_BIND_IP=<tailscale-ipv4>`.
 - `/srv/apps/observability/promtail.yml` contains label keep rule `logging=promtail`.
+- `tailscale-cert-renew.timer` is active and `tailscale-cert-renew.service` runs without errors.
+- `tls-certs.yml`, `cert.pem`, and `key.pem` update timestamps after a manual renewal run.
+- `openssl s_client` returns the renewed certificate for `courseplatform-test.longhair-eagle.ts.net`.
 - `ss -ltnp` shows `80/443/9100/8080` bound to the Tailscale IPv4, not `0.0.0.0`.
 
 ## Verify OPS host

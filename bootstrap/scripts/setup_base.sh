@@ -7,7 +7,7 @@ SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 apt_install_base() {
   export DEBIAN_FRONTEND=noninteractive
   apt-get update
-  apt-get install -y ca-certificates curl gnupg lsb-release jq unzip tar systemd
+  apt-get install -y ca-certificates curl gnupg lsb-release jq unzip tar systemd openssl
 }
 
 install_docker() {
