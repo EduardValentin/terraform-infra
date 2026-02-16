@@ -1,0 +1,51 @@
+services:
+  promtail:
+    image: grafana/promtail:3.2.1
+    container_name: promtail
+    command: ["-config.file=/etc/promtail/config.yml"]
+    restart: unless-stopped
+    labels:
+      logging: promtail
+      env: ${ENVIRONMENT}
+      app: ${APP_NAME}
+      service: promtail
+      host: ${HOST_LABEL}
+    volumes:
+      - /srv/apps/observability/promtail.yml:/etc/promtail/config.yml:ro
+      - /srv/apps/observability/promtail-positions:/var/lib/promtail
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    container_name: node-exporter
+    restart: unless-stopped
+    command:
+      - '--path.rootfs=/host'
+    ports:
+      - "9100:9100"
+    pid: host
+    labels:
+      logging: promtail
+      env: ${ENVIRONMENT}
+      app: ${APP_NAME}
+      service: node-exporter
+      host: ${HOST_LABEL}
+    volumes:
+      - /:/host:ro,rslave
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: cadvisor
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    labels:
+      logging: promtail
+      env: ${ENVIRONMENT}
+      app: ${APP_NAME}
+      service: cadvisor
+      host: ${HOST_LABEL}
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro

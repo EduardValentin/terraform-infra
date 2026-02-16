@@ -1,0 +1,50 @@
+name: Release Bootstrap Bundle
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: release version (example v0.1.0)
+        required: true
+  push:
+    tags:
+      - bootstrap-v*
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve Version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "value=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=${GITHUB_REF_NAME#bootstrap-}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build Bundle
+        run: ./scripts/package_bootstrap_bundle.sh "${{ steps.version.outputs.value }}"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-bundle-${{ steps.version.outputs.value }}
+          path: |
+            dist/bootstrap-bundle-${{ steps.version.outputs.value }}.tar.gz
+            dist/bootstrap-bundle-${{ steps.version.outputs.value }}.tar.gz.sha256
+
+      - name: Publish Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.value }}
+          files: |
+            dist/bootstrap-bundle-${{ steps.version.outputs.value }}.tar.gz
+            dist/bootstrap-bundle-${{ steps.version.outputs.value }}.tar.gz.sha256
+          generate_release_notes: true

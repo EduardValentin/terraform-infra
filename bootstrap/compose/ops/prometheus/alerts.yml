@@ -1,0 +1,46 @@
+groups:
+  - name: env-priority
+    rules:
+      - alert: TestTargetDown
+        expr: up{env="test"} == 0
+        for: 10m
+        labels:
+          severity: warning
+          priority: low
+          env: test
+        annotations:
+          summary: "TEST target down"
+          description: "A TEST target has been down for 10 minutes."
+
+      - alert: ProdTargetDown
+        expr: up{env="prod"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          priority: primary
+          env: prod
+        annotations:
+          summary: "PROD target down"
+          description: "A PROD target has been down for 5 minutes."
+
+      - alert: TestTargetsMissing
+        expr: absent(up{env="test"})
+        for: 15m
+        labels:
+          severity: warning
+          priority: low
+          env: test
+        annotations:
+          summary: "No TEST targets discovered"
+          description: "Prometheus has no TEST targets in service discovery."
+
+      - alert: ProdTargetsMissing
+        expr: absent(up{env="prod"})
+        for: 10m
+        labels:
+          severity: critical
+          priority: primary
+          env: prod
+        annotations:
+          summary: "No PROD targets discovered"
+          description: "Prometheus has no PROD targets in service discovery."

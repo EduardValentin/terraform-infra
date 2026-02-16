@@ -1,0 +1,19 @@
+services:
+  traefik:
+    image: traefik:v3.2
+    container_name: traefik-test
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    labels:
+      logging: promtail
+      env: ${ENVIRONMENT}
+      app: ${APP_NAME}
+      service: traefik
+      host: ${HOST_LABEL}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /srv/edge/traefik.yml:/etc/traefik/traefik.yml:ro
+      - /srv/edge/dynamic:/etc/traefik/dynamic:ro
+      - /srv/edge/certs:/srv/edge/certs:ro

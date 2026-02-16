@@ -1,0 +1,15 @@
+#cloud-config
+write_files:
+  - path: /etc/course-platform-bootstrap.env
+    permissions: "0600"
+    owner: root:root
+    content: |
+      ROLE=apphost
+      ENVIRONMENT=prod
+      TAILSCALE_AUTH_KEY=${tailscale_auth_key}
+      TAILSCALE_TAGS=${tailscale_tags}
+runcmd:
+  - mkdir -p /opt/bootstrap
+  - curl -fsSL -o /tmp/bootstrap-bundle.tar.gz "https://github.com/${bundle_repo}/releases/download/${bundle_version}/bootstrap-bundle-${bundle_version}.tar.gz"
+  - tar -xzf /tmp/bootstrap-bundle.tar.gz -C /opt/bootstrap
+  - /bin/sh -lc '. /etc/course-platform-bootstrap.env && /opt/bootstrap/scripts/bootstrap.sh'

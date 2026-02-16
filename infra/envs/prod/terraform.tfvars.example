@@ -1,0 +1,9 @@
+enable_hetzner            = true
+enable_cloudflare         = false
+hcloud_token              = "replace"
+cloudflare_api_token      = "replace"
+cloudflare_zone_id        = "replace"
+domain_name               = "courseplatform.com"
+bootstrap_bundle_repo     = "EduardValentin/terraform-infra"
+bootstrap_bundle_version  = "v0.1.0"
+tailscale_auth_key_prod   = "tskey-replace"
