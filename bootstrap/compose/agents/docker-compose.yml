@@ -22,7 +22,7 @@ services:
     command:
       - '--path.rootfs=/host'
     ports:
-      - "9100:9100"
+      - "${METRICS_BIND_IP}:9100:9100"
     pid: host
     labels:
       logging: promtail
@@ -37,7 +37,7 @@ services:
     container_name: cadvisor
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "${METRICS_BIND_IP}:8080:8080"
     labels:
       logging: promtail
       env: ${ENVIRONMENT}
