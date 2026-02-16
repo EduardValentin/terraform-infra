@@ -31,6 +31,11 @@ OPS_LOKI_URL='http://ops.longhair-eagle.ts.net:3100/loki/api/v1/push' \
 /opt/bootstrap/scripts/bootstrap.sh
 ```
 
+Notes:
+
+- Apphost bootstrap requires a connected Tailscale node identity and IPv4 address.
+- For TEST, Traefik and exporter ports bind to the Tailscale IPv4 only.
+
 ## OPS host bootstrap
 
 ```bash
@@ -69,10 +74,20 @@ Low-resource mode effects:
 ```bash
 docker compose --env-file /srv/edge/.env -f /srv/edge/docker-compose.yml ps
 docker compose --env-file /srv/apps/observability/.env -f /srv/apps/observability/docker-compose.yml ps
+cat /srv/edge/.env
+cat /srv/apps/observability/.env
 ls -la /srv/edge/certs/courseplatform-test.longhair-eagle.ts.net
 cat /srv/edge/dynamic/tls-certs.yml
 curl -kI https://courseplatform-test.longhair-eagle.ts.net
+tailscale ip -4
+ss -ltnp | egrep '(:80|:443|:9100|:8080)'
 ```
+
+Expected:
+
+- `/srv/edge/.env` contains `TRAEFIK_BIND_IP=<tailscale-ipv4>`.
+- `/srv/apps/observability/.env` contains `METRICS_BIND_IP=<tailscale-ipv4>`.
+- `ss -ltnp` shows `80/443/9100/8080` bound to the Tailscale IPv4, not `0.0.0.0`.
 
 ## Verify OPS host
 

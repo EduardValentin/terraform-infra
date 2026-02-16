@@ -8,7 +8,23 @@ set_app_context() {
   APP_NAME_VALUE=${APP_NAME:-courseplatform}
   HOST_LABEL_VALUE=${HOST_LABEL:-$(hostname -f 2>/dev/null || hostname)}
   OPS_LOKI_URL_VALUE=${OPS_LOKI_URL:-http://ops.longhair-eagle.ts.net:3100/loki/api/v1/push}
+  TAILSCALE_BIND_IP_VALUE=${TAILSCALE_BIND_IP:-}
+  TRAEFIK_BIND_IP_VALUE=${TRAEFIK_BIND_IP:-}
+  METRICS_BIND_IP_VALUE=${METRICS_BIND_IP:-}
   DOLLAR='$'
+
+  if [ -z "$TAILSCALE_BIND_IP_VALUE" ] && command -v tailscale >/dev/null 2>&1; then
+    TAILSCALE_BIND_IP_VALUE=$(tailscale ip -4 2>/dev/null | head -n 1 || true)
+  fi
+
+  if [ -z "$TAILSCALE_BIND_IP_VALUE" ]; then
+    log "tailscale IPv4 address is required for apphost bootstrap"
+    exit 1
+  fi
+
+  if [ -z "$METRICS_BIND_IP_VALUE" ]; then
+    METRICS_BIND_IP_VALUE=$TAILSCALE_BIND_IP_VALUE
+  fi
 }
 
 prepare_directories() {
@@ -19,10 +35,28 @@ prepare_directories() {
 }
 
 write_edge_env() {
+  case "${ENVIRONMENT:-}" in
+    test)
+      if [ -z "$TRAEFIK_BIND_IP_VALUE" ]; then
+        TRAEFIK_BIND_IP_VALUE=$TAILSCALE_BIND_IP_VALUE
+      fi
+      ;;
+    prod)
+      if [ -z "$TRAEFIK_BIND_IP_VALUE" ]; then
+        TRAEFIK_BIND_IP_VALUE=0.0.0.0
+      fi
+      ;;
+    *)
+      log "ENVIRONMENT must be test or prod"
+      exit 1
+      ;;
+  esac
+
   cat > /srv/edge/.env <<__EDGE_ENV__
 ENVIRONMENT=${ENVIRONMENT}
 APP_NAME=${APP_NAME_VALUE}
 HOST_LABEL=${HOST_LABEL_VALUE}
+TRAEFIK_BIND_IP=${TRAEFIK_BIND_IP_VALUE}
 __EDGE_ENV__
 }
 
@@ -32,6 +66,7 @@ ENVIRONMENT=${ENVIRONMENT}
 APP_NAME=${APP_NAME_VALUE}
 HOST_LABEL=${HOST_LABEL_VALUE}
 OPS_LOKI_URL=${OPS_LOKI_URL_VALUE}
+METRICS_BIND_IP=${METRICS_BIND_IP_VALUE}
 __OBS_ENV__
 }
 
