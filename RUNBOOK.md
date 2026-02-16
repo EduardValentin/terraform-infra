@@ -76,6 +76,7 @@ docker compose --env-file /srv/edge/.env -f /srv/edge/docker-compose.yml ps
 docker compose --env-file /srv/apps/observability/.env -f /srv/apps/observability/docker-compose.yml ps
 cat /srv/edge/.env
 cat /srv/apps/observability/.env
+cat /srv/apps/observability/promtail.yml
 ls -la /srv/edge/certs/courseplatform-test.longhair-eagle.ts.net
 cat /srv/edge/dynamic/tls-certs.yml
 curl -kI https://courseplatform-test.longhair-eagle.ts.net
@@ -87,6 +88,7 @@ Expected:
 
 - `/srv/edge/.env` contains `TRAEFIK_BIND_IP=<tailscale-ipv4>`.
 - `/srv/apps/observability/.env` contains `METRICS_BIND_IP=<tailscale-ipv4>`.
+- `/srv/apps/observability/promtail.yml` contains label keep rule `logging=promtail`.
 - `ss -ltnp` shows `80/443/9100/8080` bound to the Tailscale IPv4, not `0.0.0.0`.
 
 ## Verify OPS host
@@ -99,6 +101,8 @@ curl -s http://localhost:9090/-/healthy
 curl -s http://localhost:9093/-/healthy
 curl -s http://localhost:3100/ready
 curl -s http://localhost:3200/ready
+curl -s http://localhost:9090/api/v1/targets | jq '.data.activeTargets[] | select(.labels.env=="test") | {scrapeUrl: .scrapeUrl, health: .health, labels: .labels}'
+curl -G -s http://localhost:3100/loki/api/v1/query --data-urlencode 'query=sum(count_over_time({env="test",app="courseplatform"}[5m]))'
 grep -n \"ingestion_rate_mb\" /srv/ops/loki/config.yml || true
 ```
 

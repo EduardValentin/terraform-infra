@@ -88,6 +88,9 @@ scrape_configs:
       - host: unix:///var/run/docker.sock
         refresh_interval: 10s
     relabel_configs:
+      - source_labels: ['__meta_docker_container_label_logging']
+        regex: 'promtail'
+        action: keep
       - source_labels: ['__meta_docker_container_name']
         regex: '/(.*)'
         target_label: service
@@ -113,10 +116,6 @@ scrape_configs:
       - source_labels: ['__meta_docker_container_label_host']
         regex: '(.+)'
         target_label: host
-        replacement: '${DOLLAR}1'
-      - source_labels: ['__meta_docker_container_name']
-        regex: '/(.*)'
-        target_label: container
         replacement: '${DOLLAR}1'
     pipeline_stages:
       - docker: {}
