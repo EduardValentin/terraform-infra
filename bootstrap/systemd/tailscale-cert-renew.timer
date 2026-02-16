@@ -1,0 +1,10 @@
+[Unit]
+Description=Run tailscale certificate renewal every 12 hours
+
+[Timer]
+OnBootSec=5m
+OnUnitActiveSec=12h
+Unit=tailscale-cert-renew.service
+
+[Install]
+WantedBy=timers.target

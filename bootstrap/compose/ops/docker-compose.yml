@@ -1,0 +1,118 @@
+services:
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: ops-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${OPS_GRAFANA_ADMIN_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    labels:
+      logging: promtail
+      env: ops
+      app: ${APP_NAME}
+      service: grafana
+      host: ${HOST_LABEL}
+    volumes:
+      - /srv/ops/grafana/data:/var/lib/grafana
+      - /srv/ops/grafana/provisioning:/etc/grafana/provisioning:ro
+      - /srv/ops/grafana/dashboards:/etc/grafana/dashboards:ro
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: ops-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    labels:
+      logging: promtail
+      env: ops
+      app: ${APP_NAME}
+      service: prometheus
+      host: ${HOST_LABEL}
+    volumes:
+      - /srv/ops/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - /srv/ops/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - /srv/ops/prometheus/targets:/etc/prometheus/targets:ro
+      - /srv/ops/prometheus/data:/prometheus
+
+  loki:
+    image: grafana/loki:3.2.1
+    container_name: ops-loki
+    restart: unless-stopped
+    command:
+      - '-config.file=/etc/loki/config.yml'
+    ports:
+      - "3100:3100"
+    labels:
+      logging: promtail
+      env: ops
+      app: ${APP_NAME}
+      service: loki
+      host: ${HOST_LABEL}
+    volumes:
+      - /srv/ops/loki/config.yml:/etc/loki/config.yml:ro
+      - /srv/ops/loki/data:/loki
+
+  tempo:
+    image: grafana/tempo:2.6.1
+    container_name: ops-tempo
+    restart: unless-stopped
+    command:
+      - '-config.file=/etc/tempo/config.yml'
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+      - "4318:4318"
+    labels:
+      logging: promtail
+      env: ops
+      app: ${APP_NAME}
+      service: tempo
+      host: ${HOST_LABEL}
+    volumes:
+      - /srv/ops/tempo/config.yml:/etc/tempo/config.yml:ro
+      - /srv/ops/tempo/data:/var/tempo
+
+  ops-node-exporter:
+    image: prom/node-exporter:v1.8.2
+    container_name: ops-node-exporter
+    restart: unless-stopped
+    command:
+      - '--path.rootfs=/host'
+    labels:
+      logging: promtail
+      env: ops
+      app: ${APP_NAME}
+      service: node-exporter
+      host: ${HOST_LABEL}
+    pid: host
+    ports:
+      - "19100:9100"
+    volumes:
+      - /:/host:ro,rslave
+
+  ops-cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: ops-cadvisor
+    restart: unless-stopped
+    labels:
+      logging: promtail
+      env: ops
+      app: ${APP_NAME}
+      service: cadvisor
+      host: ${HOST_LABEL}
+    ports:
+      - "18080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro

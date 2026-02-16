@@ -1,0 +1,26 @@
+api:
+  dashboard: true
+  insecure: false
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+providers:
+  docker:
+    exposedByDefault: false
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: ops@courseplatform.com
+      storage: /srv/edge/acme/acme.json
+      httpChallenge:
+        entryPoint: web
+log:
+  format: json
+  level: INFO
+accessLog:
+  format: json

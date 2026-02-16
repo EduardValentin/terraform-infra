@@ -1,0 +1,79 @@
+{
+  "id": null,
+  "uid": "cp-prod-overview",
+  "title": "Course Platform PROD Overview",
+  "tags": ["course-platform", "prod"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "templating": {
+    "list": [
+      {
+        "name": "host",
+        "label": "Host",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "query": "label_values(up{env=\"prod\"}, host)",
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": false,
+        "current": {
+          "text": "All",
+          "value": ".*"
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "text",
+      "title": "ENV Banner",
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
+      "options": {
+        "mode": "markdown",
+        "content": "# ENV: PROD\\nPrimary alert routing and user-impacting signal monitoring."
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Down Targets",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "count(up{env=\"prod\",host=~\"$host\"} == 0)"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Target Availability by Service",
+      "gridPos": { "h": 10, "w": 16, "x": 8, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "avg by (service) (up{env=\"prod\",host=~\"$host\"})",
+          "legendFormat": "{{service}}"
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "Recent Logs",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 10 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{env=\"prod\",host=~\"$host\"}"
+        }
+      ]
+    }
+  ]
+}

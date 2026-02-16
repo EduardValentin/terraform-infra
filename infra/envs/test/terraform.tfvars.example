@@ -1,0 +1,6 @@
+enable_cloudflare    = false
+cloudflare_api_token = "replace"
+cloudflare_zone_id   = "replace"
+domain_name          = "courseplatform.com"
+test_subdomain       = "courseplatform-test"
+test_host_ipv4       = "100.64.0.10"
