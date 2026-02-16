@@ -59,9 +59,10 @@ LOW_RESOURCE_MODE=true ROLE=ops ENVIRONMENT=ops /opt/bootstrap/scripts/bootstrap
 
 Low-resource mode effects:
 
+- Loki uses conservative ingestion limits and a slower compaction interval.
 - Tempo uses lower ingestion limits and smaller block duration.
 - You should also set application trace sampling to 10-20% (for example `OTEL_TRACES_SAMPLER=parentbased_traceidratio` and `OTEL_TRACES_SAMPLER_ARG=0.2`).
-- Expect reduced trace coverage.
+- Expect reduced trace coverage and potential delay for high-volume log indexing.
 
 ## Verify TEST host
 
@@ -83,6 +84,7 @@ curl -s http://localhost:9090/-/healthy
 curl -s http://localhost:9093/-/healthy
 curl -s http://localhost:3100/ready
 curl -s http://localhost:3200/ready
+grep -n \"ingestion_rate_mb\" /srv/ops/loki/config.yml || true
 ```
 
 ## Grafana checks

@@ -46,11 +46,11 @@ copy_static_files() {
 
   cp "$SCRIPT_DIR/../compose/ops/alertmanager/alertmanager.yml" /srv/ops/alertmanager/alertmanager.yml
 
-  cp "$SCRIPT_DIR/../compose/ops/loki/config.yml" /srv/ops/loki/config.yml
-
   if [ "$LOW_RESOURCE_MODE_VALUE" = "true" ]; then
+    cp "$SCRIPT_DIR/../compose/ops/loki/config-low-resource.yml" /srv/ops/loki/config.yml
     cp "$SCRIPT_DIR/../compose/ops/tempo/config-low-resource.yml" /srv/ops/tempo/config.yml
   else
+    cp "$SCRIPT_DIR/../compose/ops/loki/config.yml" /srv/ops/loki/config.yml
     cp "$SCRIPT_DIR/../compose/ops/tempo/config.yml" /srv/ops/tempo/config.yml
   fi
 }

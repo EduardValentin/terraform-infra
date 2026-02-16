@@ -33,6 +33,7 @@ It is designed for human operators and coding agents to share the same constrain
 - Observability in OPS: Grafana + Prometheus + Loki + Tempo
   - Loki retention: 30 days
   - Tempo retention: 7 days
+  - If OPS runs on 1 vCPU / 2 GB, use low-resource mode with conservative Loki/Tempo ingestion and 10-20% app trace sampling
 - Standard labels everywhere: `env`, `app`, `service`, `host`
 - No high-cardinality PII labels in Loki (`email`, `username`, `IP` are log fields only)
 - Hosts must not require git credentials
@@ -203,6 +204,18 @@ Out of scope for this repository:
 2. Build new bootstrap bundle version.
 3. Apply to OPS host by rerunning bootstrap role `ops`.
 4. Verify health endpoints and dashboards.
+
+### Operating low-resource OPS mode
+
+Use low-resource mode only when OPS capacity is constrained (1 vCPU / 2 GB class VM).
+
+- Enable with `LOW_RESOURCE_MODE=true` when running `setup_ops.sh`.
+- Expected behavior:
+  - Loki: conservative ingestion limits and slower compaction cadence.
+  - Tempo: lower ingestion limits and smaller block duration.
+  - Applications should lower trace sampling to 10-20%.
+- Tradeoff:
+  - reduced trace detail and slower indexing under burst traffic.
 
 ### Updating Traefik or telemetry agents
 
