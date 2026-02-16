@@ -1,0 +1,32 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ['env', 'priority', 'alertname']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 2h
+  receiver: ops-default
+  routes:
+    - matchers:
+        - env="test"
+      receiver: test-low-priority
+      continue: false
+    - matchers:
+        - env="prod"
+      receiver: prod-primary
+      continue: false
+
+receivers:
+  - name: ops-default
+  - name: test-low-priority
+  - name: prod-primary
+
+inhibit_rules:
+  - source_matchers:
+      - env="prod"
+      - severity="critical"
+    target_matchers:
+      - env="prod"
+      - severity="warning"
+    equal: ['alertname', 'service', 'host']

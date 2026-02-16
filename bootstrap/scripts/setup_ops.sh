@@ -20,6 +20,8 @@ prepare_directories() {
   install -d -m 0755 /srv/ops/prometheus
   install -d -m 0755 /srv/ops/prometheus/data
   install -d -m 0755 /srv/ops/prometheus/targets
+  install -d -m 0755 /srv/ops/alertmanager
+  install -d -m 0755 /srv/ops/alertmanager/data
   install -d -m 0755 /srv/ops/loki
   install -d -m 0755 /srv/ops/loki/data
   install -d -m 0755 /srv/ops/tempo
@@ -41,6 +43,8 @@ copy_static_files() {
 
   cp "$SCRIPT_DIR/../compose/ops/prometheus/prometheus.yml" /srv/ops/prometheus/prometheus.yml
   cp "$SCRIPT_DIR/../compose/ops/prometheus/alerts.yml" /srv/ops/prometheus/alerts.yml
+
+  cp "$SCRIPT_DIR/../compose/ops/alertmanager/alertmanager.yml" /srv/ops/alertmanager/alertmanager.yml
 
   cp "$SCRIPT_DIR/../compose/ops/loki/config.yml" /srv/ops/loki/config.yml
 

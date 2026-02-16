@@ -80,6 +80,7 @@ docker compose --env-file /srv/ops/.env -f /srv/ops/docker-compose.yml ps
 cat /srv/ops/prometheus/targets/test.json
 cat /srv/ops/prometheus/targets/prod.json
 curl -s http://localhost:9090/-/healthy
+curl -s http://localhost:9093/-/healthy
 curl -s http://localhost:3100/ready
 curl -s http://localhost:3200/ready
 ```
@@ -92,6 +93,10 @@ curl -s http://localhost:3200/ready
 - Confirm Prometheus alerts distinguish severity:
   - `env=test` -> low priority
   - `env=prod` -> primary/critical
+- Confirm Alertmanager routing config loaded:
+  - `docker exec ops-alertmanager cat /etc/alertmanager/alertmanager.yml`
+  - test alerts route to `test-low-priority`
+  - prod alerts route to `prod-primary`
 
 ## Rollback
 
