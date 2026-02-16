@@ -2,29 +2,49 @@
   "id": null,
   "uid": "cp-test-overview",
   "title": "Course Platform TEST Overview",
-  "tags": ["course-platform", "test"],
+  "tags": ["course-platform", "test", "ops"],
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "refresh": "30s",
   "templating": {
     "list": [
       {
+        "name": "env",
+        "label": "Environment",
+        "type": "constant",
+        "query": "test",
+        "current": { "text": "test", "value": "test" }
+      },
+      {
+        "name": "app",
+        "label": "App",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": "label_values(up{env=\"test\"}, app)",
+        "includeAll": true,
+        "allValue": ".*",
+        "current": { "text": "All", "value": ".*" }
+      },
+      {
+        "name": "service",
+        "label": "Service",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": "label_values(up{env=\"test\",app=~\"$app\"}, service)",
+        "includeAll": true,
+        "allValue": ".*",
+        "current": { "text": "All", "value": ".*" }
+      },
+      {
         "name": "host",
         "label": "Host",
         "type": "query",
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "query": "label_values(up{env=\"test\"}, host)",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": "label_values(up{env=\"test\",app=~\"$app\",service=~\"$service\"}, host)",
         "includeAll": true,
         "allValue": ".*",
-        "multi": false,
-        "current": {
-          "text": "All",
-          "value": ".*"
-        }
+        "current": { "text": "All", "value": ".*" }
       }
     ]
   },
@@ -35,43 +55,92 @@
       "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
       "options": {
         "mode": "markdown",
-        "content": "# ENV: TEST\\nLow-priority alert routing and safe rollout validation."
+        "content": "# ENV: TEST\\nLow-priority alert routing and rollout validation."
       }
     },
     {
       "type": "stat",
-      "title": "Down Targets",
-      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 4 },
+      "title": "Firing Alerts",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 4 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
           "refId": "A",
-          "expr": "count(up{env=\"test\",host=~\"$host\"} == 0)"
+          "expr": "count(ALERTS{alertstate=\"firing\",env=\"test\",app=~\"$app\",service=~\"$service\",host=~\"$host\"})"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Down Targets",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "count(up{env=\"test\",app=~\"$app\",service=~\"$service\",host=~\"$host\"} == 0)"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Targets Total",
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "count(up{env=\"test\",app=~\"$app\",service=~\"$service\",host=~\"$host\"})"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Promtail Log Lines/s",
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 4 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate({env=\"test\",app=~\"$app\",service=~\"$service\",host=~\"$host\"}[5m]))"
         }
       ]
     },
     {
       "type": "timeseries",
-      "title": "Target Availability by Service",
-      "gridPos": { "h": 10, "w": 16, "x": 8, "y": 4 },
+      "title": "Availability by Service",
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 10 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
           "refId": "A",
-          "expr": "avg by (service) (up{env=\"test\",host=~\"$host\"})",
+          "expr": "avg by (service) (up{env=\"test\",app=~\"$app\",service=~\"$service\",host=~\"$host\"})",
           "legendFormat": "{{service}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Firing Alerts by Priority",
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (priority) (ALERTS{alertstate=\"firing\",env=\"test\",app=~\"$app\",service=~\"$service\",host=~\"$host\"})",
+          "legendFormat": "{{priority}}"
         }
       ]
     },
     {
       "type": "logs",
       "title": "Recent Logs",
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 10 },
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 20 },
       "datasource": { "type": "loki", "uid": "loki" },
       "targets": [
         {
           "refId": "A",
-          "expr": "{env=\"test\",host=~\"$host\"}"
+          "expr": "{env=\"test\",app=~\"$app\",service=~\"$service\",host=~\"$host\"}"
         }
       ]
     }
