@@ -7,7 +7,7 @@ SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 set_app_context() {
   APP_NAME_VALUE=${APP_NAME:-courseplatform}
   HOST_LABEL_VALUE=${HOST_LABEL:-$(hostname -f 2>/dev/null || hostname)}
-  OPS_LOKI_URL_VALUE=${OPS_LOKI_URL:-http://ops.longhair-eagle.ts.net:3100/loki/api/v1/push}
+  OPS_LOKI_URL_VALUE=${OPS_LOKI_URL:-http://susanoo-ops.longhair-eagle.ts.net:3100/loki/api/v1/push}
   TAILSCALE_BIND_IP_VALUE=${TAILSCALE_BIND_IP:-}
   TRAEFIK_BIND_IP_VALUE=${TRAEFIK_BIND_IP:-}
   METRICS_BIND_IP_VALUE=${METRICS_BIND_IP:-}

@@ -21,6 +21,10 @@ Portable infrastructure and bootstrap automation for Course Platform across TEST
 - test-first rollout: deploy TEST and OPS on home server before Hetzner PROD
 - tailnet: `longhair-eagle.ts.net` with MagicDNS enabled
 - bundle source repo: `EduardValentin/terraform-infra`
+- VM node hostnames:
+  - TEST VM: `susanoo-test`
+  - OPS VM: `susanoo-ops`
+- TEST app hostname stays `[app]-test.longhair-eagle.ts.net` (for example `courseplatform-test.longhair-eagle.ts.net`)
 
 ## Quick start
 
@@ -40,7 +44,7 @@ Use this on TEST/OPS manual VM creation and in PROD cloud-init payload:
 ```bash
 curl -fsSL -o /tmp/bootstrap-bundle.tar.gz "https://github.com/EduardValentin/terraform-infra/releases/download/v0.1.0/bootstrap-bundle-v0.1.0.tar.gz" && \
 mkdir -p /opt/bootstrap && tar -xzf /tmp/bootstrap-bundle.tar.gz -C /opt/bootstrap && \
-ROLE=apphost ENVIRONMENT=test TAILSCALE_AUTH_KEY=tskey-example TAILSCALE_TAGS='tag:test' /opt/bootstrap/scripts/bootstrap.sh
+ROLE=apphost ENVIRONMENT=test HOSTNAME_OVERRIDE=susanoo-test TAILSCALE_AUTH_KEY=tskey-example TAILSCALE_TAGS='tag:test' /opt/bootstrap/scripts/bootstrap.sh
 ```
 
 ## Brand domain mapping later

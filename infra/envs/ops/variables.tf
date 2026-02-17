@@ -5,7 +5,7 @@ variable "domain_name" {
 
 variable "ops_subdomain" {
   type    = string
-  default = "ops"
+  default = "susanoo-ops"
 }
 
 variable "ops_additional_hostnames" {

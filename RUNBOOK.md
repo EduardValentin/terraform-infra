@@ -24,10 +24,11 @@ mkdir -p /opt/bootstrap
 tar -xzf /tmp/bootstrap-bundle.tar.gz -C /opt/bootstrap
 ROLE=apphost \
 ENVIRONMENT=test \
+HOSTNAME_OVERRIDE=susanoo-test \
 TAILSCALE_AUTH_KEY=tskey-test \
 TAILSCALE_TAGS='tag:test' \
 APP_NAME=courseplatform \
-OPS_LOKI_URL='http://ops.longhair-eagle.ts.net:3100/loki/api/v1/push' \
+OPS_LOKI_URL='http://susanoo-ops.longhair-eagle.ts.net:3100/loki/api/v1/push' \
 /opt/bootstrap/scripts/bootstrap.sh
 ```
 
@@ -35,6 +36,8 @@ Notes:
 
 - Apphost bootstrap requires a connected Tailscale node identity and IPv4 address.
 - For TEST, Traefik and exporter ports bind to the Tailscale IPv4 only.
+- TEST VM node hostname should be `susanoo-test`.
+- TEST app TLS hostname remains `courseplatform-test.longhair-eagle.ts.net`.
 
 ## OPS host bootstrap
 
@@ -44,6 +47,7 @@ mkdir -p /opt/bootstrap
 tar -xzf /tmp/bootstrap-bundle.tar.gz -C /opt/bootstrap
 ROLE=ops \
 ENVIRONMENT=ops \
+HOSTNAME_OVERRIDE=susanoo-ops \
 TAILSCALE_AUTH_KEY=tskey-ops \
 TAILSCALE_TAGS='tag:ops' \
 APP_NAME=courseplatform \

@@ -5,6 +5,8 @@ Current domain root is a placeholder: `courseplatform.com`.
 ## Current usage
 
 - TEST Tailscale TLS hostname: `courseplatform-test.longhair-eagle.ts.net`
+- TEST VM node hostname: `susanoo-test.longhair-eagle.ts.net`
+- OPS VM node hostname: `susanoo-ops.longhair-eagle.ts.net`
 - PROD placeholder host can be `app.courseplatform.com`
 
 ## Future brand domains
