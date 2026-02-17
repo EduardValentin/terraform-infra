@@ -51,7 +51,7 @@ It is designed for human operators and coding agents to share the same constrain
   - host type: home server VM
   - access: Tailscale only
   - VM node hostname: `susanoo-test.longhair-eagle.ts.net`
-  - app TLS hostname pattern: `[app]-test.longhair-eagle.ts.net` (for example `courseplatform-test.longhair-eagle.ts.net`)
+  - current TLS hostname: `susanoo-test.longhair-eagle.ts.net` (single-node cert mode)
 - OPS:
   - purpose: centralized business observability
   - host type: dedicated home server VM

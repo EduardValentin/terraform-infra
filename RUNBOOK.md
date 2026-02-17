@@ -37,7 +37,7 @@ Notes:
 - Apphost bootstrap requires a connected Tailscale node identity and IPv4 address.
 - For TEST, Traefik and exporter ports bind to the Tailscale IPv4 only.
 - TEST VM node hostname should be `susanoo-test`.
-- TEST app TLS hostname remains `courseplatform-test.longhair-eagle.ts.net`.
+- TEST TLS hostname defaults to `susanoo-test.longhair-eagle.ts.net`.
 
 ## OPS host bootstrap
 
@@ -51,7 +51,7 @@ HOSTNAME_OVERRIDE=susanoo-ops \
 TAILSCALE_AUTH_KEY=tskey-ops \
 TAILSCALE_TAGS='tag:ops' \
 APP_NAME=courseplatform \
-TEST_HOSTS='courseplatform-test.longhair-eagle.ts.net' \
+TEST_HOSTS='susanoo-test.longhair-eagle.ts.net' \
 PROD_HOSTS='' \
 LOW_RESOURCE_MODE=false \
 OPS_GRAFANA_ADMIN_PASSWORD='change-me' \
@@ -81,14 +81,14 @@ docker compose --env-file /srv/apps/observability/.env -f /srv/apps/observabilit
 cat /srv/edge/.env
 cat /srv/apps/observability/.env
 cat /srv/apps/observability/promtail.yml
-ls -la /srv/edge/certs/courseplatform-test.longhair-eagle.ts.net
+ls -la /srv/edge/certs/susanoo-test.longhair-eagle.ts.net
 cat /srv/edge/dynamic/tls-certs.yml
-curl -kI https://courseplatform-test.longhair-eagle.ts.net
+curl -kI https://susanoo-test.longhair-eagle.ts.net
 systemctl status tailscale-cert-renew.timer --no-pager
 systemctl start tailscale-cert-renew.service
 journalctl -u tailscale-cert-renew.service -n 20 --no-pager
-stat -c '%y %n' /srv/edge/dynamic/tls-certs.yml /srv/edge/certs/courseplatform-test.longhair-eagle.ts.net/cert.pem /srv/edge/certs/courseplatform-test.longhair-eagle.ts.net/key.pem
-echo | openssl s_client -connect courseplatform-test.longhair-eagle.ts.net:443 -servername courseplatform-test.longhair-eagle.ts.net 2>/dev/null | openssl x509 -noout -subject -issuer -enddate
+stat -c '%y %n' /srv/edge/dynamic/tls-certs.yml /srv/edge/certs/susanoo-test.longhair-eagle.ts.net/cert.pem /srv/edge/certs/susanoo-test.longhair-eagle.ts.net/key.pem
+echo | openssl s_client -connect susanoo-test.longhair-eagle.ts.net:443 -servername susanoo-test.longhair-eagle.ts.net 2>/dev/null | openssl x509 -noout -subject -issuer -enddate
 tailscale ip -4
 ss -ltnp | egrep '(:80|:443|:9100|:8080)'
 ```
@@ -100,7 +100,7 @@ Expected:
 - `/srv/apps/observability/promtail.yml` contains label keep rule `logging=promtail`.
 - `tailscale-cert-renew.timer` is active and `tailscale-cert-renew.service` runs without errors.
 - `tls-certs.yml`, `cert.pem`, and `key.pem` update timestamps after a manual renewal run.
-- `openssl s_client` returns the renewed certificate for `courseplatform-test.longhair-eagle.ts.net`.
+- `openssl s_client` returns the renewed certificate for `susanoo-test.longhair-eagle.ts.net`.
 - `ss -ltnp` shows `80/443/9100/8080` bound to the Tailscale IPv4, not `0.0.0.0`.
 
 ## Verify OPS host

@@ -24,7 +24,7 @@ Portable infrastructure and bootstrap automation for Course Platform across TEST
 - VM node hostnames:
   - TEST VM: `susanoo-test`
   - OPS VM: `susanoo-ops`
-- TEST app hostname stays `[app]-test.longhair-eagle.ts.net` (for example `courseplatform-test.longhair-eagle.ts.net`)
+- Current TEST TLS hostname default: `susanoo-test.longhair-eagle.ts.net` (single-node cert mode)
 
 ## Quick start
 

@@ -5,7 +5,7 @@ variable "domain_name" {
 
 variable "test_subdomain" {
   type    = string
-  default = "courseplatform-test"
+  default = "susanoo-test"
 }
 
 variable "test_additional_hostnames" {
