@@ -25,6 +25,7 @@ Portable infrastructure and bootstrap automation for Course Platform across TEST
   - TEST VM: `susanoo-test`
   - OPS VM: `susanoo-ops`
 - Current TEST TLS hostname default: `susanoo-test.longhair-eagle.ts.net` (single-node cert mode)
+- PROD bootstrap includes scheduled PostgreSQL backups with local retention and optional NAS replication path.
 
 ## Quick start
 
