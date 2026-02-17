@@ -50,11 +50,13 @@ It is designed for human operators and coding agents to share the same constrain
   - purpose: pre-production validation
   - host type: home server VM
   - access: Tailscale only
-  - hostname convention: `[app]-test.longhair-eagle.ts.net`
+  - VM node hostname: `susanoo-test.longhair-eagle.ts.net`
+  - current TLS hostname: `susanoo-test.longhair-eagle.ts.net` (single-node cert mode)
 - OPS:
   - purpose: centralized business observability
   - host type: dedicated home server VM
   - access: Tailscale only
+  - VM node hostname: `susanoo-ops.longhair-eagle.ts.net`
 - PROD:
   - purpose: public production delivery
   - host type: Hetzner VPS

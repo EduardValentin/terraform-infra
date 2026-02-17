@@ -8,7 +8,7 @@ set_context() {
   APP_NAME_VALUE=${APP_NAME:-courseplatform}
   HOST_LABEL_VALUE=${HOST_LABEL:-$(hostname -f 2>/dev/null || hostname)}
   LOW_RESOURCE_MODE_VALUE=${LOW_RESOURCE_MODE:-false}
-  TEST_HOSTS_VALUE=${TEST_HOSTS:-courseplatform-test.longhair-eagle.ts.net}
+  TEST_HOSTS_VALUE=${TEST_HOSTS:-susanoo-test.longhair-eagle.ts.net}
   PROD_HOSTS_VALUE=${PROD_HOSTS:-}
   OPS_GRAFANA_ADMIN_PASSWORD_VALUE=${OPS_GRAFANA_ADMIN_PASSWORD:-admin-change-me}
 }
