@@ -20,6 +20,7 @@ cp -R "$ROOT_DIR/bootstrap/scripts" "$BUNDLE_DIR/scripts"
 cp -R "$ROOT_DIR/bootstrap/compose" "$BUNDLE_DIR/compose"
 cp -R "$ROOT_DIR/bootstrap/systemd" "$BUNDLE_DIR/systemd"
 cp -R "$ROOT_DIR/bootstrap/edge" "$BUNDLE_DIR/edge"
+cp -R "$ROOT_DIR/bootstrap/env" "$BUNDLE_DIR/env"
 cp "$ROOT_DIR/scripts/install_bootstrap_bundle.sh" "$BUNDLE_DIR/install_bootstrap_bundle.sh"
 printf '%s\n' "$VERSION" > "$BUNDLE_DIR/VERSION"
 
