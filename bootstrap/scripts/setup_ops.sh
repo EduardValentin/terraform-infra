@@ -28,6 +28,14 @@ prepare_directories() {
   install -d -m 0755 /srv/ops/tempo/data
 }
 
+set_data_permissions() {
+  chown -R 472:472 /srv/ops/grafana/data
+  chown -R 65534:65534 /srv/ops/prometheus/data
+  chown -R 65534:65534 /srv/ops/alertmanager/data
+  chown -R 10001:10001 /srv/ops/loki/data
+  chown -R 10001:10001 /srv/ops/tempo/data
+}
+
 copy_static_files() {
   cp "$SCRIPT_DIR/../compose/ops/docker-compose.yml" /srv/ops/docker-compose.yml
 
@@ -123,6 +131,7 @@ main() {
   require_root
   set_context
   prepare_directories
+  set_data_permissions
   copy_static_files
   write_env_file
   write_targets
