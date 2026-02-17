@@ -3,6 +3,8 @@ services:
     image: traefik:v3.2
     container_name: traefik-prod
     restart: unless-stopped
+    environment:
+      DOCKER_API_VERSION: "1.44"
     ports:
       - "${TRAEFIK_BIND_IP}:80:80"
       - "${TRAEFIK_BIND_IP}:443:443"
