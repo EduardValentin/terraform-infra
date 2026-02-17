@@ -33,8 +33,8 @@ Portable infrastructure and bootstrap automation for Course Platform across TEST
 3. Build and publish bootstrap bundle:
    - `make bundle VERSION=v0.1.0`
 4. Bootstrap hosts:
-   - TEST VM: `ROLE=apphost ENVIRONMENT=test ... /opt/bootstrap/scripts/bootstrap.sh`
-   - OPS VM: `ROLE=ops ENVIRONMENT=ops ... /opt/bootstrap/scripts/bootstrap.sh`
+   - copy env templates from `bootstrap-bundle-<version>/env/*.template` to `/root/bootstrap/*.env`
+   - execute with loader script `bootstrap-bundle-<version>/scripts/run_bootstrap_from_env.sh`
 5. Configure scrape target hostnames on OPS host via `TEST_HOSTS` and `PROD_HOSTS` env in setup command.
 
 ## Bootstrap install command
@@ -42,9 +42,11 @@ Portable infrastructure and bootstrap automation for Course Platform across TEST
 Use this on TEST/OPS manual VM creation and in PROD cloud-init payload:
 
 ```bash
-curl -fsSL -o /tmp/bootstrap-bundle.tar.gz "https://github.com/EduardValentin/terraform-infra/releases/download/v0.1.0/bootstrap-bundle-v0.1.0.tar.gz" && \
+curl -fsSL -o /tmp/bootstrap-bundle.tar.gz "https://github.com/EduardValentin/terraform-infra/releases/download/0.1.10/bootstrap-bundle-0.1.10.tar.gz" && \
 mkdir -p /opt/bootstrap && tar -xzf /tmp/bootstrap-bundle.tar.gz -C /opt/bootstrap && \
-ROLE=apphost ENVIRONMENT=test HOSTNAME_OVERRIDE=susanoo-test TAILSCALE_AUTH_KEY=tskey-example TAILSCALE_TAGS='tag:test' /opt/bootstrap/scripts/bootstrap.sh
+cp /opt/bootstrap/bootstrap-bundle-0.1.10/env/bootstrap-test.env.template /root/bootstrap-test.env && \
+chmod 600 /root/bootstrap-test.env && \
+/opt/bootstrap/bootstrap-bundle-0.1.10/scripts/run_bootstrap_from_env.sh /root/bootstrap-test.env
 ```
 
 ## Brand domain mapping later

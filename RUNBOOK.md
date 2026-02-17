@@ -11,25 +11,31 @@
 
 ```bash
 cd /Users/trocaneduard/Documents/Personal/terraform-infra
-./scripts/package_bootstrap_bundle.sh v0.1.0
-ls -lh dist/bootstrap-bundle-v0.1.0.tar.gz
-sha256sum dist/bootstrap-bundle-v0.1.0.tar.gz
+./scripts/package_bootstrap_bundle.sh 0.1.10
+ls -lh dist/bootstrap-bundle-0.1.10.tar.gz
+sha256sum dist/bootstrap-bundle-0.1.10.tar.gz
+```
+
+## Standardized bootstrap env files
+
+Use bundle templates and keep real env files root-only:
+
+```bash
+sudo install -d -m 0700 /root/bootstrap
+sudo cp /opt/bootstrap/bootstrap-bundle-0.1.10/env/bootstrap-test.env.template /root/bootstrap/bootstrap-test.env
+sudo cp /opt/bootstrap/bootstrap-bundle-0.1.10/env/bootstrap-ops.env.template /root/bootstrap/bootstrap-ops.env
+sudo chmod 600 /root/bootstrap/bootstrap-test.env /root/bootstrap/bootstrap-ops.env
+sudo nano /root/bootstrap/bootstrap-test.env
+sudo nano /root/bootstrap/bootstrap-ops.env
 ```
 
 ## TEST host bootstrap
 
 ```bash
-curl -fsSL -o /tmp/bootstrap-bundle.tar.gz "https://github.com/EduardValentin/terraform-infra/releases/download/v0.1.0/bootstrap-bundle-v0.1.0.tar.gz"
+curl -fsSL -o /tmp/bootstrap-bundle.tar.gz "https://github.com/EduardValentin/terraform-infra/releases/download/0.1.10/bootstrap-bundle-0.1.10.tar.gz"
 mkdir -p /opt/bootstrap
 tar -xzf /tmp/bootstrap-bundle.tar.gz -C /opt/bootstrap
-ROLE=apphost \
-ENVIRONMENT=test \
-HOSTNAME_OVERRIDE=susanoo-test \
-TAILSCALE_AUTH_KEY=tskey-test \
-TAILSCALE_TAGS='tag:test' \
-APP_NAME=courseplatform \
-OPS_LOKI_URL='http://susanoo-ops.longhair-eagle.ts.net:3100/loki/api/v1/push' \
-/opt/bootstrap/scripts/bootstrap.sh
+/opt/bootstrap/bootstrap-bundle-0.1.10/scripts/run_bootstrap_from_env.sh /root/bootstrap/bootstrap-test.env
 ```
 
 Notes:
@@ -42,20 +48,10 @@ Notes:
 ## OPS host bootstrap
 
 ```bash
-curl -fsSL -o /tmp/bootstrap-bundle.tar.gz "https://github.com/EduardValentin/terraform-infra/releases/download/v0.1.0/bootstrap-bundle-v0.1.0.tar.gz"
+curl -fsSL -o /tmp/bootstrap-bundle.tar.gz "https://github.com/EduardValentin/terraform-infra/releases/download/0.1.10/bootstrap-bundle-0.1.10.tar.gz"
 mkdir -p /opt/bootstrap
 tar -xzf /tmp/bootstrap-bundle.tar.gz -C /opt/bootstrap
-ROLE=ops \
-ENVIRONMENT=ops \
-HOSTNAME_OVERRIDE=susanoo-ops \
-TAILSCALE_AUTH_KEY=tskey-ops \
-TAILSCALE_TAGS='tag:ops' \
-APP_NAME=courseplatform \
-TEST_HOSTS='susanoo-test.longhair-eagle.ts.net' \
-PROD_HOSTS='' \
-LOW_RESOURCE_MODE=false \
-OPS_GRAFANA_ADMIN_PASSWORD='change-me' \
-/opt/bootstrap/scripts/bootstrap.sh
+/opt/bootstrap/bootstrap-bundle-0.1.10/scripts/run_bootstrap_from_env.sh /root/bootstrap/bootstrap-ops.env
 ```
 
 ## OPS low-resource mode
@@ -63,7 +59,7 @@ OPS_GRAFANA_ADMIN_PASSWORD='change-me' \
 Use for 1 vCPU / 2 GB OPS VM:
 
 ```bash
-LOW_RESOURCE_MODE=true ROLE=ops ENVIRONMENT=ops /opt/bootstrap/scripts/bootstrap.sh
+LOW_RESOURCE_MODE=true /opt/bootstrap/bootstrap-bundle-0.1.10/scripts/run_bootstrap_from_env.sh /root/bootstrap/bootstrap-ops.env
 ```
 
 Low-resource mode effects:
