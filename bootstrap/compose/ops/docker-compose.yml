@@ -4,7 +4,7 @@ services:
     container_name: ops-grafana
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${OPS_TAILSCALE_IPV4}:3000:3000"
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: ${OPS_GRAFANA_ADMIN_PASSWORD}
@@ -30,7 +30,7 @@ services:
       - '--storage.tsdb.retention.time=30d'
       - '--web.enable-lifecycle'
     ports:
-      - "9090:9090"
+      - "${OPS_TAILSCALE_IPV4}:9090:9090"
     labels:
       logging: promtail
       env: ops
@@ -67,7 +67,7 @@ services:
     command:
       - '-config.file=/etc/loki/config.yml'
     ports:
-      - "3100:3100"
+      - "${OPS_TAILSCALE_IPV4}:3100:3100"
     labels:
       logging: promtail
       env: ops
@@ -85,9 +85,9 @@ services:
     command:
       - '-config.file=/etc/tempo/config.yml'
     ports:
-      - "3200:3200"
-      - "4317:4317"
-      - "4318:4318"
+      - "${OPS_TAILSCALE_IPV4}:3200:3200"
+      - "${OPS_TAILSCALE_IPV4}:4317:4317"
+      - "${OPS_TAILSCALE_IPV4}:4318:4318"
     labels:
       logging: promtail
       env: ops
@@ -112,7 +112,7 @@ services:
       host: ${HOST_LABEL}
     pid: host
     ports:
-      - "19100:9100"
+      - "${OPS_TAILSCALE_IPV4}:19100:9100"
     volumes:
       - /:/host:ro,rslave
 
@@ -127,7 +127,7 @@ services:
       service: cadvisor
       host: ${HOST_LABEL}
     ports:
-      - "18080:8080"
+      - "${OPS_TAILSCALE_IPV4}:18080:8080"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
