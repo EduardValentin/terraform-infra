@@ -78,7 +78,13 @@ GitHub secret scanning and push protection:
 - `course-platform` is private and returned `HTTP 422` for secret scanning API enablement; this requires GitHub plan/features that include private-repo secret scanning.
 - Re-run enablement checks when needed:
 ```bash
-./scripts/security/enable_repo_secret_scanning.sh EduardValentin/terraform-infra EduardValentin/course-platform
+gh api -X PATCH repos/EduardValentin/terraform-infra \
+  -f 'security_and_analysis[secret_scanning][status]=enabled' \
+  -f 'security_and_analysis[secret_scanning_push_protection][status]=enabled'
+
+gh api -X PATCH repos/EduardValentin/course-platform \
+  -f 'security_and_analysis[secret_scanning][status]=enabled' \
+  -f 'security_and_analysis[secret_scanning_push_protection][status]=enabled'
 ```
 - Ongoing guard workflow: `.github/workflows/repository-security-guard.yml`
 
@@ -210,8 +216,8 @@ without manual SSH secret edits.
 Secret hygiene checks for TEST/OPS:
 
 ```bash
-./scripts/security/check_remote_secret_hygiene.sh root@100.81.129.17 --cleanup
-./scripts/security/check_remote_secret_hygiene.sh root@100.121.159.108 --cleanup
+ssh root@100.81.129.17 'sudo find /tmp /var/tmp -maxdepth 4 -type f \( -name "*.app.env" -o -name "*.postgres.env" -o -name "age.key" \) -delete; sudo find /tmp /var/tmp -maxdepth 4 -type d \( -name "runtime-secrets" -o -name "runtime-secrets-*" \) -exec rm -rf {} +; sudo sh -lc "for f in /root/bootstrap/bootstrap-*.env /srv/apps/*/.env /srv/postgres/*.env /srv/ops/.env /etc/course-platform-backup.env; do [ -f \"$f\" ] && chmod 600 \"$f\" && stat -c \"%a %n\" \"$f\"; done"'
+ssh root@100.121.159.108 'sudo find /tmp /var/tmp -maxdepth 4 -type f \( -name "*.app.env" -o -name "*.postgres.env" -o -name "age.key" \) -delete; sudo find /tmp /var/tmp -maxdepth 4 -type d \( -name "runtime-secrets" -o -name "runtime-secrets-*" \) -exec rm -rf {} +; sudo sh -lc "for f in /root/bootstrap/bootstrap-*.env /srv/apps/*/.env /srv/postgres/*.env /srv/ops/.env /etc/course-platform-backup.env; do [ -f \"$f\" ] && chmod 600 \"$f\" && stat -c \"%a %n\" \"$f\"; done"'
 ```
 
 This removes known plaintext temp secret files from `/tmp` and `/var/tmp`, and enforces `0600` on expected secret env files.
