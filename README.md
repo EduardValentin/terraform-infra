@@ -40,7 +40,8 @@ Portable infrastructure and bootstrap automation for Course Platform across TEST
    - `/Users/trocaneduard/Documents/Personal/terraform-infra/secrets/README.md`
    - `/Users/trocaneduard/Documents/Personal/terraform-infra/docs/RUNTIME_SECRETS.md`
 3. Build and publish bootstrap bundle:
-   - `make bundle VERSION=v0.1.0`
+   - automatic on `main` push when bootstrap files change (`Release Bootstrap Bundle` workflow)
+   - manual fallback: `make bundle VERSION=v0.1.0`
 4. Bootstrap hosts:
    - copy env templates from `bootstrap-bundle-<version>/env/*.template` to `/root/bootstrap/*.env`
    - execute with loader script `bootstrap-bundle-<version>/scripts/run_bootstrap_from_env.sh` for TEST/OPS only
