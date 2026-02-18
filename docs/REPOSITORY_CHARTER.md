@@ -135,6 +135,7 @@ Out of scope for this repository:
 2. Terraform creates/updates provider resources.
 3. For PROD, Terraform injects cloud-init with release bundle coordinates.
 4. Host downloads bundle and runs `bootstrap.sh` with role-specific context.
+5. Manual PROD bootstrap path is disabled; PROD bootstrap is cloud-init only.
 
 ### 2) Host Bootstrap Flow
 
