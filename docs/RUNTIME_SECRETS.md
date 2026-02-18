@@ -121,3 +121,12 @@ Expected permissions:
 Runtime secret file updates do not automatically recreate app containers.
 
 After syncing secrets, run the app deploy workflow (`deploy_by_digest`) so new env values are applied to running containers.
+
+## Postgres credential caveat
+
+For existing initialized Postgres volumes, changing `POSTGRES_USER` or `POSTGRES_PASSWORD` in env files does not rotate credentials inside the database automatically.
+
+Safe rule:
+
+- Keep Postgres credentials stable once initialized.
+- If rotation is needed, run an explicit SQL credential-rotation procedure first, then update encrypted env files and redeploy.
