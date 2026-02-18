@@ -25,8 +25,16 @@ run_role() {
   esac
 }
 
+enforce_prod_bootstrap_source() {
+  if [ "${ENVIRONMENT:-}" = "prod" ] && [ "${BOOTSTRAP_SOURCE:-}" != "cloud-init" ]; then
+    log "manual PROD bootstrap is disabled; use Terraform/cloud-init path"
+    exit 1
+  fi
+}
+
 main() {
   require_root
+  enforce_prod_bootstrap_source
   run_common
   run_role
   log "bootstrap complete"

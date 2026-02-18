@@ -36,7 +36,8 @@ Portable infrastructure and bootstrap automation for Course Platform across TEST
    - `make bundle VERSION=v0.1.0`
 4. Bootstrap hosts:
    - copy env templates from `bootstrap-bundle-<version>/env/*.template` to `/root/bootstrap/*.env`
-   - execute with loader script `bootstrap-bundle-<version>/scripts/run_bootstrap_from_env.sh`
+   - execute with loader script `bootstrap-bundle-<version>/scripts/run_bootstrap_from_env.sh` for TEST/OPS only
+   - PROD bootstrap is cloud-init only (manual PROD bootstrap is intentionally blocked)
 5. Configure scrape target hostnames on OPS host via `TEST_HOSTS` and `PROD_HOSTS` env in setup command.
 6. Sync encrypted runtime secrets to host with GitHub Actions workflow:
    - `.github/workflows/sync-runtime-secrets.yml`
@@ -44,7 +45,7 @@ Portable infrastructure and bootstrap automation for Course Platform across TEST
 
 ## Bootstrap install command
 
-Use this on TEST/OPS manual VM creation and in PROD cloud-init payload:
+Use this on TEST/OPS manual VM creation:
 
 ```bash
 curl -fsSL -o /tmp/bootstrap-bundle.tar.gz "https://github.com/EduardValentin/terraform-infra/releases/download/0.1.10/bootstrap-bundle-0.1.10.tar.gz" && \

@@ -6,6 +6,7 @@ write_files:
     content: |
       ROLE=apphost
       ENVIRONMENT=prod
+      BOOTSTRAP_SOURCE=cloud-init
       TAILSCALE_AUTH_KEY=${tailscale_auth_key}
       TAILSCALE_TAGS=${tailscale_tags}
 runcmd:

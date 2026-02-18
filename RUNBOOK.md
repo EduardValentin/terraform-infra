@@ -29,6 +29,11 @@ sudo nano /root/bootstrap/bootstrap-test.env
 sudo nano /root/bootstrap/bootstrap-ops.env
 ```
 
+Production policy:
+
+- manual PROD bootstrap is disabled
+- PROD bootstrap is allowed only via Terraform cloud-init path
+
 ## Runtime secrets (encrypted, no manual VM edits)
 
 Use SOPS+age encrypted files under:
