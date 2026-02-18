@@ -227,6 +227,13 @@ Use low-resource mode only when OPS capacity is constrained (1 vCPU / 2 GB class
 3. Re-run bootstrap role on target host (`apphost` or `ops`).
 4. Verify services and telemetry continuity.
 
+### Production database backup policy
+
+- production apphost bootstrap configures scheduled PostgreSQL backups via systemd timer
+- one local copy is retained on host (`/srv/backups/postgres`)
+- optional second copy is replicated to NAS path if mounted and writable
+- retention is controlled by bootstrap/cloud-init variables and must be validated during PROD rollout
+
 ### Operational safety rules
 
 - do not deploy unversioned bootstrap artifacts

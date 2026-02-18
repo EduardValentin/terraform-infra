@@ -12,6 +12,12 @@ set_app_context() {
   TRAEFIK_BIND_IP_VALUE=${TRAEFIK_BIND_IP:-}
   METRICS_BIND_IP_VALUE=${METRICS_BIND_IP:-}
   DOLLAR='$'
+  PROD_PG_BACKUP_ENABLED_VALUE=${PROD_PG_BACKUP_ENABLED:-true}
+  PROD_PG_BACKUP_ONCALENDAR_VALUE=${PROD_PG_BACKUP_ONCALENDAR:-"*-*-* 03:15:00"}
+  PROD_PG_BACKUP_LOCAL_DIR_VALUE=${PROD_PG_BACKUP_LOCAL_DIR:-/srv/backups/postgres}
+  PROD_PG_BACKUP_LOCAL_RETENTION_DAYS_VALUE=${PROD_PG_BACKUP_LOCAL_RETENTION_DAYS:-14}
+  PROD_PG_BACKUP_NAS_DIR_VALUE=${PROD_PG_BACKUP_NAS_DIR:-}
+  PROD_PG_BACKUP_NAS_RETENTION_DAYS_VALUE=${PROD_PG_BACKUP_NAS_RETENTION_DAYS:-14}
 
   if [ -z "$TAILSCALE_BIND_IP_VALUE" ] && command -v tailscale >/dev/null 2>&1; then
     TAILSCALE_BIND_IP_VALUE=$(tailscale ip -4 2>/dev/null | head -n 1 || true)
@@ -25,6 +31,15 @@ set_app_context() {
   if [ -z "$METRICS_BIND_IP_VALUE" ]; then
     METRICS_BIND_IP_VALUE=$TAILSCALE_BIND_IP_VALUE
   fi
+
+  case "$PROD_PG_BACKUP_ENABLED_VALUE" in
+    true|false)
+      ;;
+    *)
+      log "PROD_PG_BACKUP_ENABLED must be true or false"
+      exit 1
+      ;;
+  esac
 }
 
 prepare_directories() {
@@ -32,6 +47,7 @@ prepare_directories() {
   install -d -m 0755 /srv/edge/dynamic
   install -d -m 0755 /srv/apps/observability
   install -d -m 0755 /srv/apps/observability/promtail-positions
+  install -d -m 0755 /srv/backups
 }
 
 write_edge_env() {
@@ -148,6 +164,64 @@ copy_prod_files() {
   chmod 600 /srv/edge/acme/acme.json
 }
 
+configure_prod_backups() {
+  install -m 0755 "$SCRIPT_DIR/prod_pg_backup.sh" /usr/local/bin/prod_pg_backup.sh
+
+  if [ "$PROD_PG_BACKUP_ENABLED_VALUE" != "true" ]; then
+    systemctl disable --now course-platform-pg-backup.timer >/dev/null 2>&1 || true
+    rm -f /etc/systemd/system/course-platform-pg-backup.timer
+    rm -f /etc/systemd/system/course-platform-pg-backup.service
+    rm -f /etc/course-platform-backup.env
+    systemctl daemon-reload
+    log "prod postgres backup timer disabled"
+    return
+  fi
+
+  install -d -m 0700 "$PROD_PG_BACKUP_LOCAL_DIR_VALUE"
+
+  cat > /etc/course-platform-backup.env <<__BACKUP_ENV__
+APP_NAME=${APP_NAME_VALUE}
+ENVIRONMENT=${ENVIRONMENT}
+POSTGRES_CONTAINER_NAME=${APP_NAME_VALUE}-${ENVIRONMENT}-postgres
+POSTGRES_ENV_FILE=/srv/postgres/${APP_NAME_VALUE}.env
+LOCAL_BACKUP_DIR=${PROD_PG_BACKUP_LOCAL_DIR_VALUE}
+LOCAL_RETENTION_DAYS=${PROD_PG_BACKUP_LOCAL_RETENTION_DAYS_VALUE}
+NAS_BACKUP_DIR=${PROD_PG_BACKUP_NAS_DIR_VALUE}
+NAS_RETENTION_DAYS=${PROD_PG_BACKUP_NAS_RETENTION_DAYS_VALUE}
+__BACKUP_ENV__
+  chmod 600 /etc/course-platform-backup.env
+
+  cat > /etc/systemd/system/course-platform-pg-backup.service <<'__BACKUP_SERVICE__'
+[Unit]
+Description=Course Platform PostgreSQL backup
+After=docker.service
+Wants=docker.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/course-platform-backup.env
+ExecStart=/usr/local/bin/prod_pg_backup.sh
+__BACKUP_SERVICE__
+
+  cat > /etc/systemd/system/course-platform-pg-backup.timer <<__BACKUP_TIMER__
+[Unit]
+Description=Schedule Course Platform PostgreSQL backups
+
+[Timer]
+OnCalendar=${PROD_PG_BACKUP_ONCALENDAR_VALUE}
+Persistent=true
+RandomizedDelaySec=10m
+Unit=course-platform-pg-backup.service
+
+[Install]
+WantedBy=timers.target
+__BACKUP_TIMER__
+
+  systemctl daemon-reload
+  systemctl enable --now course-platform-pg-backup.timer
+  log "prod postgres backup timer enabled schedule=$PROD_PG_BACKUP_ONCALENDAR_VALUE"
+}
+
 start_traefik() {
   docker compose --env-file /srv/edge/.env -f /srv/edge/docker-compose.yml up -d
 }
@@ -171,6 +245,7 @@ main() {
       ;;
     prod)
       copy_prod_files
+      configure_prod_backups
       ;;
     *)
       log "ENVIRONMENT must be test or prod"

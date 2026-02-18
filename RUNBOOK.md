@@ -121,6 +121,38 @@ Low-resource mode effects:
 - You should also set application trace sampling to 10-20% (for example `OTEL_TRACES_SAMPLER=parentbased_traceidratio` and `OTEL_TRACES_SAMPLER_ARG=0.2`).
 - Expect reduced trace coverage and potential delay for high-volume log indexing.
 
+## PROD scheduled PostgreSQL backups
+
+This is configured via bootstrap variables and cloud-init for `ENVIRONMENT=prod`.
+
+Settings:
+
+- `PROD_PG_BACKUP_ENABLED=true`
+- `PROD_PG_BACKUP_ONCALENDAR="*-*-* 03:15:00"`
+- `PROD_PG_BACKUP_LOCAL_DIR=/srv/backups/postgres`
+- `PROD_PG_BACKUP_LOCAL_RETENTION_DAYS=14`
+- `PROD_PG_BACKUP_NAS_DIR=/mnt/nas/courseplatform-backups` (optional)
+- `PROD_PG_BACKUP_NAS_RETENTION_DAYS=14`
+
+Manual verification on PROD host:
+
+```bash
+systemctl status course-platform-pg-backup.timer --no-pager
+systemctl list-timers --all | grep course-platform-pg-backup || true
+sudo systemctl start course-platform-pg-backup.service
+journalctl -u course-platform-pg-backup.service -n 50 --no-pager
+ls -lah /srv/backups/postgres
+ls -lah /mnt/nas/courseplatform-backups
+```
+
+Expected:
+
+- Timer is enabled and active.
+- Manual service run completes successfully.
+- New `*.sql.gz` file appears in local backup dir.
+- If NAS path is mounted/writable, same file appears in NAS dir.
+- Older files are pruned according to retention days.
+
 ## Verify TEST host
 
 ```bash

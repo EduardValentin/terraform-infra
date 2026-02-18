@@ -6,9 +6,16 @@ write_files:
     content: |
       ROLE=apphost
       ENVIRONMENT=prod
+      APP_NAME=${app_name}
       BOOTSTRAP_SOURCE=cloud-init
       TAILSCALE_AUTH_KEY=${tailscale_auth_key}
       TAILSCALE_TAGS=${tailscale_tags}
+      PROD_PG_BACKUP_ENABLED=${prod_pg_backup_enabled}
+      PROD_PG_BACKUP_ONCALENDAR='${prod_pg_backup_oncalendar}'
+      PROD_PG_BACKUP_LOCAL_DIR='${prod_pg_backup_local_dir}'
+      PROD_PG_BACKUP_LOCAL_RETENTION_DAYS=${prod_pg_backup_local_retention_days}
+      PROD_PG_BACKUP_NAS_DIR='${prod_pg_backup_nas_dir}'
+      PROD_PG_BACKUP_NAS_RETENTION_DAYS=${prod_pg_backup_nas_retention_days}
 runcmd:
   - mkdir -p /opt/bootstrap
   - curl -fsSL -o /tmp/bootstrap-bundle.tar.gz "https://github.com/${bundle_repo}/releases/download/${bundle_version}/bootstrap-bundle-${bundle_version}.tar.gz"
