@@ -42,6 +42,8 @@ mkdir -p "$OUTPUT_DIR"
 
 APP_OUT="$OUTPUT_DIR/$APP_NAME.app.env.enc"
 POSTGRES_OUT="$OUTPUT_DIR/$APP_NAME.postgres.env.enc"
+APP_OUT_REL="secrets/runtime/$ENVIRONMENT/$APP_NAME.app.env.enc"
+POSTGRES_OUT_REL="secrets/runtime/$ENVIRONMENT/$APP_NAME.postgres.env.enc"
 APP_TMP="$(mktemp)"
 POSTGRES_TMP="$(mktemp)"
 
@@ -50,8 +52,30 @@ cleanup() {
 }
 trap cleanup EXIT
 
-sops --encrypt --input-type dotenv --output-type dotenv "$APP_ENV_FILE" > "$APP_TMP"
-sops --encrypt --input-type dotenv --output-type dotenv "$POSTGRES_ENV_FILE" > "$POSTGRES_TMP"
+resolve_age_recipients() {
+  if [[ -n "${SOPS_AGE_RECIPIENTS:-}" ]]; then
+    printf '%s' "$SOPS_AGE_RECIPIENTS"
+    return
+  fi
+
+  local sops_config="$ROOT_DIR/.sops.yaml"
+  if [[ ! -f "$sops_config" ]]; then
+    echo ""
+    return
+  fi
+
+  awk '/^[[:space:]]*age:[[:space:]]*/ {print $2}' "$sops_config" | tr -d '"' | awk '!seen[$0]++' | paste -sd, -
+}
+
+AGE_RECIPIENTS="$(resolve_age_recipients)"
+
+if [[ -z "$AGE_RECIPIENTS" ]]; then
+  echo "failed to resolve age recipients. set SOPS_AGE_RECIPIENTS or configure .sops.yaml"
+  exit 1
+fi
+
+sops --config /dev/null --encrypt --age "$AGE_RECIPIENTS" --filename-override "$APP_OUT_REL" --input-type dotenv --output-type dotenv "$APP_ENV_FILE" > "$APP_TMP"
+sops --config /dev/null --encrypt --age "$AGE_RECIPIENTS" --filename-override "$POSTGRES_OUT_REL" --input-type dotenv --output-type dotenv "$POSTGRES_ENV_FILE" > "$POSTGRES_TMP"
 
 mv "$APP_TMP" "$APP_OUT"
 mv "$POSTGRES_TMP" "$POSTGRES_OUT"
