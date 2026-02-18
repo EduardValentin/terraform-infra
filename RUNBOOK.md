@@ -59,6 +59,8 @@ git push
 ./scripts/secrets/edit_runtime_secret_set.sh cleanup test courseplatform
 ```
 
+If encrypted files do not exist yet, `prepare` seeds work files from templates automatically.
+
 Then run GitHub Actions workflow:
 
 - `.github/workflows/sync-runtime-secrets.yml`

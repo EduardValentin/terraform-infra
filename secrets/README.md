@@ -36,6 +36,11 @@ Example templates:
 ./scripts/secrets/edit_runtime_secret_set.sh cleanup test courseplatform
 ```
 
+`prepare` behavior:
+
+- decrypts existing encrypted files when present
+- falls back to `secrets/runtime/templates/*.example` when encrypted files are missing
+
 ## Decrypt locally for verification
 
 ```bash

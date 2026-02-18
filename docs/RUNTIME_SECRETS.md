@@ -20,7 +20,7 @@ Plaintext authoring workspace:
 Update helper script:
 
 - `scripts/secrets/edit_runtime_secret_set.sh`
-  - `prepare`: decrypt encrypted files into gitignored work folder
+  - `prepare`: decrypt encrypted files into gitignored work folder; if encrypted files are missing, populate from templates
   - `apply`: encrypt edited work files back into `secrets/runtime/<env>/`
   - `cleanup`: remove local work folder
 
