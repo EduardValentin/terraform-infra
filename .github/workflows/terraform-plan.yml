@@ -125,7 +125,7 @@ jobs:
             local env_dir="$2"
             local tfvars_secret="$3"
             local backend_secret="$4"
-            matrix="$(echo "$matrix" | jq --arg env_name "$env_name" --arg env_dir "$env_dir" --arg tfvars_secret "$tfvars_secret" --arg backend_secret "$backend_secret" '. + [{environment: $env_name, dir: $env_dir, tfvars_secret: $tfvars_secret, backend_secret: $backend_secret}]')"
+            matrix="$(echo "$matrix" | jq -c --arg env_name "$env_name" --arg env_dir "$env_dir" --arg tfvars_secret "$tfvars_secret" --arg backend_secret "$backend_secret" '. + [{environment: $env_name, dir: $env_dir, tfvars_secret: $tfvars_secret, backend_secret: $backend_secret}]')"
           }
 
           [[ "$controlplane" == "true" ]] && add_env "controlplane" "infra/envs/controlplane" "TFVARS_CONTROLPLANE" "TF_BACKEND_CONFIG_CONTROLPLANE"
