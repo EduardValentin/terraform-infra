@@ -105,6 +105,12 @@ Behavior:
 
 You can still run it manually via `workflow_dispatch` for forced re-sync.
 
+Merge guard:
+
+- `.github/workflows/runtime-secrets-guard.yml` validates that every touched `env/app` pair has both encrypted files present:
+  - `<app>.app.env.enc`
+  - `<app>.postgres.env.enc`
+
 ## Verification
 
 ```bash
