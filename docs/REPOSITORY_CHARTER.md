@@ -91,6 +91,7 @@ Out of scope for this repository:
 
 - `infra/modules/cloudflare_dns`: reusable DNS records module
 - `infra/modules/hetzner_host`: reusable Hetzner host/firewall/IP module
+- `infra/envs/controlplane`: shared control-plane IaC (GitHub repo config, Tailscale ACL policy, bootstrap env rendering)
 - `infra/envs/test`: DNS + test metadata entrypoint for manually provisioned TEST VM
 - `infra/envs/ops`: DNS + ops metadata entrypoint for manually provisioned OPS VM
 - `infra/envs/prod`: full PROD provisioning entrypoint (Hetzner + optional DNS)
@@ -120,6 +121,7 @@ Out of scope for this repository:
 - `bootstrap/compose/ops/tempo/*`
 - `bootstrap/compose/ops/grafana/*`
 - `bootstrap/compose/agents/docker-compose.yml` for apphost promtail/node-exporter/cadvisor
+- OPS stack also hosts Terraform state backend service (MinIO, Tailscale-only) for CI Terraform runs
 
 ### Release Layer
 
@@ -135,7 +137,8 @@ Out of scope for this repository:
 2. Terraform creates/updates provider resources.
 3. For PROD, Terraform injects cloud-init with release bundle coordinates.
 4. Host downloads bundle and runs `bootstrap.sh` with role-specific context.
-5. Manual PROD bootstrap path is disabled; PROD bootstrap is cloud-init only.
+5. Control-plane Terraform root (`controlplane`) manages GitHub CI/CD settings, Tailscale ACL policy, and rendered bootstrap env payloads.
+6. Manual PROD bootstrap path is disabled; PROD bootstrap is cloud-init only.
 
 ### 2) Host Bootstrap Flow
 

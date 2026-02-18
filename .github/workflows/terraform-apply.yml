@@ -1,0 +1,170 @@
+name: Terraform Apply
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Environment to apply"
+        required: true
+        type: choice
+        options:
+          - controlplane
+          - test
+          - ops
+          - prod
+          - all
+      ref:
+        description: "Git ref to apply (branch, tag, or commit SHA)"
+        required: true
+        default: "main"
+        type: string
+      confirm:
+        description: "Type APPLY to confirm apply operation"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  validate_confirmation:
+    name: Confirm apply intent
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate confirmation token
+        run: |
+          if [[ "${{ inputs.confirm }}" != "APPLY" ]]; then
+            echo "Confirmation token mismatch. Re-run with confirm=APPLY."
+            exit 1
+          fi
+
+  resolve:
+    name: Resolve target environments
+    runs-on: ubuntu-latest
+    needs: validate_confirmation
+    outputs:
+      matrix: ${{ steps.build.outputs.matrix }}
+    steps:
+      - name: Build matrix
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          matrix='[]'
+          add_env() {
+            local env_name="$1"
+            local env_dir="$2"
+            local tfvars_secret="$3"
+            local backend_secret="$4"
+            matrix="$(echo "$matrix" | jq --arg env_name "$env_name" --arg env_dir "$env_dir" --arg tfvars_secret "$tfvars_secret" --arg backend_secret "$backend_secret" '. + [{environment: $env_name, dir: $env_dir, tfvars_secret: $tfvars_secret, backend_secret: $backend_secret}]')"
+          }
+
+          case "${{ inputs.target_environment }}" in
+            controlplane)
+              add_env "controlplane" "infra/envs/controlplane" "TFVARS_CONTROLPLANE" "TF_BACKEND_CONFIG_CONTROLPLANE"
+              ;;
+            test)
+              add_env "test" "infra/envs/test" "TFVARS_TEST" "TF_BACKEND_CONFIG_TEST"
+              ;;
+            ops)
+              add_env "ops" "infra/envs/ops" "TFVARS_OPS" "TF_BACKEND_CONFIG_OPS"
+              ;;
+            prod)
+              add_env "prod" "infra/envs/prod" "TFVARS_PROD" "TF_BACKEND_CONFIG_PROD"
+              ;;
+            all)
+              add_env "controlplane" "infra/envs/controlplane" "TFVARS_CONTROLPLANE" "TF_BACKEND_CONFIG_CONTROLPLANE"
+              add_env "test" "infra/envs/test" "TFVARS_TEST" "TF_BACKEND_CONFIG_TEST"
+              add_env "ops" "infra/envs/ops" "TFVARS_OPS" "TF_BACKEND_CONFIG_OPS"
+              add_env "prod" "infra/envs/prod" "TFVARS_PROD" "TF_BACKEND_CONFIG_PROD"
+              ;;
+            *)
+              echo "Unsupported target_environment: ${{ inputs.target_environment }}"
+              exit 1
+              ;;
+          esac
+
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+  apply:
+    name: Apply (${{ matrix.environment }})
+    needs: resolve
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include: ${{ fromJson(needs.resolve.outputs.matrix) }}
+    concurrency:
+      group: terraform-apply-${{ matrix.environment }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout target ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Connect to Tailscale for backend access
+        uses: tailscale/github-action@v3
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY_CI }}
+          hostname: gha-terraform-infra-apply
+          tags: tag:ci
+
+      - name: Write backend config
+        env:
+          BACKEND_CONFIG: ${{ secrets[matrix.backend_secret] }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${BACKEND_CONFIG}" ]]; then
+            echo "Missing required secret: ${{ matrix.backend_secret }}"
+            exit 1
+          fi
+          printf '%s' "${BACKEND_CONFIG}" > "${{ matrix.dir }}/backend.hcl"
+
+      - name: Write tfvars
+        env:
+          TFVARS_CONTENT: ${{ secrets[matrix.tfvars_secret] }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${TFVARS_CONTENT}" ]]; then
+            echo "Missing required secret: ${{ matrix.tfvars_secret }}"
+            exit 1
+          fi
+          printf '%s' "${TFVARS_CONTENT}" > "${{ matrix.dir }}/terraform.auto.tfvars"
+
+      - name: Terraform init
+        run: terraform -chdir="${{ matrix.dir }}" init -input=false -backend-config=backend.hcl
+
+      - name: Terraform fmt check
+        run: terraform -chdir="${{ matrix.dir }}" fmt -check
+
+      - name: Terraform validate
+        run: terraform -chdir="${{ matrix.dir }}" validate
+
+      - name: Terraform plan (pre-apply)
+        run: |
+          set -euo pipefail
+          terraform -chdir="${{ matrix.dir }}" plan -input=false -var-file=terraform.auto.tfvars -out=tfplan.bin
+          terraform -chdir="${{ matrix.dir }}" show -no-color tfplan.bin > tfplan.txt
+
+      - name: Upload apply plan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfapply-plan-${{ matrix.environment }}-${{ github.run_id }}
+          path: |
+            ${{ matrix.dir }}/tfplan.bin
+            ${{ matrix.dir }}/tfplan.txt
+
+      - name: Terraform apply
+        run: terraform -chdir="${{ matrix.dir }}" apply -input=false -auto-approve tfplan.bin
+
+      - name: Cleanup local plan files
+        if: always()
+        run: rm -f "${{ matrix.dir }}/backend.hcl" "${{ matrix.dir }}/terraform.auto.tfvars"

@@ -7,14 +7,19 @@ Portable infrastructure and bootstrap automation for Course Platform across TEST
 - `infra/envs/prod`: Hetzner + Cloudflare managed production entrypoint
 - `infra/envs/test`: test environment entrypoint for manually provisioned VM metadata + DNS
 - `infra/envs/ops`: ops environment entrypoint for manually provisioned VM metadata + DNS
+- `infra/envs/controlplane`: Terraform-managed GitHub CI/CD repo config + Tailscale ACL policy + generated bootstrap env payloads
 - `infra/modules/*`: reusable modules
 - `bootstrap/*`: provider-agnostic host bootstrap and runtime assets
 - `scripts/package_bootstrap_bundle.sh`: build release artifact `bootstrap-bundle-<version>.tar.gz`
 - `.github/workflows/release-bootstrap-bundle.yml`: publish bootstrap bundle to GitHub Releases
+- `.github/workflows/terraform-plan.yml`: auto Terraform checks + plan for impacted roots
+- `.github/workflows/terraform-apply.yml`: manual Terraform apply workflow (`workflow_dispatch`)
+- `scripts/terraform/render_minio_backend_configs.sh`: generate backend.hcl payloads for GitHub backend secrets
 
 ## Repository charter
 
 - `/Users/trocaneduard/Documents/Personal/terraform-infra/docs/REPOSITORY_CHARTER.md`
+- `/Users/trocaneduard/Documents/Personal/terraform-infra/docs/TERRAFORM_BACKEND.md`
 
 ## Current approach
 
@@ -26,6 +31,7 @@ Portable infrastructure and bootstrap automation for Course Platform across TEST
   - OPS VM: `susanoo-ops`
 - Current TEST TLS hostname default: `susanoo-test.longhair-eagle.ts.net` (single-node cert mode)
 - PROD bootstrap includes scheduled PostgreSQL backups with local retention and optional NAS replication path.
+- Terraform state backend target: MinIO on OPS VM over Tailscale (`susanoo-ops.longhair-eagle.ts.net:9000`).
 
 ## Quick start
 
@@ -34,13 +40,17 @@ Portable infrastructure and bootstrap automation for Course Platform across TEST
    - `/Users/trocaneduard/Documents/Personal/terraform-infra/secrets/README.md`
    - `/Users/trocaneduard/Documents/Personal/terraform-infra/docs/RUNTIME_SECRETS.md`
 3. Build and publish bootstrap bundle:
-   - `make bundle VERSION=v0.1.0`
+   - automatic on `main` push when bootstrap files change (`Release Bootstrap Bundle` workflow)
+   - manual fallback: `make bundle VERSION=v0.1.0`
 4. Bootstrap hosts:
    - copy env templates from `bootstrap-bundle-<version>/env/*.template` to `/root/bootstrap/*.env`
    - execute with loader script `bootstrap-bundle-<version>/scripts/run_bootstrap_from_env.sh` for TEST/OPS only
    - PROD bootstrap is cloud-init only (manual PROD bootstrap is intentionally blocked)
 5. Configure scrape target hostnames on OPS host via `TEST_HOSTS` and `PROD_HOSTS` env in setup command.
-6. Sync encrypted runtime secrets to host with GitHub Actions workflow:
+6. Optionally apply control-plane IaC:
+   - `cd infra/envs/controlplane`
+   - `terraform init && terraform plan -var-file=terraform.tfvars`
+7. Sync encrypted runtime secrets to host with GitHub Actions workflow:
    - `.github/workflows/sync-runtime-secrets.yml`
    - auto-triggers on `main` push when `secrets/runtime/**` encrypted files change
 

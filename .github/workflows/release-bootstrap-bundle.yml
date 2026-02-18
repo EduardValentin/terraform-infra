@@ -4,11 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: release version (example v0.1.0)
-        required: true
+        description: optional release version (example 0.1.14). if empty, auto version is generated
+        required: false
   push:
-    tags:
-      - bootstrap-v*
+    branches:
+      - main
+    paths:
+      - "bootstrap/**"
+      - "scripts/package_bootstrap_bundle.sh"
+      - "scripts/install_bootstrap_bundle.sh"
+      - "infra/templates/bootstrap-*.env.tftpl"
+      - ".github/workflows/release-bootstrap-bundle.yml"
 
 permissions:
   contents: write
@@ -24,9 +30,21 @@ jobs:
         id: version
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "value=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+            if [ -n "${{ inputs.version }}" ]; then
+              echo "value=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+            else
+              ts="$(date -u +%Y%m%d%H%M%S)"
+              short_sha="$(echo "${GITHUB_SHA}" | cut -c1-8)"
+              echo "value=auto-${ts}-${short_sha}" >> "$GITHUB_OUTPUT"
+            fi
           else
-            echo "value=${GITHUB_REF_NAME#bootstrap-}" >> "$GITHUB_OUTPUT"
+            if echo "${GITHUB_REF_NAME}" | grep -q '^bootstrap-'; then
+              echo "value=${GITHUB_REF_NAME#bootstrap-}" >> "$GITHUB_OUTPUT"
+            else
+              ts="$(date -u +%Y%m%d%H%M%S)"
+              short_sha="$(echo "${GITHUB_SHA}" | cut -c1-8)"
+              echo "value=auto-${ts}-${short_sha}" >> "$GITHUB_OUTPUT"
+            fi
           fi
 
       - name: Build Bundle
