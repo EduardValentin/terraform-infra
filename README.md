@@ -29,13 +29,17 @@ Portable infrastructure and bootstrap automation for Course Platform across TEST
 ## Quick start
 
 1. Read `/Users/trocaneduard/Documents/Personal/terraform-infra/docs/PHASE0_PREREQUISITES.md`
-2. Configure SOPS age key and bootstrap secrets from `/Users/trocaneduard/Documents/Personal/terraform-infra/secrets/README.md`
+2. Configure SOPS age key and runtime secret flow:
+   - `/Users/trocaneduard/Documents/Personal/terraform-infra/secrets/README.md`
+   - `/Users/trocaneduard/Documents/Personal/terraform-infra/docs/RUNTIME_SECRETS.md`
 3. Build and publish bootstrap bundle:
    - `make bundle VERSION=v0.1.0`
 4. Bootstrap hosts:
    - copy env templates from `bootstrap-bundle-<version>/env/*.template` to `/root/bootstrap/*.env`
    - execute with loader script `bootstrap-bundle-<version>/scripts/run_bootstrap_from_env.sh`
 5. Configure scrape target hostnames on OPS host via `TEST_HOSTS` and `PROD_HOSTS` env in setup command.
+6. Sync encrypted runtime secrets to host with GitHub Actions workflow:
+   - `.github/workflows/sync-runtime-secrets.yml`
 
 ## Bootstrap install command
 
