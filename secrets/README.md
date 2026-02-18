@@ -18,14 +18,14 @@ Example templates:
 
 ## Encrypt runtime secret files
 
-1. Create plaintext files outside this repo (for example in `/tmp`).
+1. Create plaintext files in gitignored workspace `secrets/runtime/work/`.
 2. Encrypt and write tracked `.enc` files:
 
 ```bash
-./scripts/secrets/encrypt_runtime_secret_set.sh test courseplatform /tmp/courseplatform.app.env /tmp/courseplatform.postgres.env
+./scripts/secrets/encrypt_runtime_secret_set.sh test courseplatform secrets/runtime/work/courseplatform.app.env secrets/runtime/work/courseplatform.postgres.env
 ```
 
-3. Remove plaintext files from `/tmp`.
+3. Remove plaintext files from `secrets/runtime/work/`.
 
 ## Decrypt locally for verification
 

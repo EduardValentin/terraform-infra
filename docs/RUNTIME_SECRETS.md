@@ -13,6 +13,10 @@ This is the primary runtime secret workflow for TEST and PROD.
 
 No manual secret edits on VM shell are required for normal operations.
 
+Plaintext authoring workspace:
+
+- `secrets/runtime/work/` is gitignored for local temporary env files before encryption.
+
 ## One-time setup
 
 ### 1) Install local tools
@@ -57,16 +61,17 @@ Also ensure these secrets exist in `terraform-infra`:
 ### 1) Prepare plaintext files from templates
 
 ```bash
-cp secrets/runtime/templates/courseplatform.app.env.example /tmp/courseplatform.app.env
-cp secrets/runtime/templates/courseplatform.postgres.env.example /tmp/courseplatform.postgres.env
+mkdir -p secrets/runtime/work
+cp secrets/runtime/templates/courseplatform.app.env.example secrets/runtime/work/courseplatform.app.env
+cp secrets/runtime/templates/courseplatform.postgres.env.example secrets/runtime/work/courseplatform.postgres.env
 ```
 
-Edit `/tmp/courseplatform.app.env` and `/tmp/courseplatform.postgres.env` with real values.
+Edit `secrets/runtime/work/courseplatform.app.env` and `secrets/runtime/work/courseplatform.postgres.env` with real values.
 
 ### 2) Encrypt into repository-tracked files
 
 ```bash
-./scripts/secrets/encrypt_runtime_secret_set.sh test courseplatform /tmp/courseplatform.app.env /tmp/courseplatform.postgres.env
+./scripts/secrets/encrypt_runtime_secret_set.sh test courseplatform secrets/runtime/work/courseplatform.app.env secrets/runtime/work/courseplatform.postgres.env
 ```
 
 This writes:
@@ -77,7 +82,7 @@ This writes:
 ### 3) Remove plaintext temp files
 
 ```bash
-rm -f /tmp/courseplatform.app.env /tmp/courseplatform.postgres.env
+rm -f secrets/runtime/work/courseplatform.app.env secrets/runtime/work/courseplatform.postgres.env
 ```
 
 ### 4) Commit and push

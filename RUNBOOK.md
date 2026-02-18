@@ -39,11 +39,12 @@ Use SOPS+age encrypted files under:
 Create encrypted TEST files:
 
 ```bash
-cp secrets/runtime/templates/courseplatform.app.env.example /tmp/courseplatform.app.env
-cp secrets/runtime/templates/courseplatform.postgres.env.example /tmp/courseplatform.postgres.env
-# edit /tmp files with real values
-./scripts/secrets/encrypt_runtime_secret_set.sh test courseplatform /tmp/courseplatform.app.env /tmp/courseplatform.postgres.env
-rm -f /tmp/courseplatform.app.env /tmp/courseplatform.postgres.env
+mkdir -p secrets/runtime/work
+cp secrets/runtime/templates/courseplatform.app.env.example secrets/runtime/work/courseplatform.app.env
+cp secrets/runtime/templates/courseplatform.postgres.env.example secrets/runtime/work/courseplatform.postgres.env
+# edit work files with real values
+./scripts/secrets/encrypt_runtime_secret_set.sh test courseplatform secrets/runtime/work/courseplatform.app.env secrets/runtime/work/courseplatform.postgres.env
+rm -f secrets/runtime/work/courseplatform.app.env secrets/runtime/work/courseplatform.postgres.env
 ```
 
 Then run GitHub Actions workflow:
