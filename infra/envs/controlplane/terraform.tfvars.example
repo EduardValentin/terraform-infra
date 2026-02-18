@@ -1,0 +1,85 @@
+enable_github = true
+github_owner  = "EduardValentin"
+github_token  = "ghp_replace"
+
+github_repository_environments = {
+  "course-platform" = ["test", "production"]
+}
+
+github_repository_variables = {
+  "course-platform" = {
+    TEST_APP_HOSTNAME = "susanoo-test.longhair-eagle.ts.net"
+    TEST_APP_BASE_PATH = "/courseplatform"
+    PROD_APP_HOSTNAME = "courseplatform.com"
+    PROD_APP_BASE_PATH = "/"
+  }
+}
+
+github_repository_secrets = {
+  "course-platform" = {
+    TAILSCALE_AUTHKEY_CI = "tskey-client-replace"
+    TEST_SSH_TARGET      = "root@susanoo-test.longhair-eagle.ts.net."
+    PROD_SSH_TARGET      = "root@courseplatform-prod.longhair-eagle.ts.net."
+    GHCR_PULL_USERNAME   = "EduardValentin"
+    GHCR_PULL_TOKEN      = "github_pat_replace"
+  }
+}
+
+github_environment_variables = {
+  "course-platform" = {
+    "test" = {
+      APP_ENV = "test"
+    }
+    "production" = {
+      APP_ENV = "prod"
+    }
+  }
+}
+
+github_environment_secrets = {
+  "course-platform" = {
+    "test" = {
+      TEST_DEPLOY_USER = "root"
+    }
+    "production" = {
+      PROD_DEPLOY_USER = "root"
+    }
+  }
+}
+
+enable_tailscale_policy     = true
+tailscale_tailnet           = "longhair-eagle.ts.net"
+tailscale_oauth_client_id   = "oauth-client-id-replace"
+tailscale_oauth_client_secret = "oauth-client-secret-replace"
+tailscale_admin_group       = "group:admin"
+
+tailnet_name            = "longhair-eagle.ts.net"
+placeholder_prod_domain = "courseplatform.com"
+app_names               = ["courseplatform"]
+
+app_brand_domains = {
+  courseplatform = ["courseplatform.com"]
+}
+
+bootstrap_template_app_name      = "courseplatform"
+bootstrap_hostname_test          = "susanoo-test"
+bootstrap_hostname_ops           = "susanoo-ops"
+bootstrap_hostname_prod          = "courseplatform-prod"
+bootstrap_tailscale_auth_key_test = "tskey-replace"
+bootstrap_tailscale_auth_key_ops  = "tskey-replace"
+bootstrap_tailscale_auth_key_prod = "tskey-replace"
+bootstrap_tailscale_tags_test    = "tag:test"
+bootstrap_tailscale_tags_ops     = "tag:ops"
+bootstrap_tailscale_tags_prod    = "tag:prod"
+ops_loki_host                    = "susanoo-ops.longhair-eagle.ts.net"
+ops_test_hosts                   = ["susanoo-test.longhair-eagle.ts.net"]
+ops_prod_hosts                   = []
+ops_low_resource_mode            = false
+ops_grafana_admin_password       = "replace-with-strong-password"
+
+prod_pg_backup_enabled            = true
+prod_pg_backup_oncalendar         = "*-*-* 03:15:00"
+prod_pg_backup_local_dir          = "/srv/backups/postgres"
+prod_pg_backup_local_retention_days = 14
+prod_pg_backup_nas_dir            = "/mnt/nas/courseplatform-backups"
+prod_pg_backup_nas_retention_days = 14

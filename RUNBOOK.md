@@ -6,6 +6,28 @@
 - Phase 1: terraform scaffold and bootstrap release pipeline
 - Phase 2: OPS observability stack
 - Phase 3: TEST apphost edge + telemetry agents
+- Control-plane IaC: GitHub repo config, Tailscale ACL policy, bootstrap env generation
+
+## Control-plane Terraform
+
+Use Terraform to manage GitHub Actions repo config, Tailscale ACL policy, and rendered bootstrap env payloads.
+
+```bash
+cd /Users/trocaneduard/Documents/Personal/terraform-infra/infra/envs/controlplane
+cp terraform.tfvars.example terraform.tfvars
+terraform init
+terraform plan -var-file=terraform.tfvars
+terraform apply -var-file=terraform.tfvars
+```
+
+Render bootstrap env files from Terraform outputs:
+
+```bash
+terraform output -raw bootstrap_test_env > /tmp/bootstrap-test.env
+terraform output -raw bootstrap_ops_env > /tmp/bootstrap-ops.env
+terraform output -raw bootstrap_prod_env > /tmp/bootstrap-prod.env
+chmod 600 /tmp/bootstrap-test.env /tmp/bootstrap-ops.env /tmp/bootstrap-prod.env
+```
 
 ## Build bootstrap bundle
 

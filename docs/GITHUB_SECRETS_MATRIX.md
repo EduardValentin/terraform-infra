@@ -1,5 +1,8 @@
 # GitHub Secrets Matrix
 
+Primary management path: `infra/envs/controlplane` Terraform root.
+Use `github_repository_variables`, `github_repository_secrets`, `github_environment_variables`, and `github_environment_secrets` inputs.
+
 ## terraform-infra repository
 
 - `HCLOUD_TOKEN`

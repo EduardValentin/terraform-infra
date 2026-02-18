@@ -7,6 +7,7 @@ Portable infrastructure and bootstrap automation for Course Platform across TEST
 - `infra/envs/prod`: Hetzner + Cloudflare managed production entrypoint
 - `infra/envs/test`: test environment entrypoint for manually provisioned VM metadata + DNS
 - `infra/envs/ops`: ops environment entrypoint for manually provisioned VM metadata + DNS
+- `infra/envs/controlplane`: Terraform-managed GitHub CI/CD repo config + Tailscale ACL policy + generated bootstrap env payloads
 - `infra/modules/*`: reusable modules
 - `bootstrap/*`: provider-agnostic host bootstrap and runtime assets
 - `scripts/package_bootstrap_bundle.sh`: build release artifact `bootstrap-bundle-<version>.tar.gz`
@@ -36,6 +37,9 @@ Portable infrastructure and bootstrap automation for Course Platform across TEST
    - copy env templates from `bootstrap-bundle-<version>/env/*.template` to `/root/bootstrap/*.env`
    - execute with loader script `bootstrap-bundle-<version>/scripts/run_bootstrap_from_env.sh`
 5. Configure scrape target hostnames on OPS host via `TEST_HOSTS` and `PROD_HOSTS` env in setup command.
+6. Optionally apply control-plane IaC:
+   - `cd infra/envs/controlplane`
+   - `terraform init && terraform plan -var-file=terraform.tfvars`
 
 ## Bootstrap install command
 
