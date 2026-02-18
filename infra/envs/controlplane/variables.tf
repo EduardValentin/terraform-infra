@@ -118,7 +118,7 @@ variable "tailscale_ci_sources" {
 
 variable "tailscale_ci_destinations" {
   type    = list(string)
-  default = ["tag:test:*", "tag:prod:*"]
+  default = ["tag:test:*", "tag:prod:*", "tag:ops:*"]
 }
 
 variable "tailscale_admin_destinations" {
@@ -230,6 +230,37 @@ variable "ops_low_resource_mode" {
 }
 
 variable "ops_grafana_admin_password" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
+
+variable "ops_terraform_backend_enabled" {
+  type    = bool
+  default = true
+}
+
+variable "ops_terraform_backend_bucket" {
+  type    = string
+  default = "terraform-state"
+}
+
+variable "ops_terraform_backend_bind_ip" {
+  type    = string
+  default = ""
+}
+
+variable "ops_terraform_backend_port" {
+  type    = number
+  default = 9000
+}
+
+variable "ops_terraform_backend_access_key" {
+  type    = string
+  default = "terraform-state"
+}
+
+variable "ops_terraform_backend_secret_key" {
   type      = string
   sensitive = true
   default   = ""

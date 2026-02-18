@@ -14,10 +14,12 @@ Portable infrastructure and bootstrap automation for Course Platform across TEST
 - `.github/workflows/release-bootstrap-bundle.yml`: publish bootstrap bundle to GitHub Releases
 - `.github/workflows/terraform-plan.yml`: auto Terraform checks + plan for impacted roots
 - `.github/workflows/terraform-apply.yml`: manual Terraform apply workflow (`workflow_dispatch`)
+- `scripts/terraform/render_minio_backend_configs.sh`: generate backend.hcl payloads for GitHub backend secrets
 
 ## Repository charter
 
 - `/Users/trocaneduard/Documents/Personal/terraform-infra/docs/REPOSITORY_CHARTER.md`
+- `/Users/trocaneduard/Documents/Personal/terraform-infra/docs/TERRAFORM_BACKEND.md`
 
 ## Current approach
 
@@ -29,6 +31,7 @@ Portable infrastructure and bootstrap automation for Course Platform across TEST
   - OPS VM: `susanoo-ops`
 - Current TEST TLS hostname default: `susanoo-test.longhair-eagle.ts.net` (single-node cert mode)
 - PROD bootstrap includes scheduled PostgreSQL backups with local retention and optional NAS replication path.
+- Terraform state backend target: MinIO on OPS VM over Tailscale (`susanoo-ops.longhair-eagle.ts.net:9000`).
 
 ## Quick start
 

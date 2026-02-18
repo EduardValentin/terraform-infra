@@ -22,8 +22,66 @@ Required multi-line secrets:
 - `TFVARS_OPS`
 - `TFVARS_PROD`
 
-`TF_BACKEND_CONFIG_*` should contain backend configuration (for example remote state backend args).
+`TF_BACKEND_CONFIG_*` should contain backend configuration for the `s3` backend (MinIO on OPS).
 `TFVARS_*` should contain the full environment-specific variable payload for the corresponding root.
+
+Recommended MinIO backend payloads:
+
+- `TF_BACKEND_CONFIG_CONTROLPLANE`
+```hcl
+bucket                      = "terraform-state"
+key                         = "controlplane/terraform.tfstate"
+region                      = "us-east-1"
+endpoint                    = "http://susanoo-ops.longhair-eagle.ts.net:9000"
+access_key                  = "terraform-state"
+secret_key                  = "replace-with-strong-secret"
+skip_credentials_validation = true
+skip_region_validation      = true
+skip_metadata_api_check     = true
+force_path_style            = true
+```
+
+- `TF_BACKEND_CONFIG_TEST`
+```hcl
+bucket                      = "terraform-state"
+key                         = "test/terraform.tfstate"
+region                      = "us-east-1"
+endpoint                    = "http://susanoo-ops.longhair-eagle.ts.net:9000"
+access_key                  = "terraform-state"
+secret_key                  = "replace-with-strong-secret"
+skip_credentials_validation = true
+skip_region_validation      = true
+skip_metadata_api_check     = true
+force_path_style            = true
+```
+
+- `TF_BACKEND_CONFIG_OPS`
+```hcl
+bucket                      = "terraform-state"
+key                         = "ops/terraform.tfstate"
+region                      = "us-east-1"
+endpoint                    = "http://susanoo-ops.longhair-eagle.ts.net:9000"
+access_key                  = "terraform-state"
+secret_key                  = "replace-with-strong-secret"
+skip_credentials_validation = true
+skip_region_validation      = true
+skip_metadata_api_check     = true
+force_path_style            = true
+```
+
+- `TF_BACKEND_CONFIG_PROD`
+```hcl
+bucket                      = "terraform-state"
+key                         = "prod/terraform.tfstate"
+region                      = "us-east-1"
+endpoint                    = "http://susanoo-ops.longhair-eagle.ts.net:9000"
+access_key                  = "terraform-state"
+secret_key                  = "replace-with-strong-secret"
+skip_credentials_validation = true
+skip_region_validation      = true
+skip_metadata_api_check     = true
+force_path_style            = true
+```
 
 ## terraform-infra repository
 
@@ -36,6 +94,7 @@ Required by runtime secret sync workflow (`.github/workflows/sync-runtime-secret
 
 Required by Terraform workflows (`.github/workflows/terraform-plan.yml`, `.github/workflows/terraform-apply.yml`):
 
+- `TAILSCALE_AUTHKEY_CI`
 - `TF_BACKEND_CONFIG_CONTROLPLANE`
 - `TF_BACKEND_CONFIG_TEST`
 - `TF_BACKEND_CONFIG_OPS`

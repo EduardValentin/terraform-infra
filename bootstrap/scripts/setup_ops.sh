@@ -11,6 +11,38 @@ set_context() {
   TEST_HOSTS_VALUE=${TEST_HOSTS:-susanoo-test.longhair-eagle.ts.net}
   PROD_HOSTS_VALUE=${PROD_HOSTS:-}
   OPS_GRAFANA_ADMIN_PASSWORD_VALUE=${OPS_GRAFANA_ADMIN_PASSWORD:-admin-change-me}
+  OPS_TAILSCALE_IPV4_VALUE=${OPS_TAILSCALE_IPV4:-$(tailscale ip -4 | sed -n '1p')}
+  TERRAFORM_BACKEND_ENABLED_VALUE=${TERRAFORM_BACKEND_ENABLED:-true}
+  TERRAFORM_BACKEND_BUCKET_VALUE=${TERRAFORM_BACKEND_BUCKET:-terraform-state}
+  TERRAFORM_BACKEND_BIND_IP_VALUE=${TERRAFORM_BACKEND_BIND_IP:-$OPS_TAILSCALE_IPV4_VALUE}
+  TERRAFORM_BACKEND_PORT_VALUE=${TERRAFORM_BACKEND_PORT:-9000}
+  TERRAFORM_BACKEND_ACCESS_KEY_VALUE=${TERRAFORM_BACKEND_ACCESS_KEY:-terraform-state}
+  TERRAFORM_BACKEND_SECRET_KEY_VALUE=${TERRAFORM_BACKEND_SECRET_KEY:-replace-me}
+}
+
+validate_context() {
+  if [ -z "$OPS_TAILSCALE_IPV4_VALUE" ]; then
+    log "failed to detect Tailscale IPv4 for OPS host"
+    exit 1
+  fi
+
+  case "$TERRAFORM_BACKEND_ENABLED_VALUE" in
+    true|false)
+      ;;
+    *)
+      log "TERRAFORM_BACKEND_ENABLED must be true or false"
+      exit 1
+      ;;
+  esac
+
+  if [ "$TERRAFORM_BACKEND_ENABLED_VALUE" = "true" ]; then
+    case "$TERRAFORM_BACKEND_SECRET_KEY_VALUE" in
+      replace-me|replace-with-strong-secret|"")
+        log "TERRAFORM_BACKEND_SECRET_KEY must be set when TERRAFORM_BACKEND_ENABLED=true"
+        exit 1
+        ;;
+    esac
+  fi
 }
 
 prepare_directories() {
@@ -26,6 +58,8 @@ prepare_directories() {
   install -d -m 0755 /srv/ops/loki/data
   install -d -m 0755 /srv/ops/tempo
   install -d -m 0755 /srv/ops/tempo/data
+  install -d -m 0755 /srv/ops/terraform-backend
+  install -d -m 0755 /srv/ops/terraform-backend/data
 }
 
 set_data_permissions() {
@@ -78,7 +112,15 @@ OPS_GRAFANA_ADMIN_PASSWORD=${OPS_GRAFANA_ADMIN_PASSWORD_VALUE}
 LOW_RESOURCE_MODE=${LOW_RESOURCE_MODE_VALUE}
 TEST_HOSTS=${TEST_HOSTS_VALUE}
 PROD_HOSTS=${PROD_HOSTS_VALUE}
+OPS_TAILSCALE_IPV4=${OPS_TAILSCALE_IPV4_VALUE}
+TERRAFORM_BACKEND_ENABLED=${TERRAFORM_BACKEND_ENABLED_VALUE}
+TERRAFORM_BACKEND_BUCKET=${TERRAFORM_BACKEND_BUCKET_VALUE}
+TERRAFORM_BACKEND_BIND_IP=${TERRAFORM_BACKEND_BIND_IP_VALUE}
+TERRAFORM_BACKEND_PORT=${TERRAFORM_BACKEND_PORT_VALUE}
+TERRAFORM_BACKEND_ACCESS_KEY=${TERRAFORM_BACKEND_ACCESS_KEY_VALUE}
+TERRAFORM_BACKEND_SECRET_KEY=${TERRAFORM_BACKEND_SECRET_KEY_VALUE}
 __OPS_ENV__
+  chmod 600 /srv/ops/.env
 }
 
 generate_targets() {
@@ -124,12 +166,18 @@ write_targets() {
 }
 
 start_stack() {
+  if [ "$TERRAFORM_BACKEND_ENABLED_VALUE" = "true" ]; then
+    docker compose --profile tfstate --env-file /srv/ops/.env -f /srv/ops/docker-compose.yml up -d
+    return
+  fi
+
   docker compose --env-file /srv/ops/.env -f /srv/ops/docker-compose.yml up -d
 }
 
 main() {
   require_root
   set_context
+  validate_context
   prepare_directories
   set_data_permissions
   copy_static_files

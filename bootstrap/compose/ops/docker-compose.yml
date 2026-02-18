@@ -133,3 +133,49 @@ services:
       - /var/run:/var/run:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+
+  terraform-state:
+    image: minio/minio:RELEASE.2025-01-20T14-49-07Z
+    container_name: ops-terraform-state
+    restart: unless-stopped
+    profiles:
+      - tfstate
+    command: server /data --address ":9000" --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${TERRAFORM_BACKEND_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${TERRAFORM_BACKEND_SECRET_KEY}
+    ports:
+      - "${TERRAFORM_BACKEND_BIND_IP}:${TERRAFORM_BACKEND_PORT}:9000"
+    labels:
+      logging: promtail
+      env: ops
+      app: ${APP_NAME}
+      service: terraform-state
+      host: ${HOST_LABEL}
+    volumes:
+      - /srv/ops/terraform-backend/data:/data
+
+  terraform-state-init:
+    image: minio/mc:RELEASE.2025-01-17T23-25-50Z
+    container_name: ops-terraform-state-init
+    restart: "no"
+    profiles:
+      - tfstate
+    depends_on:
+      - terraform-state
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -eu
+        until mc alias set local http://terraform-state:9000 "${TERRAFORM_BACKEND_ACCESS_KEY}" "${TERRAFORM_BACKEND_SECRET_KEY}"; do
+          sleep 2
+        done
+        mc mb --ignore-existing "local/${TERRAFORM_BACKEND_BUCKET}"
+        mc anonymous set none "local/${TERRAFORM_BACKEND_BUCKET}"
+    labels:
+      logging: promtail
+      env: ops
+      app: ${APP_NAME}
+      service: terraform-state-init
+      host: ${HOST_LABEL}

@@ -76,6 +76,12 @@ ops_test_hosts                   = ["susanoo-test.longhair-eagle.ts.net"]
 ops_prod_hosts                   = []
 ops_low_resource_mode            = false
 ops_grafana_admin_password       = "replace-with-strong-password"
+ops_terraform_backend_enabled    = true
+ops_terraform_backend_bucket     = "terraform-state"
+ops_terraform_backend_bind_ip    = ""
+ops_terraform_backend_port       = 9000
+ops_terraform_backend_access_key = "terraform-state"
+ops_terraform_backend_secret_key = "replace-with-strong-secret"
 
 prod_pg_backup_enabled            = true
 prod_pg_backup_oncalendar         = "*-*-* 03:15:00"

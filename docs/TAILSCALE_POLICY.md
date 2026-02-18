@@ -15,7 +15,7 @@ Adjust policy inputs through Terraform variables (`tailscale_*`) and apply from 
     {
       "action": "accept",
       "src": ["tag:ci"],
-      "dst": ["tag:test:*", "tag:prod:*"]
+      "dst": ["tag:test:*", "tag:prod:*", "tag:ops:*"]
     },
     {
       "action": "accept",

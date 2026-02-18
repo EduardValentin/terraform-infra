@@ -110,6 +110,13 @@ jobs:
         with:
           terraform_wrapper: false
 
+      - name: Connect to Tailscale for backend access
+        uses: tailscale/github-action@v3
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY_CI }}
+          hostname: gha-terraform-infra-apply
+          tags: tag:ci
+
       - name: Write backend config
         env:
           BACKEND_CONFIG: ${{ secrets[matrix.backend_secret] }}

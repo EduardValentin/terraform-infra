@@ -107,6 +107,7 @@ locals {
   bootstrap_ops_tailscale_auth_key  = var.bootstrap_tailscale_auth_key_ops != "" ? nonsensitive(var.bootstrap_tailscale_auth_key_ops) : "tskey-replace"
   bootstrap_prod_tailscale_auth_key = var.bootstrap_tailscale_auth_key_prod != "" ? nonsensitive(var.bootstrap_tailscale_auth_key_prod) : "tskey-replace"
   bootstrap_ops_grafana_password    = var.ops_grafana_admin_password != "" ? nonsensitive(var.ops_grafana_admin_password) : "replace-with-strong-password"
+  bootstrap_ops_terraform_backend_secret = var.ops_terraform_backend_secret_key != "" ? nonsensitive(var.ops_terraform_backend_secret_key) : "replace-with-strong-secret"
 
   bootstrap_test_env_content = templatefile("../../templates/bootstrap-test.env.tftpl", {
     hostname_override  = var.bootstrap_hostname_test
@@ -125,6 +126,12 @@ locals {
     prod_hosts             = join(",", local.generated_ops_prod_hosts)
     low_resource_mode      = var.ops_low_resource_mode ? "true" : "false"
     grafana_admin_password = local.bootstrap_ops_grafana_password
+    terraform_backend_enabled    = var.ops_terraform_backend_enabled ? "true" : "false"
+    terraform_backend_bucket     = var.ops_terraform_backend_bucket
+    terraform_backend_bind_ip    = var.ops_terraform_backend_bind_ip
+    terraform_backend_port       = tostring(var.ops_terraform_backend_port)
+    terraform_backend_access_key = var.ops_terraform_backend_access_key
+    terraform_backend_secret_key = local.bootstrap_ops_terraform_backend_secret
   })
 
   bootstrap_prod_env_content = templatefile("../../templates/bootstrap-prod.env.tftpl", {

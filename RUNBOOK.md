@@ -52,6 +52,63 @@ Manual apply:
   - reruns `init`, `fmt -check`, `validate`, and `plan`
   - applies using generated plan file
 
+Backend connectivity note:
+
+- Terraform workflows join Tailscale (`tag:ci`) before `terraform init`.
+- Remote state backend is expected at OPS MinIO endpoint (`susanoo-ops.longhair-eagle.ts.net:9000`).
+- If OPS VM is down, Terraform plan/apply workflows fail, but application CI/CD in `course-platform` still works.
+
+## Terraform backend on OPS VM (MinIO)
+
+OPS bootstrap now provisions a Tailscale-only MinIO service for Terraform remote state.
+
+Required vars in `/root/bootstrap/bootstrap-ops.env`:
+
+- `TERRAFORM_BACKEND_ENABLED=true`
+- `TERRAFORM_BACKEND_BUCKET=terraform-state`
+- `TERRAFORM_BACKEND_BIND_IP=` (leave empty to auto-use OPS Tailscale IPv4)
+- `TERRAFORM_BACKEND_PORT=9000`
+- `TERRAFORM_BACKEND_ACCESS_KEY=terraform-state`
+- `TERRAFORM_BACKEND_SECRET_KEY=<strong-random-secret>`
+
+Apply/reconcile on OPS host:
+
+```bash
+/opt/bootstrap/bootstrap-bundle-<version>/scripts/run_bootstrap_from_env.sh /root/bootstrap/bootstrap-ops.env
+```
+
+Verify on OPS host:
+
+```bash
+docker compose --profile tfstate --env-file /srv/ops/.env -f /srv/ops/docker-compose.yml ps
+curl -fsS "http://$(awk -F= '$1==\"OPS_TAILSCALE_IPV4\"{print $2}' /srv/ops/.env):9000/minio/health/live" && echo
+docker logs --tail 50 ops-terraform-state-init
+```
+
+Expected:
+
+- `ops-terraform-state` is `Up`
+- `ops-terraform-state-init` exits successfully after bucket creation
+- MinIO health endpoint returns `200`
+
+Generate backend config snippets locally:
+
+```bash
+./scripts/terraform/render_minio_backend_configs.sh \
+  http://susanoo-ops.longhair-eagle.ts.net:9000 \
+  terraform-state \
+  terraform-state \
+  '<strong-random-secret>' \
+  ./dist/backend-config
+```
+
+Then copy file contents into GitHub repo secrets:
+
+- `TF_BACKEND_CONFIG_CONTROLPLANE` from `./dist/backend-config/controlplane.backend.hcl`
+- `TF_BACKEND_CONFIG_TEST` from `./dist/backend-config/test.backend.hcl`
+- `TF_BACKEND_CONFIG_OPS` from `./dist/backend-config/ops.backend.hcl`
+- `TF_BACKEND_CONFIG_PROD` from `./dist/backend-config/prod.backend.hcl`
+
 ## Build bootstrap bundle
 
 ```bash

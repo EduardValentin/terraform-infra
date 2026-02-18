@@ -121,6 +121,7 @@ Out of scope for this repository:
 - `bootstrap/compose/ops/tempo/*`
 - `bootstrap/compose/ops/grafana/*`
 - `bootstrap/compose/agents/docker-compose.yml` for apphost promtail/node-exporter/cadvisor
+- OPS stack also hosts Terraform state backend service (MinIO, Tailscale-only) for CI Terraform runs
 
 ### Release Layer
 
