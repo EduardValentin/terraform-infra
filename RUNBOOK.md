@@ -29,6 +29,58 @@ sudo nano /root/bootstrap/bootstrap-test.env
 sudo nano /root/bootstrap/bootstrap-ops.env
 ```
 
+Production policy:
+
+- manual PROD bootstrap is disabled
+- PROD bootstrap is allowed only via Terraform cloud-init path
+
+## Runtime secrets (encrypted, no manual VM edits)
+
+Use SOPS+age encrypted files under:
+
+- `secrets/runtime/test/*.enc`
+- `secrets/runtime/prod/*.enc`
+
+Create encrypted TEST files:
+
+```bash
+mkdir -p secrets/runtime/work
+cp secrets/runtime/templates/courseplatform.app.env.example secrets/runtime/work/courseplatform.app.env
+cp secrets/runtime/templates/courseplatform.postgres.env.example secrets/runtime/work/courseplatform.postgres.env
+# edit work files with real values
+./scripts/secrets/encrypt_runtime_secret_set.sh test courseplatform secrets/runtime/work/courseplatform.app.env secrets/runtime/work/courseplatform.postgres.env
+rm -f secrets/runtime/work/courseplatform.app.env secrets/runtime/work/courseplatform.postgres.env
+```
+
+Update existing runtime secrets:
+
+```bash
+./scripts/secrets/edit_runtime_secret_set.sh prepare test courseplatform
+# edit files in secrets/runtime/work/test-courseplatform/
+./scripts/secrets/edit_runtime_secret_set.sh apply test courseplatform
+git add secrets/runtime/test/courseplatform.app.env.enc secrets/runtime/test/courseplatform.postgres.env.enc
+git commit -m "CP-56 update test runtime secrets"
+git push
+./scripts/secrets/edit_runtime_secret_set.sh cleanup test courseplatform
+```
+
+If encrypted files do not exist yet, `prepare` seeds work files from templates automatically.
+
+Then run GitHub Actions workflow:
+
+- `.github/workflows/sync-runtime-secrets.yml`
+  - `environment=test`
+  - `app_name=courseplatform`
+
+Or push encrypted runtime secret file changes to `main`; the workflow auto-detects and syncs changed env/app targets.
+
+This updates:
+
+- `/srv/apps/courseplatform/.env`
+- `/srv/postgres/courseplatform.env`
+
+without manual SSH secret edits.
+
 ## TEST host bootstrap
 
 ```bash

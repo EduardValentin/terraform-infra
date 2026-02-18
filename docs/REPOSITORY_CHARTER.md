@@ -135,6 +135,7 @@ Out of scope for this repository:
 2. Terraform creates/updates provider resources.
 3. For PROD, Terraform injects cloud-init with release bundle coordinates.
 4. Host downloads bundle and runs `bootstrap.sh` with role-specific context.
+5. Manual PROD bootstrap path is disabled; PROD bootstrap is cloud-init only.
 
 ### 2) Host Bootstrap Flow
 
@@ -239,6 +240,7 @@ Use low-resource mode only when OPS capacity is constrained (1 vCPU / 2 GB class
 - keep bundle versions immutable
 - test in TEST before OPS/PROD updates where practical
 - keep secrets encrypted at rest in repo (SOPS+age)
+- keep runtime env files managed via encrypted repo files under `secrets/runtime/<env>/` and CI sync workflow, not manual host edits
 
 ## Migration and Portability Process
 

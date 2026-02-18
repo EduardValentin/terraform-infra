@@ -6,5 +6,11 @@
 *.log
 dist/
 secrets/*.dec.yaml
+secrets/**/*.dec.yaml
+secrets/**/*.dec.env
+secrets/runtime/**/*.env
+!secrets/runtime/**/*.env.example
+secrets/runtime/work/*
+!secrets/runtime/work/.gitkeep
 .env
 .DS_Store

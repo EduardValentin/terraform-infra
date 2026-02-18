@@ -24,4 +24,9 @@ set -a
 . "$ENV_FILE"
 set +a
 
+if [ "${ENVIRONMENT:-}" = "prod" ]; then
+  echo "manual PROD bootstrap is disabled; use Terraform/cloud-init path"
+  exit 1
+fi
+
 exec "$BOOTSTRAP_SCRIPT"

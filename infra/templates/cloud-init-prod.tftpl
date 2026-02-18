@@ -7,6 +7,7 @@ write_files:
       ROLE=apphost
       ENVIRONMENT=prod
       APP_NAME=${app_name}
+      BOOTSTRAP_SOURCE=cloud-init
       TAILSCALE_AUTH_KEY=${tailscale_auth_key}
       TAILSCALE_TAGS=${tailscale_tags}
       PROD_PG_BACKUP_ENABLED=${prod_pg_backup_enabled}
