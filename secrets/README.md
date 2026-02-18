@@ -27,6 +27,15 @@ Example templates:
 
 3. Remove plaintext files from `secrets/runtime/work/`.
 
+## Fast update cycle
+
+```bash
+./scripts/secrets/edit_runtime_secret_set.sh prepare test courseplatform
+# edit files under secrets/runtime/work/test-courseplatform/
+./scripts/secrets/edit_runtime_secret_set.sh apply test courseplatform
+./scripts/secrets/edit_runtime_secret_set.sh cleanup test courseplatform
+```
+
 ## Decrypt locally for verification
 
 ```bash

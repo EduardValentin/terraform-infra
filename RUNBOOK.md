@@ -47,6 +47,18 @@ cp secrets/runtime/templates/courseplatform.postgres.env.example secrets/runtime
 rm -f secrets/runtime/work/courseplatform.app.env secrets/runtime/work/courseplatform.postgres.env
 ```
 
+Update existing runtime secrets:
+
+```bash
+./scripts/secrets/edit_runtime_secret_set.sh prepare test courseplatform
+# edit files in secrets/runtime/work/test-courseplatform/
+./scripts/secrets/edit_runtime_secret_set.sh apply test courseplatform
+git add secrets/runtime/test/courseplatform.app.env.enc secrets/runtime/test/courseplatform.postgres.env.enc
+git commit -m "CP-56 update test runtime secrets"
+git push
+./scripts/secrets/edit_runtime_secret_set.sh cleanup test courseplatform
+```
+
 Then run GitHub Actions workflow:
 
 - `.github/workflows/sync-runtime-secrets.yml`
