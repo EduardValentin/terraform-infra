@@ -42,9 +42,19 @@ mkdir -p "$OUTPUT_DIR"
 
 APP_OUT="$OUTPUT_DIR/$APP_NAME.app.env.enc"
 POSTGRES_OUT="$OUTPUT_DIR/$APP_NAME.postgres.env.enc"
+APP_TMP="$(mktemp)"
+POSTGRES_TMP="$(mktemp)"
 
-sops --encrypt --input-type dotenv --output-type dotenv "$APP_ENV_FILE" > "$APP_OUT"
-sops --encrypt --input-type dotenv --output-type dotenv "$POSTGRES_ENV_FILE" > "$POSTGRES_OUT"
+cleanup() {
+  rm -f "$APP_TMP" "$POSTGRES_TMP"
+}
+trap cleanup EXIT
+
+sops --encrypt --input-type dotenv --output-type dotenv "$APP_ENV_FILE" > "$APP_TMP"
+sops --encrypt --input-type dotenv --output-type dotenv "$POSTGRES_ENV_FILE" > "$POSTGRES_TMP"
+
+mv "$APP_TMP" "$APP_OUT"
+mv "$POSTGRES_TMP" "$POSTGRES_OUT"
 
 echo "wrote $APP_OUT"
 echo "wrote $POSTGRES_OUT"
