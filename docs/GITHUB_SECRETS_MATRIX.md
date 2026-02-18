@@ -88,13 +88,15 @@ force_path_style            = true
 Required by runtime secret sync workflow (`.github/workflows/sync-runtime-secrets.yml`):
 
 - `SOPS_AGE_KEY`
-- `TAILSCALE_AUTHKEY_CI`
+- `TAILSCALE_AUTHKEY_CI_SECRETS` (or legacy fallback `TAILSCALE_AUTHKEY_CI`)
 - `TEST_SSH_TARGET`
 - `PROD_SSH_TARGET`
+- `TEST_SSH_KNOWN_HOSTS`
+- `PROD_SSH_KNOWN_HOSTS`
 
 Required by Terraform workflows (`.github/workflows/terraform-plan.yml`, `.github/workflows/terraform-apply.yml`):
 
-- `TAILSCALE_AUTHKEY_CI`
+- `TAILSCALE_AUTHKEY_CI_TERRAFORM` (or legacy fallback `TAILSCALE_AUTHKEY_CI`)
 - `TF_BACKEND_CONFIG_CONTROLPLANE`
 - `TF_BACKEND_CONFIG_TEST`
 - `TF_BACKEND_CONFIG_OPS`
@@ -117,12 +119,28 @@ Provider/API secrets used by Terraform roots (depending on enabled modules):
 
 Deployment/build secrets (current workflows):
 
-- `TAILSCALE_AUTHKEY_CI`
+- `TAILSCALE_AUTHKEY_CI_APP` (fallback to legacy `TAILSCALE_AUTHKEY_CI`)
 - `TEST_SSH_TARGET`
 - `PROD_SSH_TARGET`
+- `TEST_SSH_KNOWN_HOSTS`
+- `PROD_SSH_KNOWN_HOSTS`
 - `GHCR_PULL_USERNAME`
 - `GHCR_PULL_TOKEN`
 
 Optional:
 
 - `CODECOV_TOKEN`
+
+## Pinned SSH host key secrets
+
+Use host key pinning secrets (not `accept-new`) for CI SSH:
+
+```bash
+ssh-keyscan -H susanoo-test.longhair-eagle.ts.net 2>/dev/null
+ssh-keyscan -H <prod-hostname-or-ip> 2>/dev/null
+```
+
+Copy the full output line(s) into:
+
+- `TEST_SSH_KNOWN_HOSTS`
+- `PROD_SSH_KNOWN_HOSTS`

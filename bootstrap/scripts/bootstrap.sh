@@ -37,6 +37,7 @@ main() {
   enforce_prod_bootstrap_source
   run_common
   run_role
+  "$SCRIPT_DIR/enforce_secret_hygiene.sh"
   log "bootstrap complete"
 }
 

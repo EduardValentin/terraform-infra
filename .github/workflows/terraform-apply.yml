@@ -101,21 +101,21 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: Checkout target ref
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           ref: ${{ inputs.ref }}
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd
         with:
           terraform_wrapper: false
 
       - name: Connect to Tailscale for backend access
-        uses: tailscale/github-action@v3
+        uses: tailscale/github-action@6cae46e2d796f265265cfcf628b72a32b4d7cade
         with:
-          authkey: ${{ secrets.TAILSCALE_AUTHKEY_CI }}
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY_CI_TERRAFORM != '' && secrets.TAILSCALE_AUTHKEY_CI_TERRAFORM || secrets.TAILSCALE_AUTHKEY_CI }}
           hostname: gha-terraform-infra-apply
-          tags: tag:ci
+          tags: tag:ci-terraform
 
       - name: Write backend config
         env:

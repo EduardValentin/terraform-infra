@@ -61,16 +61,28 @@ locals {
 
   tailscale_policy = {
     tagOwners = {
-      "tag:prod" = [var.tailscale_admin_group]
-      "tag:test" = [var.tailscale_admin_group]
-      "tag:ops"  = [var.tailscale_admin_group]
-      "tag:ci"   = [var.tailscale_admin_group]
+      "tag:prod"         = [var.tailscale_admin_group]
+      "tag:test"         = [var.tailscale_admin_group]
+      "tag:ops"          = [var.tailscale_admin_group]
+      "tag:ci-app"       = [var.tailscale_admin_group]
+      "tag:ci-secrets"   = [var.tailscale_admin_group]
+      "tag:ci-terraform" = [var.tailscale_admin_group]
     }
     acls = [
       {
         action = "accept"
-        src    = var.tailscale_ci_sources
-        dst    = var.tailscale_ci_destinations
+        src    = var.tailscale_ci_terraform_sources
+        dst    = var.tailscale_ci_terraform_destinations
+      },
+      {
+        action = "accept"
+        src    = var.tailscale_ci_secrets_sources
+        dst    = var.tailscale_ci_secrets_destinations
+      },
+      {
+        action = "accept"
+        src    = var.tailscale_ci_app_sources
+        dst    = var.tailscale_ci_app_destinations
       },
       {
         action = "accept"

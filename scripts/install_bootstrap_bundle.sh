@@ -19,9 +19,13 @@ if [ "$ENVIRONMENT" = "prod" ]; then
 fi
 
 TMP_TGZ="/tmp/bootstrap-bundle-$VERSION.tar.gz"
+TMP_SHA="/tmp/bootstrap-bundle-$VERSION.tar.gz.sha256"
 INSTALL_DIR="/opt/bootstrap"
 
 curl -fsSL -o "$TMP_TGZ" "https://github.com/$REPO/releases/download/$VERSION/bootstrap-bundle-$VERSION.tar.gz"
+curl -fsSL -o "$TMP_SHA" "https://github.com/$REPO/releases/download/$VERSION/bootstrap-bundle-$VERSION.tar.gz.sha256"
+(cd /tmp && sha256sum -c "$(basename "$TMP_SHA")")
 mkdir -p "$INSTALL_DIR"
 tar -xzf "$TMP_TGZ" -C "$INSTALL_DIR" --strip-components=1
+rm -f "$TMP_TGZ" "$TMP_SHA"
 ROLE="$ROLE" ENVIRONMENT="$ENVIRONMENT" TAILSCALE_AUTH_KEY="$TAILSCALE_AUTH_KEY" TAILSCALE_TAGS="$TAILSCALE_TAGS" "$INSTALL_DIR/scripts/bootstrap.sh"

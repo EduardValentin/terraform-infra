@@ -17,11 +17,22 @@ github_repository_variables = {
 
 github_repository_secrets = {
   "course-platform" = {
-    TAILSCALE_AUTHKEY_CI = "tskey-client-replace"
-    TEST_SSH_TARGET      = "root@susanoo-test.longhair-eagle.ts.net."
-    PROD_SSH_TARGET      = "root@courseplatform-prod.longhair-eagle.ts.net."
-    GHCR_PULL_USERNAME   = "EduardValentin"
-    GHCR_PULL_TOKEN      = "github_pat_replace"
+    TAILSCALE_AUTHKEY_CI_APP = "tskey-client-replace"
+    TEST_SSH_TARGET          = "root@susanoo-test.longhair-eagle.ts.net."
+    PROD_SSH_TARGET          = "root@courseplatform-prod.longhair-eagle.ts.net."
+    TEST_SSH_KNOWN_HOSTS     = "susanoo-test.longhair-eagle.ts.net ssh-ed25519 AAAA..."
+    PROD_SSH_KNOWN_HOSTS     = "courseplatform-prod.longhair-eagle.ts.net ssh-ed25519 AAAA..."
+    GHCR_PULL_USERNAME       = "EduardValentin"
+    GHCR_PULL_TOKEN          = "github_pat_replace"
+  }
+  "terraform-infra" = {
+    TAILSCALE_AUTHKEY_CI_TERRAFORM = "tskey-client-replace"
+    TAILSCALE_AUTHKEY_CI_SECRETS   = "tskey-client-replace"
+    TEST_SSH_TARGET                = "root@susanoo-test.longhair-eagle.ts.net."
+    PROD_SSH_TARGET                = "root@courseplatform-prod.longhair-eagle.ts.net."
+    TEST_SSH_KNOWN_HOSTS           = "susanoo-test.longhair-eagle.ts.net ssh-ed25519 AAAA..."
+    PROD_SSH_KNOWN_HOSTS           = "courseplatform-prod.longhair-eagle.ts.net ssh-ed25519 AAAA..."
+    SOPS_AGE_KEY                   = "AGE-SECRET-KEY-1..."
   }
 }
 
@@ -52,6 +63,12 @@ tailscale_tailnet           = "longhair-eagle.ts.net"
 tailscale_oauth_client_id   = "oauth-client-id-replace"
 tailscale_oauth_client_secret = "oauth-client-secret-replace"
 tailscale_admin_group       = "group:admin"
+tailscale_ci_terraform_sources = ["tag:ci-terraform"]
+tailscale_ci_terraform_destinations = ["tag:ops:9000"]
+tailscale_ci_secrets_sources = ["tag:ci-secrets"]
+tailscale_ci_secrets_destinations = ["tag:test:22", "tag:prod:22"]
+tailscale_ci_app_sources = ["tag:ci-app"]
+tailscale_ci_app_destinations = ["tag:test:22", "tag:prod:22"]
 
 tailnet_name            = "longhair-eagle.ts.net"
 placeholder_prod_domain = "courseplatform.com"

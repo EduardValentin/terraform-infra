@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Resolve Version
         id: version
@@ -51,7 +51,7 @@ jobs:
         run: ./scripts/package_bootstrap_bundle.sh "${{ steps.version.outputs.value }}"
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: bootstrap-bundle-${{ steps.version.outputs.value }}
           path: |
@@ -59,7 +59,7 @@ jobs:
             dist/bootstrap-bundle-${{ steps.version.outputs.value }}.tar.gz.sha256
 
       - name: Publish Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b
         with:
           tag_name: ${{ steps.version.outputs.value }}
           files: |

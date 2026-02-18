@@ -17,7 +17,9 @@
   - `tag:test`
   - `tag:prod`
   - `tag:ops`
-  - `tag:ci`
+  - `tag:ci-app`
+  - `tag:ci-secrets`
+  - `tag:ci-terraform`
 - Create reusable pre-auth keys scoped per tag set.
 - Enable Tailscale SSH for admin identities.
 - Keep public SSH closed for production host.

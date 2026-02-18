@@ -54,9 +54,33 @@ Manual apply:
 
 Backend connectivity note:
 
-- Terraform workflows join Tailscale (`tag:ci`) before `terraform init`.
+- Terraform plan/apply workflows join Tailscale as `tag:ci-terraform` before `terraform init`.
+- Runtime secret sync workflow joins as `tag:ci-secrets`.
 - Remote state backend is expected at OPS MinIO endpoint (`susanoo-ops.longhair-eagle.ts.net:9000`).
 - If OPS VM is down, Terraform plan/apply workflows fail, but application CI/CD in `course-platform` still works.
+
+SSH host key pinning note:
+
+- CI SSH jobs no longer use `accept-new`.
+- Set pinned host key secrets:
+  - `TEST_SSH_KNOWN_HOSTS`
+  - `PROD_SSH_KNOWN_HOSTS`
+- Generate values from a trusted admin machine:
+```bash
+ssh-keyscan -H susanoo-test.longhair-eagle.ts.net 2>/dev/null
+ssh-keyscan -H <prod-hostname-or-ip> 2>/dev/null
+```
+- Copy the full output lines into the corresponding GitHub secrets.
+
+GitHub secret scanning and push protection:
+
+- `terraform-infra` now has secret scanning and push protection enabled.
+- `course-platform` is private and returned `HTTP 422` for secret scanning API enablement; this requires GitHub plan/features that include private-repo secret scanning.
+- Re-run enablement checks when needed:
+```bash
+./scripts/security/enable_repo_secret_scanning.sh EduardValentin/terraform-infra EduardValentin/course-platform
+```
+- Ongoing guard workflow: `.github/workflows/repository-security-guard.yml`
 
 ## Terraform backend on OPS VM (MinIO)
 
@@ -182,6 +206,15 @@ This updates:
 - `/srv/postgres/courseplatform.env`
 
 without manual SSH secret edits.
+
+Secret hygiene checks for TEST/OPS:
+
+```bash
+./scripts/security/check_remote_secret_hygiene.sh root@100.81.129.17 --cleanup
+./scripts/security/check_remote_secret_hygiene.sh root@100.121.159.108 --cleanup
+```
+
+This removes known plaintext temp secret files from `/tmp` and `/var/tmp`, and enforces `0600` on expected secret env files.
 
 ## TEST host bootstrap
 
