@@ -12,6 +12,8 @@ Portable infrastructure and bootstrap automation for Course Platform across TEST
 - `bootstrap/*`: provider-agnostic host bootstrap and runtime assets
 - `scripts/package_bootstrap_bundle.sh`: build release artifact `bootstrap-bundle-<version>.tar.gz`
 - `.github/workflows/release-bootstrap-bundle.yml`: publish bootstrap bundle to GitHub Releases
+- `.github/workflows/terraform-plan.yml`: auto Terraform checks + plan for impacted roots
+- `.github/workflows/terraform-apply.yml`: manual Terraform apply workflow (`workflow_dispatch`)
 
 ## Repository charter
 

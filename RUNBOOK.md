@@ -29,6 +29,29 @@ terraform output -raw bootstrap_prod_env > /tmp/bootstrap-prod.env
 chmod 600 /tmp/bootstrap-test.env /tmp/bootstrap-ops.env /tmp/bootstrap-prod.env
 ```
 
+## Terraform CI/CD workflows
+
+Automatic plan/checks:
+
+- Workflow: `Terraform Plan`
+- Trigger: push to `main` when `infra/**` Terraform files change
+- Behavior:
+  - detects impacted roots (`controlplane`, `test`, `ops`, `prod`)
+  - runs `init`, `fmt -check`, `validate`, and `plan`
+  - uploads plan artifacts per environment
+
+Manual apply:
+
+- Workflow: `Terraform Apply`
+- Trigger: manual (`workflow_dispatch`)
+- Inputs:
+  - `target_environment` (`controlplane`, `test`, `ops`, `prod`, `all`)
+  - `ref`
+  - `confirm=APPLY`
+- Behavior:
+  - reruns `init`, `fmt -check`, `validate`, and `plan`
+  - applies using generated plan file
+
 ## Build bootstrap bundle
 
 ```bash

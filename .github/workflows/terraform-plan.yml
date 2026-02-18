@@ -1,0 +1,209 @@
+name: Terraform Plan
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "infra/**/*.tf"
+      - "infra/**/*.tftpl"
+      - "infra/**/*.tfvars"
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Environment to plan"
+        required: true
+        type: choice
+        options:
+          - changed
+          - controlplane
+          - test
+          - ops
+          - prod
+          - all
+        default: changed
+
+permissions:
+  contents: read
+
+jobs:
+  detect:
+    name: Detect impacted Terraform envs
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build.outputs.matrix }}
+      has_changes: ${{ steps.build.outputs.has_changes }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build environment matrix
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          controlplane=false
+          test_env=false
+          ops_env=false
+          prod_env=false
+
+          append_all_envs() {
+            controlplane=true
+            test_env=true
+            ops_env=true
+            prod_env=true
+          }
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            target="${{ inputs.target_environment }}"
+            case "$target" in
+              all)
+                append_all_envs
+                ;;
+              controlplane)
+                controlplane=true
+                ;;
+              test)
+                test_env=true
+                ;;
+              ops)
+                ops_env=true
+                ;;
+              prod)
+                prod_env=true
+                ;;
+              changed)
+                append_all_envs
+                ;;
+              *)
+                echo "Unsupported target_environment: $target"
+                exit 1
+                ;;
+            esac
+          else
+            base="${{ github.event.before }}"
+            head="${{ github.sha }}"
+
+            if [[ "$base" == "0000000000000000000000000000000000000000" ]]; then
+              if git rev-parse "$head^" >/dev/null 2>&1; then
+                base="$(git rev-parse "$head^")"
+              else
+                base="$head"
+              fi
+            fi
+
+            changed_files="$(git diff --name-only "$base" "$head")"
+
+            while IFS= read -r file; do
+              [[ -z "$file" ]] && continue
+              case "$file" in
+                infra/modules/*|infra/templates/*)
+                  append_all_envs
+                  ;;
+                infra/envs/controlplane/*)
+                  controlplane=true
+                  ;;
+                infra/envs/test/*)
+                  test_env=true
+                  ;;
+                infra/envs/ops/*)
+                  ops_env=true
+                  ;;
+                infra/envs/prod/*)
+                  prod_env=true
+                  ;;
+              esac
+            done <<< "$changed_files"
+          fi
+
+          matrix='[]'
+          add_env() {
+            local env_name="$1"
+            local env_dir="$2"
+            local tfvars_secret="$3"
+            local backend_secret="$4"
+            matrix="$(echo "$matrix" | jq --arg env_name "$env_name" --arg env_dir "$env_dir" --arg tfvars_secret "$tfvars_secret" --arg backend_secret "$backend_secret" '. + [{environment: $env_name, dir: $env_dir, tfvars_secret: $tfvars_secret, backend_secret: $backend_secret}]')"
+          }
+
+          [[ "$controlplane" == "true" ]] && add_env "controlplane" "infra/envs/controlplane" "TFVARS_CONTROLPLANE" "TF_BACKEND_CONFIG_CONTROLPLANE"
+          [[ "$test_env" == "true" ]] && add_env "test" "infra/envs/test" "TFVARS_TEST" "TF_BACKEND_CONFIG_TEST"
+          [[ "$ops_env" == "true" ]] && add_env "ops" "infra/envs/ops" "TFVARS_OPS" "TF_BACKEND_CONFIG_OPS"
+          [[ "$prod_env" == "true" ]] && add_env "prod" "infra/envs/prod" "TFVARS_PROD" "TF_BACKEND_CONFIG_PROD"
+
+          has_changes="false"
+          if [[ "$(echo "$matrix" | jq 'length')" -gt 0 ]]; then
+            has_changes="true"
+          fi
+
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "has_changes=$has_changes" >> "$GITHUB_OUTPUT"
+
+  plan:
+    name: Plan (${{ matrix.environment }})
+    needs: detect
+    if: needs.detect.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.detect.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Write backend config
+        env:
+          BACKEND_CONFIG: ${{ secrets[matrix.backend_secret] }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${BACKEND_CONFIG}" ]]; then
+            echo "Missing required secret: ${{ matrix.backend_secret }}"
+            exit 1
+          fi
+          printf '%s' "${BACKEND_CONFIG}" > "${{ matrix.dir }}/backend.hcl"
+
+      - name: Write tfvars
+        env:
+          TFVARS_CONTENT: ${{ secrets[matrix.tfvars_secret] }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${TFVARS_CONTENT}" ]]; then
+            echo "Missing required secret: ${{ matrix.tfvars_secret }}"
+            exit 1
+          fi
+          printf '%s' "${TFVARS_CONTENT}" > "${{ matrix.dir }}/terraform.auto.tfvars"
+
+      - name: Terraform init
+        run: terraform -chdir="${{ matrix.dir }}" init -input=false -backend-config=backend.hcl
+
+      - name: Terraform fmt check
+        run: terraform -chdir="${{ matrix.dir }}" fmt -check
+
+      - name: Terraform validate
+        run: terraform -chdir="${{ matrix.dir }}" validate
+
+      - name: Terraform plan
+        run: |
+          set -euo pipefail
+          terraform -chdir="${{ matrix.dir }}" plan -input=false -var-file=terraform.auto.tfvars -out=tfplan.bin
+          terraform -chdir="${{ matrix.dir }}" show -no-color tfplan.bin > tfplan.txt
+
+      - name: Upload plan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-${{ matrix.environment }}-${{ github.sha }}
+          path: |
+            ${{ matrix.dir }}/tfplan.bin
+            ${{ matrix.dir }}/tfplan.txt
+
+      - name: Cleanup local plan files
+        if: always()
+        run: rm -f "${{ matrix.dir }}/backend.hcl" "${{ matrix.dir }}/terraform.auto.tfvars"
