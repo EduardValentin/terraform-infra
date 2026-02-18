@@ -1,5 +1,5 @@
 creation_rules:
-  - path_regex: secrets/.*\\.enc$
-    age: age1replacewithyourrealagepublickey
-  - path_regex: secrets/.*\\.enc\\.ya?ml$
-    age: age1replacewithyourrealagepublickey
+    - path_regex: secrets/.*\\.enc$
+      age: age1luzzfp4ecft97queegzderztw5u9dj8jdkpq2xuzfjydpscuhd6s7fvavc
+    - path_regex: secrets/.*\\.enc\\.ya?ml$
+      age: age1luzzfp4ecft97queegzderztw5u9dj8jdkpq2xuzfjydpscuhd6s7fvavc
