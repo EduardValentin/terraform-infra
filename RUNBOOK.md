@@ -52,6 +52,8 @@ Then run GitHub Actions workflow:
   - `environment=test`
   - `app_name=courseplatform`
 
+Or push encrypted runtime secret file changes to `main`; the workflow auto-detects and syncs changed env/app targets.
+
 This updates:
 
 - `/srv/apps/courseplatform/.env`

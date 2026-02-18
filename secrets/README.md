@@ -50,3 +50,5 @@ It decrypts runtime env files in CI and installs:
 - `/srv/postgres/<app>.env`
 
 on the selected TEST or PROD host over Tailscale SSH.
+
+It also auto-runs on push to `main` whenever encrypted runtime files change under `secrets/runtime/**`.

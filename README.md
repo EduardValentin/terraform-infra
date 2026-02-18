@@ -40,6 +40,7 @@ Portable infrastructure and bootstrap automation for Course Platform across TEST
 5. Configure scrape target hostnames on OPS host via `TEST_HOSTS` and `PROD_HOSTS` env in setup command.
 6. Sync encrypted runtime secrets to host with GitHub Actions workflow:
    - `.github/workflows/sync-runtime-secrets.yml`
+   - auto-triggers on `main` push when `secrets/runtime/**` encrypted files change
 
 ## Bootstrap install command
 

@@ -88,22 +88,22 @@ git commit -m "CP-56 add encrypted test runtime secrets for courseplatform"
 git push
 ```
 
-## Sync encrypted secrets to TEST host
+## Automatic sync on push
 
-Run GitHub Actions workflow:
+Workflow `.github/workflows/sync-runtime-secrets.yml` runs automatically on pushes to `main` when encrypted runtime files change under:
 
-- `Sync Runtime Secrets`
+- `secrets/runtime/test/*.enc`
+- `secrets/runtime/prod/*.enc`
 
-Inputs:
+Behavior:
 
-- `environment`: `test`
-- `app_name`: `courseplatform`
+1. Detects exactly which `environment/app` pairs changed.
+2. Decrypts only those files with `SOPS_AGE_KEY`.
+3. Syncs to matching host over Tailscale SSH.
+4. If app env changed (`*.app.env.enc`), performs rolling app container reload.
+5. If postgres env changed (`*.postgres.env.enc`), updates file only (no auto Postgres restart).
 
-What it does:
-
-1. Decrypts files with `SOPS_AGE_KEY`.
-2. Connects to tailnet with `TAILSCALE_AUTHKEY_CI`.
-3. Installs files on TEST host with mode `0600`.
+You can still run it manually via `workflow_dispatch` for forced re-sync.
 
 ## Verification
 
@@ -120,7 +120,7 @@ Expected permissions:
 
 Runtime secret file updates do not automatically recreate app containers.
 
-After syncing secrets, run the app deploy workflow (`deploy_by_digest`) so new env values are applied to running containers.
+App secret updates now trigger rolling reload automatically.
 
 ## Postgres credential caveat
 
