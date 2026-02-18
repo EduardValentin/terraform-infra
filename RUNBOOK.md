@@ -29,6 +29,38 @@ sudo nano /root/bootstrap/bootstrap-test.env
 sudo nano /root/bootstrap/bootstrap-ops.env
 ```
 
+## Runtime secrets (encrypted, no manual VM edits)
+
+Use SOPS+age encrypted files under:
+
+- `secrets/runtime/test/*.enc`
+- `secrets/runtime/prod/*.enc`
+
+Create encrypted TEST files:
+
+```bash
+cp secrets/runtime/templates/courseplatform.app.env.example /tmp/courseplatform.app.env
+cp secrets/runtime/templates/courseplatform.postgres.env.example /tmp/courseplatform.postgres.env
+# edit /tmp files with real values
+./scripts/secrets/encrypt_runtime_secret_set.sh test courseplatform /tmp/courseplatform.app.env /tmp/courseplatform.postgres.env
+rm -f /tmp/courseplatform.app.env /tmp/courseplatform.postgres.env
+```
+
+Then run GitHub Actions workflow:
+
+- `.github/workflows/sync-runtime-secrets.yml`
+  - `environment=test`
+  - `app_name=courseplatform`
+
+Or push encrypted runtime secret file changes to `main`; the workflow auto-detects and syncs changed env/app targets.
+
+This updates:
+
+- `/srv/apps/courseplatform/.env`
+- `/srv/postgres/courseplatform.env`
+
+without manual SSH secret edits.
+
 ## TEST host bootstrap
 
 ```bash

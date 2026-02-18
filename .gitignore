@@ -6,5 +6,9 @@
 *.log
 dist/
 secrets/*.dec.yaml
+secrets/**/*.dec.yaml
+secrets/**/*.dec.env
+secrets/runtime/**/*.env
+!secrets/runtime/**/*.env.example
 .env
 .DS_Store

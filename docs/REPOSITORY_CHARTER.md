@@ -232,6 +232,7 @@ Use low-resource mode only when OPS capacity is constrained (1 vCPU / 2 GB class
 - keep bundle versions immutable
 - test in TEST before OPS/PROD updates where practical
 - keep secrets encrypted at rest in repo (SOPS+age)
+- keep runtime env files managed via encrypted repo files under `secrets/runtime/<env>/` and CI sync workflow, not manual host edits
 
 ## Migration and Portability Process
 
