@@ -42,11 +42,47 @@ POSTGRES_ENC_FILE="$ROOT_DIR/secrets/runtime/${ENVIRONMENT}/${APP_NAME}.postgres
 APP_TEMPLATE_FILE="$ROOT_DIR/secrets/runtime/templates/${APP_NAME}.app.env.example"
 POSTGRES_TEMPLATE_FILE="$ROOT_DIR/secrets/runtime/templates/${APP_NAME}.postgres.env.example"
 
+decrypt_to_work_file() {
+  local encrypted_file="$1"
+  local output_file="$2"
+  local template_file="$3"
+  local label="$4"
+
+  if [[ -f "$encrypted_file" && -s "$encrypted_file" ]]; then
+    if ! command -v sops >/dev/null 2>&1; then
+      echo "sops is required to decrypt existing file: $encrypted_file"
+      exit 1
+    fi
+
+    if ! sops --decrypt --input-type dotenv --output-type dotenv "$encrypted_file" > "$output_file"; then
+      echo "failed to decrypt $encrypted_file"
+      echo "if this file is corrupted, remove it and re-run prepare:"
+      echo "  rm -f $encrypted_file"
+      exit 1
+    fi
+    return
+  fi
+
+  if [[ -f "$encrypted_file" && ! -s "$encrypted_file" ]]; then
+    echo "warning: ignoring empty encrypted file: $encrypted_file"
+  fi
+
+  if [[ -f "$template_file" ]]; then
+    cp "$template_file" "$output_file"
+    return
+  fi
+
+  echo "missing encrypted or template file for $label env:"
+  echo "  $encrypted_file"
+  echo "  $template_file"
+  exit 1
+}
+
 case "$COMMAND" in
   prepare)
     mkdir -p "$WORK_DIR"
 
-    if [[ -f "$APP_ENC_FILE" && -f "$POSTGRES_ENC_FILE" ]]; then
+    if [[ -s "$APP_ENC_FILE" && -s "$POSTGRES_ENC_FILE" ]]; then
       "$DECRYPT_SCRIPT" "$ENVIRONMENT" "$APP_NAME" "$WORK_DIR"
       chmod 600 "$APP_WORK_FILE" "$POSTGRES_WORK_FILE"
       echo "decrypted files ready for editing:"
@@ -55,35 +91,8 @@ case "$COMMAND" in
       exit 0
     fi
 
-    if [[ -f "$APP_ENC_FILE" ]]; then
-      if ! command -v sops >/dev/null 2>&1; then
-        echo "sops is required to decrypt existing file: $APP_ENC_FILE"
-        exit 1
-      fi
-      sops --decrypt --input-type dotenv --output-type dotenv "$APP_ENC_FILE" > "$APP_WORK_FILE"
-    elif [[ -f "$APP_TEMPLATE_FILE" ]]; then
-      cp "$APP_TEMPLATE_FILE" "$APP_WORK_FILE"
-    else
-      echo "missing encrypted or template file for app env:"
-      echo "  $APP_ENC_FILE"
-      echo "  $APP_TEMPLATE_FILE"
-      exit 1
-    fi
-
-    if [[ -f "$POSTGRES_ENC_FILE" ]]; then
-      if ! command -v sops >/dev/null 2>&1; then
-        echo "sops is required to decrypt existing file: $POSTGRES_ENC_FILE"
-        exit 1
-      fi
-      sops --decrypt --input-type dotenv --output-type dotenv "$POSTGRES_ENC_FILE" > "$POSTGRES_WORK_FILE"
-    elif [[ -f "$POSTGRES_TEMPLATE_FILE" ]]; then
-      cp "$POSTGRES_TEMPLATE_FILE" "$POSTGRES_WORK_FILE"
-    else
-      echo "missing encrypted or template file for postgres env:"
-      echo "  $POSTGRES_ENC_FILE"
-      echo "  $POSTGRES_TEMPLATE_FILE"
-      exit 1
-    fi
+    decrypt_to_work_file "$APP_ENC_FILE" "$APP_WORK_FILE" "$APP_TEMPLATE_FILE" "app"
+    decrypt_to_work_file "$POSTGRES_ENC_FILE" "$POSTGRES_WORK_FILE" "$POSTGRES_TEMPLATE_FILE" "postgres"
 
     chmod 600 "$APP_WORK_FILE" "$POSTGRES_WORK_FILE"
     echo "work files ready for editing:"
