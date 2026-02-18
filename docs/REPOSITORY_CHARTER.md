@@ -137,6 +137,7 @@ Out of scope for this repository:
 3. For PROD, Terraform injects cloud-init with release bundle coordinates.
 4. Host downloads bundle and runs `bootstrap.sh` with role-specific context.
 5. Control-plane Terraform root (`controlplane`) manages GitHub CI/CD settings, Tailscale ACL policy, and rendered bootstrap env payloads.
+6. Manual PROD bootstrap path is disabled; PROD bootstrap is cloud-init only.
 
 ### 2) Host Bootstrap Flow
 
@@ -228,12 +229,20 @@ Use low-resource mode only when OPS capacity is constrained (1 vCPU / 2 GB class
 3. Re-run bootstrap role on target host (`apphost` or `ops`).
 4. Verify services and telemetry continuity.
 
+### Production database backup policy
+
+- production apphost bootstrap configures scheduled PostgreSQL backups via systemd timer
+- one local copy is retained on host (`/srv/backups/postgres`)
+- optional second copy is replicated to NAS path if mounted and writable
+- retention is controlled by bootstrap/cloud-init variables and must be validated during PROD rollout
+
 ### Operational safety rules
 
 - do not deploy unversioned bootstrap artifacts
 - keep bundle versions immutable
 - test in TEST before OPS/PROD updates where practical
 - keep secrets encrypted at rest in repo (SOPS+age)
+- keep runtime env files managed via encrypted repo files under `secrets/runtime/<env>/` and CI sync workflow, not manual host edits
 
 ## Migration and Portability Process
 

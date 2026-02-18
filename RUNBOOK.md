@@ -74,6 +74,58 @@ sudo nano /root/bootstrap/bootstrap-test.env
 sudo nano /root/bootstrap/bootstrap-ops.env
 ```
 
+Production policy:
+
+- manual PROD bootstrap is disabled
+- PROD bootstrap is allowed only via Terraform cloud-init path
+
+## Runtime secrets (encrypted, no manual VM edits)
+
+Use SOPS+age encrypted files under:
+
+- `secrets/runtime/test/*.enc`
+- `secrets/runtime/prod/*.enc`
+
+Create encrypted TEST files:
+
+```bash
+mkdir -p secrets/runtime/work
+cp secrets/runtime/templates/courseplatform.app.env.example secrets/runtime/work/courseplatform.app.env
+cp secrets/runtime/templates/courseplatform.postgres.env.example secrets/runtime/work/courseplatform.postgres.env
+# edit work files with real values
+./scripts/secrets/encrypt_runtime_secret_set.sh test courseplatform secrets/runtime/work/courseplatform.app.env secrets/runtime/work/courseplatform.postgres.env
+rm -f secrets/runtime/work/courseplatform.app.env secrets/runtime/work/courseplatform.postgres.env
+```
+
+Update existing runtime secrets:
+
+```bash
+./scripts/secrets/edit_runtime_secret_set.sh prepare test courseplatform
+# edit files in secrets/runtime/work/test-courseplatform/
+./scripts/secrets/edit_runtime_secret_set.sh apply test courseplatform
+git add secrets/runtime/test/courseplatform.app.env.enc secrets/runtime/test/courseplatform.postgres.env.enc
+git commit -m "CP-56 update test runtime secrets"
+git push
+./scripts/secrets/edit_runtime_secret_set.sh cleanup test courseplatform
+```
+
+If encrypted files do not exist yet, `prepare` seeds work files from templates automatically.
+
+Then run GitHub Actions workflow:
+
+- `.github/workflows/sync-runtime-secrets.yml`
+  - `environment=test`
+  - `app_name=courseplatform`
+
+Or push encrypted runtime secret file changes to `main`; the workflow auto-detects and syncs changed env/app targets.
+
+This updates:
+
+- `/srv/apps/courseplatform/.env`
+- `/srv/postgres/courseplatform.env`
+
+without manual SSH secret edits.
+
 ## TEST host bootstrap
 
 ```bash
@@ -113,6 +165,38 @@ Low-resource mode effects:
 - Tempo uses lower ingestion limits and smaller block duration.
 - You should also set application trace sampling to 10-20% (for example `OTEL_TRACES_SAMPLER=parentbased_traceidratio` and `OTEL_TRACES_SAMPLER_ARG=0.2`).
 - Expect reduced trace coverage and potential delay for high-volume log indexing.
+
+## PROD scheduled PostgreSQL backups
+
+This is configured via bootstrap variables and cloud-init for `ENVIRONMENT=prod`.
+
+Settings:
+
+- `PROD_PG_BACKUP_ENABLED=true`
+- `PROD_PG_BACKUP_ONCALENDAR="*-*-* 03:15:00"`
+- `PROD_PG_BACKUP_LOCAL_DIR=/srv/backups/postgres`
+- `PROD_PG_BACKUP_LOCAL_RETENTION_DAYS=14`
+- `PROD_PG_BACKUP_NAS_DIR=/mnt/nas/courseplatform-backups` (optional)
+- `PROD_PG_BACKUP_NAS_RETENTION_DAYS=14`
+
+Manual verification on PROD host:
+
+```bash
+systemctl status course-platform-pg-backup.timer --no-pager
+systemctl list-timers --all | grep course-platform-pg-backup || true
+sudo systemctl start course-platform-pg-backup.service
+journalctl -u course-platform-pg-backup.service -n 50 --no-pager
+ls -lah /srv/backups/postgres
+ls -lah /mnt/nas/courseplatform-backups
+```
+
+Expected:
+
+- Timer is enabled and active.
+- Manual service run completes successfully.
+- New `*.sql.gz` file appears in local backup dir.
+- If NAS path is mounted/writable, same file appears in NAS dir.
+- Older files are pruned according to retention days.
 
 ## Verify TEST host
 

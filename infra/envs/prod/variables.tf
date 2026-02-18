@@ -84,6 +84,36 @@ variable "tailscale_tags_prod" {
   default = "tag:prod"
 }
 
+variable "prod_pg_backup_enabled" {
+  type    = bool
+  default = true
+}
+
+variable "prod_pg_backup_oncalendar" {
+  type    = string
+  default = "*-*-* 03:15:00"
+}
+
+variable "prod_pg_backup_local_dir" {
+  type    = string
+  default = "/srv/backups/postgres"
+}
+
+variable "prod_pg_backup_local_retention_days" {
+  type    = number
+  default = 14
+}
+
+variable "prod_pg_backup_nas_dir" {
+  type    = string
+  default = ""
+}
+
+variable "prod_pg_backup_nas_retention_days" {
+  type    = number
+  default = 14
+}
+
 variable "host_labels" {
   type = map(string)
   default = {

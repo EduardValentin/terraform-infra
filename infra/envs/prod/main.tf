@@ -12,10 +12,17 @@ module "prod_host" {
   location    = var.hcloud_location
   labels      = var.host_labels
   user_data = templatefile("../../templates/cloud-init-prod.tftpl", {
-    bundle_repo        = var.bootstrap_bundle_repo
-    bundle_version     = var.bootstrap_bundle_version
-    tailscale_auth_key = var.tailscale_auth_key_prod
-    tailscale_tags     = var.tailscale_tags_prod
+    app_name                           = var.project_prefix
+    bundle_repo                        = var.bootstrap_bundle_repo
+    bundle_version                     = var.bootstrap_bundle_version
+    tailscale_auth_key                 = var.tailscale_auth_key_prod
+    tailscale_tags                     = var.tailscale_tags_prod
+    prod_pg_backup_enabled             = var.prod_pg_backup_enabled
+    prod_pg_backup_oncalendar          = var.prod_pg_backup_oncalendar
+    prod_pg_backup_local_dir           = var.prod_pg_backup_local_dir
+    prod_pg_backup_local_retention_days = var.prod_pg_backup_local_retention_days
+    prod_pg_backup_nas_dir             = var.prod_pg_backup_nas_dir
+    prod_pg_backup_nas_retention_days  = var.prod_pg_backup_nas_retention_days
   })
 }
 

@@ -13,6 +13,11 @@ ENVIRONMENT="$4"
 TAILSCALE_AUTH_KEY="${5:-}"
 TAILSCALE_TAGS="${6:-}"
 
+if [ "$ENVIRONMENT" = "prod" ]; then
+  echo "manual PROD bootstrap is disabled; use Terraform/cloud-init path"
+  exit 1
+fi
+
 TMP_TGZ="/tmp/bootstrap-bundle-$VERSION.tar.gz"
 INSTALL_DIR="/opt/bootstrap"
 
