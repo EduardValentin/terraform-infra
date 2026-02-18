@@ -201,16 +201,7 @@ jobs:
         run: |
           set -euo pipefail
           terraform -chdir="${{ matrix.dir }}" plan -input=false -var-file=terraform.auto.tfvars -out=tfplan.bin
-          terraform -chdir="${{ matrix.dir }}" show -no-color tfplan.bin > tfplan.txt
-
-      - name: Upload plan artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: tfplan-${{ matrix.environment }}-${{ github.sha }}
-          path: |
-            ${{ matrix.dir }}/tfplan.bin
-            ${{ matrix.dir }}/tfplan.txt
 
       - name: Cleanup local plan files
         if: always()
-        run: rm -f "${{ matrix.dir }}/backend.hcl" "${{ matrix.dir }}/terraform.auto.tfvars"
+        run: rm -f "${{ matrix.dir }}/backend.hcl" "${{ matrix.dir }}/terraform.auto.tfvars" "${{ matrix.dir }}/tfplan.bin" "${{ matrix.dir }}/tfplan.txt"
