@@ -111,14 +111,34 @@ variable "tailscale_admin_group" {
   default = "group:admin"
 }
 
-variable "tailscale_ci_sources" {
+variable "tailscale_ci_terraform_sources" {
   type    = list(string)
-  default = ["tag:ci"]
+  default = ["tag:ci-terraform"]
 }
 
-variable "tailscale_ci_destinations" {
+variable "tailscale_ci_terraform_destinations" {
   type    = list(string)
-  default = ["tag:test:*", "tag:prod:*", "tag:ops:*"]
+  default = ["tag:ops:9000"]
+}
+
+variable "tailscale_ci_secrets_sources" {
+  type    = list(string)
+  default = ["tag:ci-secrets"]
+}
+
+variable "tailscale_ci_secrets_destinations" {
+  type    = list(string)
+  default = ["tag:test:22", "tag:prod:22"]
+}
+
+variable "tailscale_ci_app_sources" {
+  type    = list(string)
+  default = ["tag:ci-app"]
+}
+
+variable "tailscale_ci_app_destinations" {
+  type    = list(string)
+  default = ["tag:test:22", "tag:prod:22"]
 }
 
 variable "tailscale_admin_destinations" {
