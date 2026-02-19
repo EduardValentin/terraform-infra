@@ -128,12 +128,34 @@ jobs:
           tags: tag:ci-terraform
 
       - name: Connect to Tailscale for backend access (Authkey fallback)
-        if: env.TS_OAUTH_CLIENT_ID == '' || env.TS_OAUTH_SECRET == '' || steps.tailscale_oauth.outcome != 'success'
+        if: env.TS_OAUTH_CLIENT_ID == '' || env.TS_OAUTH_SECRET == ''
         uses: tailscale/github-action@6cae46e2d796f265265cfcf628b72a32b4d7cade
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY_CI_TERRAFORM }}
           hostname: gha-terraform-infra-apply
           tags: tag:ci-terraform
+
+      - name: Ensure Tailscale connectivity for OAuth path
+        if: env.TS_OAUTH_CLIENT_ID != '' && env.TS_OAUTH_SECRET != ''
+        env:
+          TAILSCALE_AUTHKEY_FALLBACK: ${{ secrets.TAILSCALE_AUTHKEY_CI_TERRAFORM }}
+        run: |
+          set -euo pipefail
+
+          if tailscale status --json 2>/dev/null | jq -e '.BackendState == "Running"' >/dev/null; then
+            exit 0
+          fi
+
+          if [[ -z "${TAILSCALE_AUTHKEY_FALLBACK}" ]]; then
+            echo "OAuth path failed and no authkey fallback secret is available."
+            exit 1
+          fi
+
+          sudo tailscale up \
+            --authkey="${TAILSCALE_AUTHKEY_FALLBACK}" \
+            --hostname=gha-terraform-infra-apply \
+            --advertise-tags=tag:ci-terraform \
+            --accept-routes=false
 
       - name: Write backend config
         env:
