@@ -91,6 +91,9 @@ jobs:
     name: Apply (${{ matrix.environment }})
     needs: resolve
     runs-on: ubuntu-latest
+    env:
+      TS_OAUTH_CLIENT_ID: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+      TS_OAUTH_SECRET: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
     strategy:
       fail-fast: false
       max-parallel: 1
@@ -114,16 +117,16 @@ jobs:
           terraform_wrapper: false
 
       - name: Connect to Tailscale for backend access (OAuth)
-        if: secrets.TAILSCALE_OAUTH_CLIENT_ID != '' && secrets.TAILSCALE_OAUTH_SECRET != ''
+        if: env.TS_OAUTH_CLIENT_ID != '' && env.TS_OAUTH_SECRET != ''
         uses: tailscale/github-action@6cae46e2d796f265265cfcf628b72a32b4d7cade
         with:
-          oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
+          oauth-client-id: ${{ env.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ env.TS_OAUTH_SECRET }}
           hostname: gha-terraform-infra-apply
           tags: tag:ci-terraform
 
       - name: Connect to Tailscale for backend access (Authkey fallback)
-        if: secrets.TAILSCALE_OAUTH_CLIENT_ID == '' || secrets.TAILSCALE_OAUTH_SECRET == ''
+        if: env.TS_OAUTH_CLIENT_ID == '' || env.TS_OAUTH_SECRET == ''
         uses: tailscale/github-action@6cae46e2d796f265265cfcf628b72a32b4d7cade
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY_CI_TERRAFORM }}
