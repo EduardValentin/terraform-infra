@@ -32,13 +32,15 @@ Recommended MinIO backend payloads:
 bucket                      = "terraform-state"
 key                         = "controlplane/terraform.tfstate"
 region                      = "us-east-1"
-endpoint                    = "http://susanoo-ops.longhair-eagle.ts.net:9000"
+endpoints = {
+  s3 = "http://susanoo-ops.longhair-eagle.ts.net:9000"
+}
 access_key                  = "terraform-state"
 secret_key                  = "replace-with-strong-secret"
 skip_credentials_validation = true
 skip_region_validation      = true
 skip_metadata_api_check     = true
-force_path_style            = true
+use_path_style              = true
 ```
 
 - `TF_BACKEND_CONFIG_TEST`
@@ -46,13 +48,15 @@ force_path_style            = true
 bucket                      = "terraform-state"
 key                         = "test/terraform.tfstate"
 region                      = "us-east-1"
-endpoint                    = "http://susanoo-ops.longhair-eagle.ts.net:9000"
+endpoints = {
+  s3 = "http://susanoo-ops.longhair-eagle.ts.net:9000"
+}
 access_key                  = "terraform-state"
 secret_key                  = "replace-with-strong-secret"
 skip_credentials_validation = true
 skip_region_validation      = true
 skip_metadata_api_check     = true
-force_path_style            = true
+use_path_style              = true
 ```
 
 - `TF_BACKEND_CONFIG_OPS`
@@ -60,13 +64,15 @@ force_path_style            = true
 bucket                      = "terraform-state"
 key                         = "ops/terraform.tfstate"
 region                      = "us-east-1"
-endpoint                    = "http://susanoo-ops.longhair-eagle.ts.net:9000"
+endpoints = {
+  s3 = "http://susanoo-ops.longhair-eagle.ts.net:9000"
+}
 access_key                  = "terraform-state"
 secret_key                  = "replace-with-strong-secret"
 skip_credentials_validation = true
 skip_region_validation      = true
 skip_metadata_api_check     = true
-force_path_style            = true
+use_path_style              = true
 ```
 
 - `TF_BACKEND_CONFIG_PROD`
@@ -74,13 +80,15 @@ force_path_style            = true
 bucket                      = "terraform-state"
 key                         = "prod/terraform.tfstate"
 region                      = "us-east-1"
-endpoint                    = "http://susanoo-ops.longhair-eagle.ts.net:9000"
+endpoints = {
+  s3 = "http://susanoo-ops.longhair-eagle.ts.net:9000"
+}
 access_key                  = "terraform-state"
 secret_key                  = "replace-with-strong-secret"
 skip_credentials_validation = true
 skip_region_validation      = true
 skip_metadata_api_check     = true
-force_path_style            = true
+use_path_style              = true
 ```
 
 ## terraform-infra repository
@@ -88,7 +96,8 @@ force_path_style            = true
 Required by runtime secret sync workflow (`.github/workflows/sync-runtime-secrets.yml`):
 
 - `SOPS_AGE_KEY`
-- `TAILSCALE_AUTHKEY_CI_SECRETS`
+- `TAILSCALE_OAUTH_CLIENT_ID`
+- `TAILSCALE_OAUTH_SECRET`
 - `TEST_SSH_TARGET`
 - `PROD_SSH_TARGET`
 - `TEST_SSH_KNOWN_HOSTS`
@@ -96,7 +105,8 @@ Required by runtime secret sync workflow (`.github/workflows/sync-runtime-secret
 
 Required by Terraform workflows (`.github/workflows/terraform-plan.yml`, `.github/workflows/terraform-apply.yml`):
 
-- `TAILSCALE_AUTHKEY_CI_TERRAFORM`
+- `TAILSCALE_OAUTH_CLIENT_ID`
+- `TAILSCALE_OAUTH_SECRET`
 - `TF_BACKEND_CONFIG_CONTROLPLANE`
 - `TF_BACKEND_CONFIG_TEST`
 - `TF_BACKEND_CONFIG_OPS`
@@ -105,6 +115,11 @@ Required by Terraform workflows (`.github/workflows/terraform-plan.yml`, `.githu
 - `TFVARS_TEST`
 - `TFVARS_OPS`
 - `TFVARS_PROD`
+
+Legacy fallback (can be removed after OAuth secrets are present):
+
+- `TAILSCALE_AUTHKEY_CI_TERRAFORM`
+- `TAILSCALE_AUTHKEY_CI_SECRETS`
 
 Provider/API secrets used by Terraform roots (depending on enabled modules):
 

@@ -32,13 +32,15 @@ write_backend_file() {
 bucket                      = "${bucket}"
 key                         = "${key_prefix}/terraform.tfstate"
 region                      = "us-east-1"
-endpoint                    = "${endpoint}"
+endpoints = {
+  s3 = "${endpoint}"
+}
 access_key                  = "${access_key}"
 secret_key                  = "${secret_key}"
 skip_credentials_validation = true
 skip_region_validation      = true
 skip_metadata_api_check     = true
-force_path_style            = true
+use_path_style              = true
 BACKEND
 
   chmod 600 "$file_path"

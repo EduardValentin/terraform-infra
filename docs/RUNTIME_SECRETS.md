@@ -59,11 +59,16 @@ In `terraform-infra` repository settings, set:
 
 Also ensure these secrets exist in `terraform-infra`:
 
-- `TAILSCALE_AUTHKEY_CI_SECRETS`
+- `TAILSCALE_OAUTH_CLIENT_ID`
+- `TAILSCALE_OAUTH_SECRET`
 - `TEST_SSH_TARGET`
 - `PROD_SSH_TARGET`
 - `TEST_SSH_KNOWN_HOSTS`
 - `PROD_SSH_KNOWN_HOSTS`
+
+Legacy fallback secret (only needed if OAuth secrets are not set yet):
+
+- `TAILSCALE_AUTHKEY_CI_SECRETS`
 
 ## Create encrypted TEST runtime secrets
 
