@@ -129,13 +129,19 @@ Provider/API secrets used by Terraform roots (depending on enabled modules):
 
 Deployment/build secrets (current workflows):
 
-- `TAILSCALE_AUTHKEY_CI_COURSEPLATFORM`
+- `TAILSCALE_OAUTH_CLIENT_ID`
+- `TAILSCALE_OAUTH_SECRET`
 - `TEST_SSH_TARGET`
 - `PROD_SSH_TARGET`
 - `TEST_SSH_KNOWN_HOSTS`
 - `PROD_SSH_KNOWN_HOSTS`
 - `GHCR_PULL_USERNAME`
 - `GHCR_PULL_TOKEN`
+
+Notes:
+
+- `course-platform` CI and manual deploy workflows use OAuth-based Tailscale auth.
+- Do not set `TAILSCALE_AUTHKEY_CI_COURSEPLATFORM`; it is legacy and no longer consumed.
 
 Optional:
 

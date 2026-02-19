@@ -59,6 +59,14 @@ Backend connectivity note:
 - Remote state backend is expected at OPS MinIO endpoint (`susanoo-ops.longhair-eagle.ts.net:9000`).
 - If OPS VM is down, Terraform plan/apply workflows fail, but application CI/CD in `course-platform` still works.
 
+Tailscale auth model:
+
+- CI workflows use OAuth credentials only:
+  - `terraform-infra`: `TAILSCALE_OAUTH_CLIENT_ID`, `TAILSCALE_OAUTH_SECRET`
+  - `course-platform`: `TAILSCALE_OAUTH_CLIENT_ID`, `TAILSCALE_OAUTH_SECRET`
+- Long-lived VMs (`susanoo-test`, `susanoo-ops`, future PROD) do not use OAuth for steady-state connectivity.
+- VM bootstrap auth keys (`bootstrap_tailscale_auth_key_test|ops|prod`) are only for first join/recovery and are stored in control-plane tfvars/secrets.
+
 SSH host key pinning note:
 
 - CI SSH jobs no longer use `accept-new`.
@@ -86,7 +94,25 @@ gh api -X PATCH repos/EduardValentin/course-platform \
   -f 'security_and_analysis[secret_scanning][status]=enabled' \
   -f 'security_and_analysis[secret_scanning_push_protection][status]=enabled'
 ```
-- Ongoing guard workflow: `.github/workflows/repository-security-guard.yml`
+
+## Rotating TEST/OPS bootstrap Tailscale keys
+
+This rotation does not disconnect already-connected TEST/OPS nodes. Existing nodes keep working via persisted Tailscale node state.
+
+1. Generate new reusable pre-auth keys in Tailscale:
+   - one scoped to `tag:test`
+   - one scoped to `tag:ops`
+2. Update control-plane tfvars values:
+   - `bootstrap_tailscale_auth_key_test`
+   - `bootstrap_tailscale_auth_key_ops`
+3. Sync updated tfvars to `TFVARS_CONTROLPLANE` GitHub secret.
+4. Run `Terraform Apply` for `controlplane`.
+5. Revoke old TEST/OPS bootstrap keys in Tailscale admin.
+
+Use these keys only for:
+
+- initial join during VM bootstrap
+- recovery/rejoin when a VM loses Tailscale state
 
 ## Terraform backend on OPS VM (MinIO)
 

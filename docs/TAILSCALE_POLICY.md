@@ -6,12 +6,12 @@ Adjust policy inputs through Terraform variables (`tailscale_*`) and apply from 
 ```json
 {
   "tagOwners": {
-    "tag:prod": ["group:admin"],
-    "tag:test": ["group:admin"],
-    "tag:ops": ["group:admin"],
-    "tag:ci-courseplatform": ["group:admin"],
-    "tag:ci-secrets": ["group:admin"],
-    "tag:ci-terraform": ["group:admin"]
+    "tag:prod": ["autogroup:admin"],
+    "tag:test": ["autogroup:admin"],
+    "tag:ops": ["autogroup:admin"],
+    "tag:ci-courseplatform": ["autogroup:admin"],
+    "tag:ci-secrets": ["autogroup:admin"],
+    "tag:ci-terraform": ["autogroup:admin"]
   },
   "acls": [
     {
@@ -32,18 +32,18 @@ Adjust policy inputs through Terraform variables (`tailscale_*`) and apply from 
     {
       "action": "accept",
       "src": ["eli.lungu04@gmail.com"],
-      "dst": ["tag:prod:*", "tag:test:*", "tag:ops:*"]
+      "dst": ["*:*"]
     },
     {
       "action": "accept",
-      "src": ["group:admin"],
+      "src": ["autogroup:admin"],
       "dst": ["tag:prod:*", "tag:test:*", "tag:ops:*"]
     }
   ],
   "ssh": [
     {
       "action": "accept",
-      "src": ["group:admin"],
+      "src": ["autogroup:admin"],
       "dst": ["tag:prod", "tag:test", "tag:ops"],
       "users": ["root", "ubuntu"]
     },
@@ -63,8 +63,17 @@ Adjust policy inputs through Terraform variables (`tailscale_*`) and apply from 
 }
 ```
 
-Use separate reusable pre-auth keys restricted to each CI tag.
+CI access model:
 
-- `tag:ci-terraform`: terraform plan/apply (OPS MinIO backend only)
-- `tag:ci-secrets`: runtime secret sync workflows (SSH to TEST/PROD only)
-- `tag:ci-courseplatform`: application deployment workflows (SSH to TEST/PROD only)
+- CI workflows mint ephemeral Tailscale auth via OAuth client credentials.
+- Required OAuth tags:
+  - `tag:ci-terraform`: terraform plan/apply (OPS MinIO backend only)
+  - `tag:ci-secrets`: runtime secret sync workflows (SSH to TEST/PROD only)
+  - `tag:ci-courseplatform`: application deployment workflows (SSH to TEST/PROD only)
+
+Server bootstrap model:
+
+- Keep reusable pre-auth keys for server bootstrap/recovery only:
+  - `tag:test`
+  - `tag:ops`
+  - `tag:prod`

@@ -32,6 +32,9 @@ Portable infrastructure and bootstrap automation for Course Platform across TEST
 - Current TEST TLS hostname default: `susanoo-test.longhair-eagle.ts.net` (single-node cert mode)
 - PROD bootstrap includes scheduled PostgreSQL backups with local retention and optional NAS replication path.
 - Terraform state backend target: MinIO on OPS VM over Tailscale (`susanoo-ops.longhair-eagle.ts.net:9000`).
+- Tailscale auth model:
+  - CI workflows use OAuth secrets (`TAILSCALE_OAUTH_CLIENT_ID`, `TAILSCALE_OAUTH_SECRET`).
+  - TEST/OPS/PROD VMs use bootstrap auth keys only for initial join or recovery.
 
 ## Quick start
 
