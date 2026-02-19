@@ -91,6 +91,9 @@ jobs:
     name: Apply (${{ matrix.environment }})
     needs: resolve
     runs-on: ubuntu-latest
+    env:
+      TS_OAUTH_CLIENT_ID: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+      TS_OAUTH_SECRET: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
     strategy:
       fail-fast: false
       max-parallel: 1
@@ -100,6 +103,9 @@ jobs:
       group: terraform-apply-${{ matrix.environment }}
       cancel-in-progress: false
     steps:
+      - name: Configure git default branch
+        run: sudo git config --system init.defaultBranch main
+
       - name: Checkout target ref
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
@@ -110,12 +116,30 @@ jobs:
         with:
           terraform_wrapper: false
 
-      - name: Connect to Tailscale for backend access
+      - name: Validate Tailscale OAuth secrets
+        run: |
+          set -euo pipefail
+          if [[ -z "${TS_OAUTH_CLIENT_ID}" || -z "${TS_OAUTH_SECRET}" ]]; then
+            echo "TAILSCALE_OAUTH_CLIENT_ID and TAILSCALE_OAUTH_SECRET are required."
+            exit 1
+          fi
+
+      - name: Connect to Tailscale for backend access (OAuth)
         uses: tailscale/github-action@6cae46e2d796f265265cfcf628b72a32b4d7cade
         with:
-          authkey: ${{ secrets.TAILSCALE_AUTHKEY_CI_TERRAFORM }}
+          oauth-client-id: ${{ env.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ env.TS_OAUTH_SECRET }}
           hostname: gha-terraform-infra-apply
           tags: tag:ci-terraform
+
+      - name: Ensure Tailscale connectivity
+        run: |
+          set -euo pipefail
+
+          if ! tailscale status --json 2>/dev/null | jq -e '.BackendState == "Running"' >/dev/null; then
+            echo "Tailscale is not connected after OAuth login."
+            exit 1
+          fi
 
       - name: Write backend config
         env:
@@ -126,7 +150,37 @@ jobs:
             echo "Missing required secret: ${{ matrix.backend_secret }}"
             exit 1
           fi
-          printf '%s' "${BACKEND_CONFIG}" > "${{ matrix.dir }}/backend.hcl"
+          backend_file="${{ matrix.dir }}/backend.hcl"
+          printf '%s' "${BACKEND_CONFIG}" > "${backend_file}"
+          BACKEND_FILE="${backend_file}" python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          backend_file = Path(os.environ["BACKEND_FILE"])
+          lines = backend_file.read_text().splitlines()
+
+          endpoint_value = None
+          force_path_style_value = None
+          normalized = []
+
+          for line in lines:
+              stripped = line.strip()
+              if stripped.startswith("endpoint"):
+                  endpoint_value = line.split("=", 1)[1].strip().strip('"')
+                  continue
+              if stripped.startswith("force_path_style"):
+                  force_path_style_value = line.split("=", 1)[1].strip()
+                  continue
+              normalized.append(line)
+
+          if endpoint_value and not any(line.strip().startswith("endpoints") for line in normalized):
+              normalized.extend(["", "endpoints = {", f'  s3 = "{endpoint_value}"', "}"])
+
+          if force_path_style_value and not any(line.strip().startswith("use_path_style") for line in normalized):
+              normalized.append(f"use_path_style = {force_path_style_value}")
+
+          backend_file.write_text("\n".join(normalized) + "\n")
+          PY
 
       - name: Write tfvars
         env:

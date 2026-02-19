@@ -26,8 +26,8 @@ github_repository_secrets = {
     GHCR_PULL_TOKEN          = "github_pat_replace"
   }
   "terraform-infra" = {
-    TAILSCALE_AUTHKEY_CI_TERRAFORM = "tskey-client-replace"
-    TAILSCALE_AUTHKEY_CI_SECRETS   = "tskey-client-replace"
+    TAILSCALE_OAUTH_CLIENT_ID      = "oauth-client-id-replace"
+    TAILSCALE_OAUTH_SECRET         = "oauth-client-secret-replace"
     TEST_SSH_TARGET                = "root@test-host.tailnet.ts.net."
     PROD_SSH_TARGET                = "root@prod-host.tailnet.ts.net."
     TEST_SSH_KNOWN_HOSTS           = "test-host.tailnet.ts.net ssh-ed25519 AAAA..."
@@ -69,6 +69,8 @@ tailscale_ci_secrets_sources = ["tag:ci-secrets"]
 tailscale_ci_secrets_destinations = ["tag:test:22", "tag:prod:22"]
 tailscale_ci_app_sources = ["tag:ci-courseplatform"]
 tailscale_ci_app_destinations = ["tag:test:22", "tag:prod:22"]
+tailscale_member_sources = ["eli.lungu04@gmail.com"]
+tailscale_member_destinations = ["tag:test:*", "tag:ops:*", "tag:prod:*"]
 
 tailnet_name            = "longhair-eagle.ts.net"
 placeholder_prod_domain = "courseplatform.com"

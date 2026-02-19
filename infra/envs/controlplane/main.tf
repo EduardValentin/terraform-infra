@@ -73,28 +73,39 @@ locals {
       "tag:ci-secrets"   = [var.tailscale_admin_group]
       "tag:ci-terraform" = [var.tailscale_admin_group]
     }
-    acls = [
-      {
-        action = "accept"
-        src    = var.tailscale_ci_terraform_sources
-        dst    = var.tailscale_ci_terraform_destinations
-      },
-      {
-        action = "accept"
-        src    = var.tailscale_ci_secrets_sources
-        dst    = var.tailscale_ci_secrets_destinations
-      },
-      {
-        action = "accept"
-        src    = var.tailscale_ci_app_sources
-        dst    = var.tailscale_ci_app_destinations
-      },
-      {
-        action = "accept"
-        src    = [var.tailscale_admin_group]
-        dst    = var.tailscale_admin_destinations
-      }
-    ]
+    acls = concat(
+      [
+        {
+          action = "accept"
+          src    = var.tailscale_ci_terraform_sources
+          dst    = var.tailscale_ci_terraform_destinations
+        },
+        {
+          action = "accept"
+          src    = var.tailscale_ci_secrets_sources
+          dst    = var.tailscale_ci_secrets_destinations
+        },
+        {
+          action = "accept"
+          src    = var.tailscale_ci_app_sources
+          dst    = var.tailscale_ci_app_destinations
+        }
+      ],
+      length(var.tailscale_member_sources) > 0 ? [
+        {
+          action = "accept"
+          src    = var.tailscale_member_sources
+          dst    = var.tailscale_member_destinations
+        }
+      ] : [],
+      [
+        {
+          action = "accept"
+          src    = [var.tailscale_admin_group]
+          dst    = var.tailscale_admin_destinations
+        }
+      ]
+    )
     ssh = [
       {
         action = "accept"

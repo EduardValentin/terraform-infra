@@ -27,13 +27,15 @@ cat > backend.hcl <<'EOF'
 bucket                      = "terraform-state"
 key                         = "controlplane/terraform.tfstate"
 region                      = "us-east-1"
-endpoint                    = "http://susanoo-ops.longhair-eagle.ts.net:9000"
+endpoints = {
+  s3 = "http://susanoo-ops.longhair-eagle.ts.net:9000"
+}
 access_key                  = "terraform-state"
 secret_key                  = "replace-with-strong-secret"
 skip_credentials_validation = true
 skip_region_validation      = true
 skip_metadata_api_check     = true
-force_path_style            = true
+use_path_style              = true
 EOF
 terraform init -backend-config=backend.hcl
 terraform plan -var-file=terraform.tfvars
