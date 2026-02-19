@@ -69,6 +69,8 @@ tailscale_ci_secrets_sources = ["tag:ci-secrets"]
 tailscale_ci_secrets_destinations = ["tag:test:22", "tag:prod:22"]
 tailscale_ci_app_sources = ["tag:ci-courseplatform"]
 tailscale_ci_app_destinations = ["tag:test:22", "tag:prod:22"]
+tailscale_member_sources = ["eli.lungu04@gmail.com"]
+tailscale_member_destinations = ["tag:test:*", "tag:ops:*", "tag:prod:*"]
 
 tailnet_name            = "longhair-eagle.ts.net"
 placeholder_prod_domain = "courseplatform.com"

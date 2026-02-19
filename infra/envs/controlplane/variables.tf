@@ -146,6 +146,16 @@ variable "tailscale_admin_destinations" {
   default = ["tag:prod:*", "tag:test:*", "tag:ops:*"]
 }
 
+variable "tailscale_member_sources" {
+  type    = list(string)
+  default = []
+}
+
+variable "tailscale_member_destinations" {
+  type    = list(string)
+  default = ["tag:prod:*", "tag:test:*", "tag:ops:*"]
+}
+
 variable "tailscale_ssh_destinations" {
   type    = list(string)
   default = ["tag:prod", "tag:test", "tag:ops"]
