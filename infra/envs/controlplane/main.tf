@@ -61,7 +61,7 @@ locals {
 
   tailscale_ci_ssh_destinations = distinct([
     for destination in concat(var.tailscale_ci_app_destinations, var.tailscale_ci_secrets_destinations) :
-    regexreplace(destination, ":[0-9]+$", "")
+    replace(destination, ":22", "")
   ])
 
   tailscale_policy = {
