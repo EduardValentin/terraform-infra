@@ -59,6 +59,11 @@ locals {
     ]
   ])
 
+  tailscale_ci_ssh_destinations = distinct([
+    for destination in concat(var.tailscale_ci_app_destinations, var.tailscale_ci_secrets_destinations) :
+    regexreplace(destination, ":[0-9]+$", "")
+  ])
+
   tailscale_policy = {
     tagOwners = {
       "tag:prod"         = [var.tailscale_admin_group]
@@ -96,6 +101,18 @@ locals {
         src    = [var.tailscale_admin_group]
         dst    = var.tailscale_ssh_destinations
         users  = var.tailscale_ssh_users
+      },
+      {
+        action = "accept"
+        src    = var.tailscale_ci_app_sources
+        dst    = local.tailscale_ci_ssh_destinations
+        users  = ["root"]
+      },
+      {
+        action = "accept"
+        src    = var.tailscale_ci_secrets_sources
+        dst    = local.tailscale_ci_ssh_destinations
+        users  = ["root"]
       }
     ]
   }

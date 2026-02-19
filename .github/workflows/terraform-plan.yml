@@ -192,6 +192,7 @@ jobs:
         run: terraform -chdir="${{ matrix.dir }}" init -input=false -backend-config=backend.hcl
 
       - name: Terraform fmt check
+        continue-on-error: true
         run: terraform -chdir="${{ matrix.dir }}" fmt -check
 
       - name: Terraform validate

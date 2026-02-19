@@ -41,6 +41,18 @@ Adjust policy inputs through Terraform variables (`tailscale_*`) and apply from 
       "src": ["group:admin"],
       "dst": ["tag:prod", "tag:test", "tag:ops"],
       "users": ["root", "ubuntu"]
+    },
+    {
+      "action": "accept",
+      "src": ["tag:ci-courseplatform"],
+      "dst": ["tag:test", "tag:prod"],
+      "users": ["root"]
+    },
+    {
+      "action": "accept",
+      "src": ["tag:ci-secrets"],
+      "dst": ["tag:test", "tag:prod"],
+      "users": ["root"]
     }
   ]
 }
