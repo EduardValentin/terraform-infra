@@ -86,6 +86,26 @@ If a check cannot run, explicitly state why and what is needed.
 - Preserve standardized labels: `env`, `app`, `service`, `host`.
 - Do not add high-cardinality PII labels to Loki.
 - Do not introduce public admin access paths that violate charter constraints.
+- Keep Tailscale auth model consistent:
+  - CI workflows use OAuth secrets (`TAILSCALE_OAUTH_CLIENT_ID`, `TAILSCALE_OAUTH_SECRET`).
+  - Long-lived VMs use bootstrap auth keys only for first join/recovery (`bootstrap_tailscale_auth_key_*` in control-plane tfvars).
+  - Do not reintroduce static CI auth keys for app or infra workflows.
+
+## Documentation sync rules
+
+When changing any of these, update docs in the same PR:
+
+- GitHub Actions auth or deploy flow
+- Tailscale tags/ACL/auth model
+- Secret names/required values
+- Bootstrap or rotation procedures
+
+At minimum verify and update:
+
+- `RUNBOOK.md`
+- `docs/GITHUB_SECRETS_MATRIX.md`
+- `docs/TAILSCALE_POLICY.md`
+- `docs/PHASE0_PREREQUISITES.md`
 
 ## Scope discipline
 

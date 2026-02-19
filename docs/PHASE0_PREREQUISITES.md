@@ -20,7 +20,14 @@
   - `tag:ci-courseplatform`
   - `tag:ci-secrets`
   - `tag:ci-terraform`
-- Create reusable pre-auth keys scoped per tag set.
+- Create one OAuth client for CI automation with `Auth Keys` write scope and allowed tags:
+  - `tag:ci-courseplatform`
+  - `tag:ci-secrets`
+  - `tag:ci-terraform`
+- Create reusable pre-auth keys for server bootstrap/recovery only:
+  - `tag:test`
+  - `tag:ops`
+  - `tag:prod`
 - Enable Tailscale SSH for admin identities.
 - Keep public SSH closed for production host.
 
@@ -32,7 +39,7 @@
   - `EduardValentin/terraform-infra`
 - Environments:
   - `test`
-  - `prod` (manual approval)
+  - `production` (manual approval)
 - Configure secrets matrix from `/Users/trocaneduard/Documents/Personal/terraform-infra/docs/GITHUB_SECRETS_MATRIX.md`.
 
 ## Done criteria
