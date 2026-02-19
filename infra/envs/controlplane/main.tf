@@ -64,7 +64,7 @@ locals {
       "tag:prod"         = [var.tailscale_admin_group]
       "tag:test"         = [var.tailscale_admin_group]
       "tag:ops"          = [var.tailscale_admin_group]
-      "tag:ci-app"       = [var.tailscale_admin_group]
+      "tag:ci-courseplatform" = [var.tailscale_admin_group]
       "tag:ci-secrets"   = [var.tailscale_admin_group]
       "tag:ci-terraform" = [var.tailscale_admin_group]
     }

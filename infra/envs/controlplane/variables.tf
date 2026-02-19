@@ -133,7 +133,7 @@ variable "tailscale_ci_secrets_destinations" {
 
 variable "tailscale_ci_app_sources" {
   type    = list(string)
-  default = ["tag:ci-app"]
+  default = ["tag:ci-courseplatform"]
 }
 
 variable "tailscale_ci_app_destinations" {

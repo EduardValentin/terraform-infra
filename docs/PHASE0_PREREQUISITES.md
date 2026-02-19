@@ -17,7 +17,7 @@
   - `tag:test`
   - `tag:prod`
   - `tag:ops`
-  - `tag:ci-app`
+  - `tag:ci-courseplatform`
   - `tag:ci-secrets`
   - `tag:ci-terraform`
 - Create reusable pre-auth keys scoped per tag set.

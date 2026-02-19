@@ -9,7 +9,7 @@ Adjust policy inputs through Terraform variables (`tailscale_*`) and apply from 
     "tag:prod": ["group:admin"],
     "tag:test": ["group:admin"],
     "tag:ops": ["group:admin"],
-    "tag:ci-app": ["group:admin"],
+    "tag:ci-courseplatform": ["group:admin"],
     "tag:ci-secrets": ["group:admin"],
     "tag:ci-terraform": ["group:admin"]
   },
@@ -26,7 +26,7 @@ Adjust policy inputs through Terraform variables (`tailscale_*`) and apply from 
     },
     {
       "action": "accept",
-      "src": ["tag:ci-app"],
+      "src": ["tag:ci-courseplatform"],
       "dst": ["tag:test:22", "tag:prod:22"]
     },
     {
@@ -50,4 +50,4 @@ Use separate reusable pre-auth keys restricted to each CI tag.
 
 - `tag:ci-terraform`: terraform plan/apply (OPS MinIO backend only)
 - `tag:ci-secrets`: runtime secret sync workflows (SSH to TEST/PROD only)
-- `tag:ci-app`: application deployment workflows (SSH to TEST/PROD only)
+- `tag:ci-courseplatform`: application deployment workflows (SSH to TEST/PROD only)
