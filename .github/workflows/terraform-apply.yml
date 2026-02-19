@@ -142,23 +142,37 @@ jobs:
             echo "Missing required secret: ${{ matrix.backend_secret }}"
             exit 1
           fi
-          printf '%s' "${BACKEND_CONFIG}" > "${{ matrix.dir }}/backend.hcl"
-          endpoint_value="$(awk -F= '/^[[:space:]]*endpoint[[:space:]]*=/{v=$0; sub(/^[^=]*=[[:space:]]*/, \"\", v); gsub(/^[[:space:]]+|[[:space:]]+$/, \"\", v); gsub(/^\"|\"$/, \"\", v); print v; exit}' \"${{ matrix.dir }}/backend.hcl\")"
-          force_path_style_value="$(awk -F= '/^[[:space:]]*force_path_style[[:space:]]*=/{v=$0; sub(/^[^=]*=[[:space:]]*/, \"\", v); gsub(/^[[:space:]]+|[[:space:]]+$/, \"\", v); print v; exit}' \"${{ matrix.dir }}/backend.hcl\")"
-          tmp_file="$(mktemp)"
-          awk '/^[[:space:]]*endpoint[[:space:]]*=/{next} /^[[:space:]]*force_path_style[[:space:]]*=/{next} {print}' \"${{ matrix.dir }}/backend.hcl\" > \"$tmp_file\"
-          if [[ -n \"$endpoint_value\" ]] && ! grep -Eq '^[[:space:]]*endpoints[[:space:]]*=' \"$tmp_file\"; then
-            {
-              printf '\n'
-              printf 'endpoints = {\n'
-              printf '  s3 = \"%s\"\n' \"$endpoint_value\"
-              printf '}\n'
-            } >> \"$tmp_file\"
-          fi
-          if [[ -n \"$force_path_style_value\" ]] && ! grep -Eq '^[[:space:]]*use_path_style[[:space:]]*=' \"$tmp_file\"; then
-            printf 'use_path_style = %s\n' \"$force_path_style_value\" >> \"$tmp_file\"
-          fi
-          mv \"$tmp_file\" \"${{ matrix.dir }}/backend.hcl\"
+          backend_file="${{ matrix.dir }}/backend.hcl"
+          printf '%s' "${BACKEND_CONFIG}" > "${backend_file}"
+          BACKEND_FILE="${backend_file}" python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          backend_file = Path(os.environ["BACKEND_FILE"])
+          lines = backend_file.read_text().splitlines()
+
+          endpoint_value = None
+          force_path_style_value = None
+          normalized = []
+
+          for line in lines:
+              stripped = line.strip()
+              if stripped.startswith("endpoint"):
+                  endpoint_value = line.split("=", 1)[1].strip().strip('"')
+                  continue
+              if stripped.startswith("force_path_style"):
+                  force_path_style_value = line.split("=", 1)[1].strip()
+                  continue
+              normalized.append(line)
+
+          if endpoint_value and not any(line.strip().startswith("endpoints") for line in normalized):
+              normalized.extend(["", "endpoints = {", f'  s3 = "{endpoint_value}"', "}"])
+
+          if force_path_style_value and not any(line.strip().startswith("use_path_style") for line in normalized):
+              normalized.append(f"use_path_style = {force_path_style_value}")
+
+          backend_file.write_text("\n".join(normalized) + "\n")
+          PY
 
       - name: Write tfvars
         env:
