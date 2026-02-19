@@ -119,7 +119,7 @@ Provider/API secrets used by Terraform roots (depending on enabled modules):
 
 Deployment/build secrets (current workflows):
 
-- `TAILSCALE_AUTHKEY_CI_APP` (fallback to legacy `TAILSCALE_AUTHKEY_CI`)
+- `TAILSCALE_AUTHKEY_CI_COURSEPLATFORM` (preferred for app deploy workflows; fallback to `TAILSCALE_AUTHKEY_CI_APP` then legacy `TAILSCALE_AUTHKEY_CI`)
 - `TEST_SSH_TARGET`
 - `PROD_SSH_TARGET`
 - `TEST_SSH_KNOWN_HOSTS`
