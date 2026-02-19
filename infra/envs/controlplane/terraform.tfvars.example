@@ -18,20 +18,20 @@ github_repository_variables = {
 github_repository_secrets = {
   "course-platform" = {
     TAILSCALE_AUTHKEY_CI_APP = "tskey-client-replace"
-    TEST_SSH_TARGET          = "root@susanoo-test.longhair-eagle.ts.net."
-    PROD_SSH_TARGET          = "root@courseplatform-prod.longhair-eagle.ts.net."
-    TEST_SSH_KNOWN_HOSTS     = "susanoo-test.longhair-eagle.ts.net ssh-ed25519 AAAA..."
-    PROD_SSH_KNOWN_HOSTS     = "courseplatform-prod.longhair-eagle.ts.net ssh-ed25519 AAAA..."
+    TEST_SSH_TARGET          = "root@test-host.tailnet.ts.net."
+    PROD_SSH_TARGET          = "root@prod-host.tailnet.ts.net."
+    TEST_SSH_KNOWN_HOSTS     = "test-host.tailnet.ts.net ssh-ed25519 AAAA..."
+    PROD_SSH_KNOWN_HOSTS     = "prod-host.tailnet.ts.net ssh-ed25519 AAAA..."
     GHCR_PULL_USERNAME       = "EduardValentin"
     GHCR_PULL_TOKEN          = "github_pat_replace"
   }
   "terraform-infra" = {
     TAILSCALE_AUTHKEY_CI_TERRAFORM = "tskey-client-replace"
     TAILSCALE_AUTHKEY_CI_SECRETS   = "tskey-client-replace"
-    TEST_SSH_TARGET                = "root@susanoo-test.longhair-eagle.ts.net."
-    PROD_SSH_TARGET                = "root@courseplatform-prod.longhair-eagle.ts.net."
-    TEST_SSH_KNOWN_HOSTS           = "susanoo-test.longhair-eagle.ts.net ssh-ed25519 AAAA..."
-    PROD_SSH_KNOWN_HOSTS           = "courseplatform-prod.longhair-eagle.ts.net ssh-ed25519 AAAA..."
+    TEST_SSH_TARGET                = "root@test-host.tailnet.ts.net."
+    PROD_SSH_TARGET                = "root@prod-host.tailnet.ts.net."
+    TEST_SSH_KNOWN_HOSTS           = "test-host.tailnet.ts.net ssh-ed25519 AAAA..."
+    PROD_SSH_KNOWN_HOSTS           = "prod-host.tailnet.ts.net ssh-ed25519 AAAA..."
     SOPS_AGE_KEY                   = "AGE-SECRET-KEY-1..."
   }
 }
