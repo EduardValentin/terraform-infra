@@ -59,7 +59,7 @@ In `terraform-infra` repository settings, set:
 
 Also ensure these secrets exist in `terraform-infra`:
 
-- `TAILSCALE_AUTHKEY_CI_SECRETS` (or legacy `TAILSCALE_AUTHKEY_CI`)
+- `TAILSCALE_AUTHKEY_CI_SECRETS`
 - `TEST_SSH_TARGET`
 - `PROD_SSH_TARGET`
 - `TEST_SSH_KNOWN_HOSTS`

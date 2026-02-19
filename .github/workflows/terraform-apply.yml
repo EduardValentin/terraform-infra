@@ -113,7 +113,7 @@ jobs:
       - name: Connect to Tailscale for backend access
         uses: tailscale/github-action@6cae46e2d796f265265cfcf628b72a32b4d7cade
         with:
-          authkey: ${{ secrets.TAILSCALE_AUTHKEY_CI_TERRAFORM != '' && secrets.TAILSCALE_AUTHKEY_CI_TERRAFORM || secrets.TAILSCALE_AUTHKEY_CI }}
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY_CI_TERRAFORM }}
           hostname: gha-terraform-infra-apply
           tags: tag:ci-terraform
 

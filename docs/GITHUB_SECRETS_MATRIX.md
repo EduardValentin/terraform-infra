@@ -88,7 +88,7 @@ force_path_style            = true
 Required by runtime secret sync workflow (`.github/workflows/sync-runtime-secrets.yml`):
 
 - `SOPS_AGE_KEY`
-- `TAILSCALE_AUTHKEY_CI_SECRETS` (or legacy fallback `TAILSCALE_AUTHKEY_CI`)
+- `TAILSCALE_AUTHKEY_CI_SECRETS`
 - `TEST_SSH_TARGET`
 - `PROD_SSH_TARGET`
 - `TEST_SSH_KNOWN_HOSTS`
@@ -96,7 +96,7 @@ Required by runtime secret sync workflow (`.github/workflows/sync-runtime-secret
 
 Required by Terraform workflows (`.github/workflows/terraform-plan.yml`, `.github/workflows/terraform-apply.yml`):
 
-- `TAILSCALE_AUTHKEY_CI_TERRAFORM` (or legacy fallback `TAILSCALE_AUTHKEY_CI`)
+- `TAILSCALE_AUTHKEY_CI_TERRAFORM`
 - `TF_BACKEND_CONFIG_CONTROLPLANE`
 - `TF_BACKEND_CONFIG_TEST`
 - `TF_BACKEND_CONFIG_OPS`
@@ -119,7 +119,7 @@ Provider/API secrets used by Terraform roots (depending on enabled modules):
 
 Deployment/build secrets (current workflows):
 
-- `TAILSCALE_AUTHKEY_CI_COURSEPLATFORM` (preferred for app deploy workflows; fallback to `TAILSCALE_AUTHKEY_CI_APP` then legacy `TAILSCALE_AUTHKEY_CI`)
+- `TAILSCALE_AUTHKEY_CI_COURSEPLATFORM`
 - `TEST_SSH_TARGET`
 - `PROD_SSH_TARGET`
 - `TEST_SSH_KNOWN_HOSTS`
