@@ -66,10 +66,6 @@ Also ensure these secrets exist in `terraform-infra`:
 - `TEST_SSH_KNOWN_HOSTS`
 - `PROD_SSH_KNOWN_HOSTS`
 
-Legacy fallback secret (only needed if OAuth secrets are not set yet):
-
-- `TAILSCALE_AUTHKEY_CI_SECRETS`
-
 ## Create encrypted TEST runtime secrets
 
 ### 1) Prepare plaintext files from templates

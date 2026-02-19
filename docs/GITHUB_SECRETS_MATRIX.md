@@ -116,11 +116,6 @@ Required by Terraform workflows (`.github/workflows/terraform-plan.yml`, `.githu
 - `TFVARS_OPS`
 - `TFVARS_PROD`
 
-Legacy fallback (can be removed after OAuth secrets are present):
-
-- `TAILSCALE_AUTHKEY_CI_TERRAFORM`
-- `TAILSCALE_AUTHKEY_CI_SECRETS`
-
 Provider/API secrets used by Terraform roots (depending on enabled modules):
 
 - `HCLOUD_TOKEN`
