@@ -356,11 +356,13 @@ Expected:
 docker compose --env-file /srv/ops/.env -f /srv/ops/docker-compose.yml ps
 cat /srv/ops/prometheus/targets/test.json
 cat /srv/ops/prometheus/targets/prod.json
+awk -F= '$1=="APP_METRICS_PATH"{print $2}' /srv/ops/.env
 curl -s "http://$(awk -F= '$1=="OPS_TAILSCALE_IPV4"{print $2}' /srv/ops/.env):9090/-/healthy"
 docker exec ops-alertmanager sh -lc 'wget -qO- http://127.0.0.1:9093/-/healthy || curl -fsS http://127.0.0.1:9093/-/healthy'
 curl -s "http://$(awk -F= '$1=="OPS_TAILSCALE_IPV4"{print $2}' /srv/ops/.env):3100/ready"
 curl -s "http://$(awk -F= '$1=="OPS_TAILSCALE_IPV4"{print $2}' /srv/ops/.env):3200/ready"
 curl -s "http://$(awk -F= '$1=="OPS_TAILSCALE_IPV4"{print $2}' /srv/ops/.env):9090/api/v1/targets" | jq '.data.activeTargets[] | select(.labels.env=="test") | {scrapeUrl: .scrapeUrl, health: .health, labels: .labels}'
+curl -s "http://$(awk -F= '$1=="OPS_TAILSCALE_IPV4"{print $2}' /srv/ops/.env):9090/api/v1/targets" | jq '.data.activeTargets[] | select(.labels.env=="test" and .labels.service=="app-metrics") | {scrapeUrl: .scrapeUrl, health: .health, labels: .labels}'
 curl -G -s "http://$(awk -F= '$1=="OPS_TAILSCALE_IPV4"{print $2}' /srv/ops/.env):3100/loki/api/v1/query" --data-urlencode 'query=sum(count_over_time({env="test",app="courseplatform"}[5m]))'
 grep -n \"ingestion_rate_mb\" /srv/ops/loki/config.yml || true
 ```
@@ -369,6 +371,8 @@ Expected:
 
 - OPS listeners are bound to `OPS_TAILSCALE_IPV4` (not `0.0.0.0`).
 - Localhost health checks are intentionally replaced with Tailscale-IP checks after hardening.
+- `test.json`/`prod.json` include `service=app-metrics` targets on `:443`.
+- App metrics path is controlled by `APP_METRICS_PATH` in `/srv/ops/.env` (default `/courseplatform/metrics`).
 
 ## Grafana checks
 

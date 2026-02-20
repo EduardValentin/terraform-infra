@@ -2,10 +2,15 @@
   "id": null,
   "uid": "cp-prod-overview",
   "title": "Course Platform PROD Overview",
-  "tags": ["course-platform", "prod", "ops"],
+  "tags": [
+    "course-platform",
+    "prod",
+    "ops",
+    "application"
+  ],
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 2,
+  "version": 3,
   "refresh": "30s",
   "templating": {
     "list": [
@@ -14,37 +19,42 @@
         "label": "Environment",
         "type": "constant",
         "query": "prod",
-        "current": { "text": "prod", "value": "prod" }
+        "current": {
+          "text": "prod",
+          "value": "prod"
+        }
       },
       {
         "name": "app",
         "label": "App",
         "type": "query",
-        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
         "query": "label_values(up{env=\"prod\"}, app)",
         "includeAll": true,
         "allValue": ".*",
-        "current": { "text": "All", "value": ".*" }
-      },
-      {
-        "name": "service",
-        "label": "Service",
-        "type": "query",
-        "datasource": { "type": "prometheus", "uid": "prometheus" },
-        "query": "label_values(up{env=\"prod\",app=~\"$app\"}, service)",
-        "includeAll": true,
-        "allValue": ".*",
-        "current": { "text": "All", "value": ".*" }
+        "current": {
+          "text": "All",
+          "value": ".*"
+        }
       },
       {
         "name": "host",
         "label": "Host",
         "type": "query",
-        "datasource": { "type": "prometheus", "uid": "prometheus" },
-        "query": "label_values(up{env=\"prod\",app=~\"$app\",service=~\"$service\"}, host)",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "query": "label_values(up{env=\"prod\",app=~\"$app\"}, host)",
         "includeAll": true,
         "allValue": ".*",
-        "current": { "text": "All", "value": ".*" }
+        "current": {
+          "text": "All",
+          "value": ".*"
+        }
       }
     ]
   },
@@ -52,97 +62,356 @@
     {
       "type": "text",
       "title": "ENV Banner",
-      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
       "options": {
-        "mode": "markdown",
-        "content": "# ENV: PROD\\nPrimary alert routing and user-impact monitoring."
+        "mode": "html",
+        "content": "<h2>ENV: PROD</h2><p>Course Platform application reliability and business flow metrics.</p>"
       }
     },
     {
       "type": "stat",
-      "title": "Firing Alerts",
-      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 4 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "title": "App Target Availability (%)",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "refId": "A",
-          "expr": "count(ALERTS{alertstate=\"firing\",env=\"prod\",app=~\"$app\",service=~\"$service\",host=~\"$host\"})"
+          "expr": "100 * avg(up{env=\"prod\",app=~\"$app\",service=\"app-metrics\",host=~\"$host\"})"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "title": "HTTP Throughput (req/s)",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(courseplatform_http_requests_total{env=\"prod\",app=~\"$app\",host=~\"$host\"}[5m]))"
         }
       ]
     },
     {
       "type": "stat",
-      "title": "Down Targets",
-      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 4 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "title": "HTTP 5xx Rate (%)",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "refId": "A",
-          "expr": "count(up{env=\"prod\",app=~\"$app\",service=~\"$service\",host=~\"$host\"} == 0)"
+          "expr": "100 * (sum(rate(courseplatform_http_requests_total{env=\"prod\",app=~\"$app\",host=~\"$host\",status_class=\"5xx\"}[5m])) / clamp_min(sum(rate(courseplatform_http_requests_total{env=\"prod\",app=~\"$app\",host=~\"$host\"}[5m])), 0.001))"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent"
+        },
+        "overrides": []
+      }
     },
     {
       "type": "stat",
-      "title": "Targets Total",
-      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 4 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "title": "HTTP p95 Latency",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "refId": "A",
-          "expr": "count(up{env=\"prod\",app=~\"$app\",service=~\"$service\",host=~\"$host\"})"
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(courseplatform_http_request_duration_seconds_bucket{env=\"prod\",app=~\"$app\",host=~\"$host\"}[5m])))"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      }
     },
     {
-      "type": "stat",
-      "title": "Promtail Log Lines/s",
-      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 4 },
-      "datasource": { "type": "loki", "uid": "loki" },
+      "type": "timeseries",
+      "title": "App CPU Usage (cores)",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(rate({env=\"prod\",app=~\"$app\",service=~\"$service\",host=~\"$host\"}[5m]))"
+          "expr": "sum by (host) (rate(container_cpu_usage_seconds_total{env=\"prod\",app=~\"$app\",service=\"cadvisor\",container_label_service=\"app\",image!=\"\",host=~\"$host\"}[5m]))",
+          "legendFormat": "{{host}}"
         }
       ]
     },
     {
       "type": "timeseries",
-      "title": "Availability by Service",
-      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 10 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "title": "App Memory Working Set",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "refId": "A",
-          "expr": "avg by (service) (up{env=\"prod\",app=~\"$app\",service=~\"$service\",host=~\"$host\"})",
-          "legendFormat": "{{service}}"
+          "expr": "sum by (host) (container_memory_working_set_bytes{env=\"prod\",app=~\"$app\",service=\"cadvisor\",container_label_service=\"app\",image!=\"\",host=~\"$host\"})",
+          "legendFormat": "{{host}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP Request Rate by Route",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 19
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (route) (rate(courseplatform_http_requests_total{env=\"prod\",app=~\"$app\",host=~\"$host\"}[5m]))",
+          "legendFormat": "{{route}}"
         }
       ]
     },
     {
       "type": "timeseries",
-      "title": "Firing Alerts by Priority",
-      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 10 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "title": "HTTP Requests by Status Class",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 19
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (priority) (ALERTS{alertstate=\"firing\",env=\"prod\",app=~\"$app\",service=~\"$service\",host=~\"$host\"})",
-          "legendFormat": "{{priority}}"
+          "expr": "sum by (status_class) (rate(courseplatform_http_requests_total{env=\"prod\",app=~\"$app\",host=~\"$host\"}[5m]))",
+          "legendFormat": "{{status_class}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP p95 by Route",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 29
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (route, le) (rate(courseplatform_http_request_duration_seconds_bucket{env=\"prod\",app=~\"$app\",host=~\"$host\"}[5m])))",
+          "legendFormat": "{{route}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "In-Flight Requests",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 29
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "max_over_time(courseplatform_http_in_flight_requests{env=\"prod\",app=~\"$app\",host=~\"$host\"}[5m])",
+          "legendFormat": "in-flight"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Exercise Submission Outcomes",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 39
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (mode, outcome) (rate(courseplatform_exercise_submissions_total{env=\"prod\",app=~\"$app\",host=~\"$host\"}[15m]))",
+          "legendFormat": "{{mode}} {{outcome}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Checkout Flow Outcomes",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 39
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (flow, outcome) (rate(courseplatform_checkout_flow_events_total{env=\"prod\",app=~\"$app\",host=~\"$host\"}[15m]))",
+          "legendFormat": "{{flow}} {{outcome}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Purchase Fulfillment Outcomes",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 49
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (source, outcome) (rate(courseplatform_purchase_fulfillments_total{env=\"prod\",app=~\"$app\",host=~\"$host\"}[15m]))",
+          "legendFormat": "{{source}} {{outcome}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Auth Callback and Stripe Webhook Outcomes",
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 49
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (outcome) (rate(courseplatform_auth_callbacks_total{env=\"prod\",app=~\"$app\",host=~\"$host\"}[15m]))",
+          "legendFormat": "auth {{outcome}}"
+        },
+        {
+          "refId": "B",
+          "expr": "sum by (event_type, outcome) (rate(courseplatform_stripe_webhook_events_total{env=\"prod\",app=~\"$app\",host=~\"$host\"}[15m]))",
+          "legendFormat": "stripe {{event_type}} {{outcome}}"
         }
       ]
     },
     {
       "type": "logs",
-      "title": "Recent Logs",
-      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 20 },
-      "datasource": { "type": "loki", "uid": "loki" },
+      "title": "Recent Application Logs",
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 59
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "targets": [
         {
           "refId": "A",
-          "expr": "{env=\"prod\",app=~\"$app\",service=~\"$service\",host=~\"$host\"}"
+          "expr": "{env=\"prod\",app=~\"$app\",host=~\"$host\"}"
         }
       ]
     }
-  ]
+  ],
+  "description": "Application, infrastructure, and business-flow metrics for PROD."
 }

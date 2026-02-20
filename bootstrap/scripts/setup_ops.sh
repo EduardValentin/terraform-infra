@@ -6,6 +6,7 @@ SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
 set_context() {
   APP_NAME_VALUE=${APP_NAME:-courseplatform}
+  APP_METRICS_PATH_VALUE=${APP_METRICS_PATH:-/courseplatform/metrics}
   HOST_LABEL_VALUE=${HOST_LABEL:-$(hostname -f 2>/dev/null || hostname)}
   LOW_RESOURCE_MODE_VALUE=${LOW_RESOURCE_MODE:-false}
   TEST_HOSTS_VALUE=${TEST_HOSTS:-susanoo-test.longhair-eagle.ts.net}
@@ -21,6 +22,15 @@ set_context() {
 }
 
 validate_context() {
+  case "$APP_METRICS_PATH_VALUE" in
+    /*)
+      ;;
+    *)
+      log "APP_METRICS_PATH must start with /"
+      exit 1
+      ;;
+  esac
+
   if [ -z "$OPS_TAILSCALE_IPV4_VALUE" ]; then
     log "failed to detect Tailscale IPv4 for OPS host"
     exit 1
@@ -107,6 +117,7 @@ copy_static_files() {
 write_env_file() {
   cat > /srv/ops/.env <<__OPS_ENV__
 APP_NAME=${APP_NAME_VALUE}
+APP_METRICS_PATH=${APP_METRICS_PATH_VALUE}
 HOST_LABEL=${HOST_LABEL_VALUE}
 OPS_GRAFANA_ADMIN_PASSWORD=${OPS_GRAFANA_ADMIN_PASSWORD_VALUE}
 LOW_RESOURCE_MODE=${LOW_RESOURCE_MODE_VALUE}
@@ -139,21 +150,20 @@ generate_targets() {
       continue
     fi
 
-    for service in node-exporter cadvisor; do
-      if [ "$service" = "node-exporter" ]; then
-        port=9100
-      else
-        port=8080
-      fi
+    if [ "$first" -eq 0 ]; then
+      printf ',\n' >> "$out_file"
+    fi
+    printf '  {"targets":["%s:9100"],"labels":{"env":"%s","app":"%s","service":"node-exporter","host":"%s"}}' \
+      "$host_trimmed" "$env_name" "$APP_NAME_VALUE" "$host_trimmed" >> "$out_file"
+    first=0
 
-      if [ "$first" -eq 0 ]; then
-        printf ',\n' >> "$out_file"
-      fi
+    printf ',\n' >> "$out_file"
+    printf '  {"targets":["%s:8080"],"labels":{"env":"%s","app":"%s","service":"cadvisor","host":"%s"}}' \
+      "$host_trimmed" "$env_name" "$APP_NAME_VALUE" "$host_trimmed" >> "$out_file"
 
-      printf '  {"targets":["%s:%s"],"labels":{"env":"%s","app":"%s","service":"%s","host":"%s"}}' \
-        "$host_trimmed" "$port" "$env_name" "$APP_NAME_VALUE" "$service" "$host_trimmed" >> "$out_file"
-      first=0
-    done
+    printf ',\n' >> "$out_file"
+    printf '  {"targets":["%s:443"],"labels":{"env":"%s","app":"%s","service":"app-metrics","host":"%s","__scheme__":"https","__metrics_path__":"%s"}}' \
+      "$host_trimmed" "$env_name" "$APP_NAME_VALUE" "$host_trimmed" "$APP_METRICS_PATH_VALUE" >> "$out_file"
   done
   IFS=$old_ifs
 
