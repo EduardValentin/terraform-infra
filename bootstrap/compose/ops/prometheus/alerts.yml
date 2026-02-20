@@ -44,3 +44,29 @@ groups:
         annotations:
           summary: "No PROD targets discovered"
           description: "Prometheus has no PROD targets in service discovery."
+
+      - alert: TestHighHTTP5xxRate
+        expr: (sum(rate(courseplatform_http_requests_total{env="test",status_class="5xx"}[5m])) / clamp_min(sum(rate(courseplatform_http_requests_total{env="test"}[5m])), 0.001)) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+          priority: low
+          env: test
+          app: courseplatform
+          service: app-metrics
+        annotations:
+          summary: "TEST HTTP 5xx ratio is high"
+          description: "Course Platform TEST has HTTP 5xx ratio above 5% for 10 minutes."
+
+      - alert: ProdHighHTTP5xxRate
+        expr: (sum(rate(courseplatform_http_requests_total{env="prod",status_class="5xx"}[5m])) / clamp_min(sum(rate(courseplatform_http_requests_total{env="prod"}[5m])), 0.001)) > 0.02
+        for: 5m
+        labels:
+          severity: critical
+          priority: primary
+          env: prod
+          app: courseplatform
+          service: app-metrics
+        annotations:
+          summary: "PROD HTTP 5xx ratio is high"
+          description: "Course Platform PROD has HTTP 5xx ratio above 2% for 5 minutes."
