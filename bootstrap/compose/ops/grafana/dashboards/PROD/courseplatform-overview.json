@@ -408,7 +408,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "{env=\"prod\",app=~\"$app\",host=~\"$host\"}"
+          "expr": "{env=\"prod\",app=~\"$app\"}"
         }
       ]
     }
