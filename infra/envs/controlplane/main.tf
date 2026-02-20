@@ -101,6 +101,18 @@ locals {
             "tag:prod:8080",
             "tag:prod:9100"
           ]
+        },
+        {
+          action = "accept"
+          src = [
+            "tag:test",
+            "tag:prod"
+          ]
+          dst = [
+            "tag:ops:3100",
+            "tag:ops:4317",
+            "tag:ops:4318"
+          ]
         }
       ],
       length(var.tailscale_member_sources) > 0 ? [

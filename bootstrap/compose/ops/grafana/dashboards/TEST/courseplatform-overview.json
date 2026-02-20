@@ -187,14 +187,14 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (host) (rate(container_cpu_usage_seconds_total{env=\"test\",app=~\"$app\",service=\"cadvisor\",container_label_service=\"app\",image!=\"\",host=~\"$host\"}[5m]))",
+          "expr": "sum by (host) (rate(process_cpu_seconds_total{env=\"test\",app=~\"$app\",service=\"app-metrics\",host=~\"$host\"}[5m]))",
           "legendFormat": "{{host}}"
         }
       ]
     },
     {
       "type": "timeseries",
-      "title": "App Memory Working Set",
+      "title": "App Memory RSS",
       "gridPos": {
         "h": 9,
         "w": 12,
@@ -208,7 +208,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (host) (container_memory_working_set_bytes{env=\"test\",app=~\"$app\",service=\"cadvisor\",container_label_service=\"app\",image!=\"\",host=~\"$host\"})",
+          "expr": "sum by (host) (process_resident_memory_bytes{env=\"test\",app=~\"$app\",service=\"app-metrics\",host=~\"$host\"})",
           "legendFormat": "{{host}}"
         }
       ],
