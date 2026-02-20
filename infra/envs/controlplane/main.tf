@@ -89,6 +89,18 @@ locals {
           action = "accept"
           src    = var.tailscale_ci_app_sources
           dst    = var.tailscale_ci_app_destinations
+        },
+        {
+          action = "accept"
+          src    = ["tag:ops"]
+          dst = [
+            "tag:test:443",
+            "tag:test:8080",
+            "tag:test:9100",
+            "tag:prod:443",
+            "tag:prod:8080",
+            "tag:prod:9100"
+          ]
         }
       ],
       length(var.tailscale_member_sources) > 0 ? [
