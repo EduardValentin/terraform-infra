@@ -100,7 +100,7 @@ tailscale_opencl_agent_destinations = [
   "tag:ops:19100"
 ]
 tailscale_opencl_admin_sources = ["eduard.valentin1996@gmail.com"]
-tailscale_opencl_admin_destinations = ["tag:solus-agent:*", "solus-pc.longhair-eagle.ts.net:*"]
+tailscale_opencl_admin_destinations = ["tag:solus-agent:*"]
 tailscale_regular_member_sources = ["eli.lungu04@gmail.com"]
 tailscale_regular_member_destinations = ["tag:test:*", "tag:ops:*", "tag:prod:*"]
 
