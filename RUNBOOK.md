@@ -77,6 +77,18 @@ Tailscale OpenCL agent access model (control-plane tfvars):
 - `tailscale_opencl_admin_sources` -> `tailscale_opencl_admin_destinations` defines who can access OpenCL VM services (default destination `tag:solus-agent:*`).
 - After updating these values in `TFVARS_CONTROLPLANE`, run `Terraform Apply` for `controlplane`.
 
+Tailscale change safety checklist (before merge/apply):
+
+- Keep `tailscale_admin_destinations = ["*:*"]` unless you intentionally want to block admin access to untagged devices.
+- Keep `tailscale_opencl_account_destinations` limited to explicit TEST/OPS service ports only (never wildcard `tag:test:*` / `tag:ops:*`).
+- Do not include port `22` in `tailscale_opencl_account_destinations` or `tailscale_opencl_agent_destinations`.
+- Keep `solus.assistant@gmail.com` in `tailscale_opencl_agent_tag_owners`; otherwise `tailscale up --advertise-tags=tag:solus-agent` fails.
+- Keep `tailscale_opencl_agent_sources = ["tag:solus-agent"]` so restrictions apply to the node identity.
+- After apply, verify from admin laptop:
+  - `tailscale ping susanoo.longhair-eagle.ts.net`
+  - `curl -I https://susanoo.longhair-eagle.ts.net/VMs`
+  - `curl -I https://solus-pc.longhair-eagle.ts.net/`
+
 SSH host key pinning note:
 
 - CI SSH jobs no longer use `accept-new`.

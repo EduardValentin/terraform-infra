@@ -128,6 +128,22 @@ OpenCL access model:
 - `tailscale_opencl_agent_sources` and `tailscale_opencl_agent_destinations` control what the OpenCL agent node can reach (default: `tag:solus-agent` to explicit TEST/OPS service ports only, no SSH access).
 - `tailscale_opencl_admin_sources` and `tailscale_opencl_admin_destinations` control who can reach OpenCL VM services (default: `eduard.valentin1996@gmail.com` to `tag:solus-agent:*`).
 
+Desired behavior invariants (do not change without explicit owner approval):
+
+- Admin reachability is global:
+  - `tailscale_admin_destinations` must remain `["*:*"]` so admin can still access untagged tailnet devices.
+- OpenCL account is scoped:
+  - `solus.assistant@gmail.com` must be limited to TEST/OPS service ports only.
+  - OpenCL account must not have SSH access (no `:22`, no `ssh` rule for this account).
+- OpenCL node identity is scoped:
+  - `tag:solus-agent` may reach only TEST/OPS service ports.
+  - `tag:solus-agent` must not have SSH access to TEST/OPS nodes.
+- Tag assignment guard:
+  - `solus.assistant@gmail.com` must remain allowed in `tailscale_opencl_agent_tag_owners` so the agent VM can join with `tag:solus-agent`.
+- Access expectations:
+  - `eduard.valentin1996@gmail.com` can access `tag:solus-agent:*` from any personal device in the same tailnet.
+  - `https://solus-pc.longhair-eagle.ts.net/` is expected to work when `solus-pc` is online, logged in, tagged as `tag:solus-agent`, and `tailscale serve` is active.
+
 CI access model:
 
 - CI workflows mint ephemeral Tailscale auth via OAuth client credentials.
