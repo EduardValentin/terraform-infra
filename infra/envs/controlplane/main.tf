@@ -123,6 +123,13 @@ locals {
           dst    = var.tailscale_regular_member_destinations
         }
       ] : [],
+      length(var.tailscale_opencl_account_sources) > 0 ? [
+        {
+          action = "accept"
+          src    = var.tailscale_opencl_account_sources
+          dst    = var.tailscale_opencl_account_destinations
+        }
+      ] : [],
       length(var.tailscale_opencl_agent_sources) > 0 ? [
         {
           action = "accept"

@@ -25,7 +25,7 @@ Required multi-line secrets:
 OpenCL ACL note:
 
 - No additional GitHub secret names are required for OpenCL ACL access.
-- Configure OpenCL ACL inputs (`tailscale_opencl_agent_tag`, `tailscale_opencl_agent_*`, `tailscale_opencl_admin_*`) inside `TFVARS_CONTROLPLANE`.
+- Configure OpenCL ACL inputs (`tailscale_opencl_agent_tag`, `tailscale_opencl_account_*`, `tailscale_opencl_agent_*`, `tailscale_opencl_admin_*`) inside `TFVARS_CONTROLPLANE`.
 
 `TF_BACKEND_CONFIG_*` should contain backend configuration for the `s3` backend (MinIO on OPS).
 `TFVARS_*` should contain the full environment-specific variable payload for the corresponding root.
