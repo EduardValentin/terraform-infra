@@ -123,6 +123,7 @@ Adjust policy inputs through Terraform variables (`tailscale_*`) and apply from 
 OpenCL access model:
 
 - `tailscale_opencl_agent_tag` defaults to `tag:solus-agent`; join the OpenCL VM with this tag.
+- `tailscale_opencl_agent_tag_owners` controls who can advertise/assign the OpenCL agent tag (default includes `solus.assistant@gmail.com`, plus admin group).
 - `tailscale_opencl_account_sources` and `tailscale_opencl_account_destinations` limit what the OpenCL account can see/reach (default: only TEST/OPS service ports, no SSH access).
 - `tailscale_opencl_agent_sources` and `tailscale_opencl_agent_destinations` control what the OpenCL agent node can reach (default: `tag:solus-agent` to explicit TEST/OPS service ports only, no SSH access).
 - `tailscale_opencl_admin_sources` and `tailscale_opencl_admin_destinations` control who can reach OpenCL VM services (default: `eduard.valentin1996@gmail.com` to `tag:solus-agent:*`).

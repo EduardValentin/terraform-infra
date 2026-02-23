@@ -71,6 +71,7 @@ tailscale_ci_secrets_destinations = ["tag:test:22", "tag:prod:22"]
 tailscale_ci_app_sources = ["tag:ci-courseplatform"]
 tailscale_ci_app_destinations = ["tag:test:22", "tag:prod:22"]
 tailscale_opencl_agent_tag = "tag:solus-agent"
+tailscale_opencl_agent_tag_owners = ["solus.assistant@gmail.com"]
 tailscale_opencl_account_sources = ["solus.assistant@gmail.com"]
 tailscale_opencl_account_destinations = [
   "tag:test:443",
