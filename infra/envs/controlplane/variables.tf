@@ -151,12 +151,12 @@ variable "tailscale_opencl_agent_tag" {
   default = "tag:solus-agent"
 }
 
-variable "tailscale_opencl_member_sources" {
+variable "tailscale_opencl_agent_sources" {
   type    = list(string)
   default = ["solus.assistant@gmail.com"]
 }
 
-variable "tailscale_opencl_member_destinations" {
+variable "tailscale_opencl_agent_destinations" {
   type    = list(string)
   default = ["tag:test:*", "tag:ops:*"]
 }
@@ -171,12 +171,12 @@ variable "tailscale_opencl_admin_destinations" {
   default = ["tag:solus-agent:*"]
 }
 
-variable "tailscale_member_sources" {
+variable "tailscale_regular_member_sources" {
   type    = list(string)
   default = []
 }
 
-variable "tailscale_member_destinations" {
+variable "tailscale_regular_member_destinations" {
   type    = list(string)
   default = ["tag:prod:*", "tag:test:*", "tag:ops:*"]
 }

@@ -116,18 +116,18 @@ locals {
           ]
         }
       ],
-      length(var.tailscale_member_sources) > 0 ? [
+      length(var.tailscale_regular_member_sources) > 0 ? [
         {
           action = "accept"
-          src    = var.tailscale_member_sources
-          dst    = var.tailscale_member_destinations
+          src    = var.tailscale_regular_member_sources
+          dst    = var.tailscale_regular_member_destinations
         }
       ] : [],
-      length(var.tailscale_opencl_member_sources) > 0 ? [
+      length(var.tailscale_opencl_agent_sources) > 0 ? [
         {
           action = "accept"
-          src    = var.tailscale_opencl_member_sources
-          dst    = var.tailscale_opencl_member_destinations
+          src    = var.tailscale_opencl_agent_sources
+          dst    = var.tailscale_opencl_agent_destinations
         }
       ] : [],
       length(var.tailscale_opencl_admin_sources) > 0 ? [
