@@ -63,6 +63,7 @@ locals {
     for destination in concat(var.tailscale_ci_app_destinations, var.tailscale_ci_secrets_destinations) :
     replace(destination, ":22", "")
   ])
+  tailscale_regular_member_sources_effective = length(var.tailscale_regular_member_sources) > 0 ? var.tailscale_regular_member_sources : var.tailscale_member_sources
 
   tailscale_policy = {
     tagOwners = {
@@ -116,10 +117,10 @@ locals {
           ]
         }
       ],
-      length(var.tailscale_regular_member_sources) > 0 ? [
+      length(local.tailscale_regular_member_sources_effective) > 0 ? [
         {
           action = "accept"
-          src    = var.tailscale_regular_member_sources
+          src    = local.tailscale_regular_member_sources_effective
           dst    = var.tailscale_regular_member_destinations
         }
       ] : [],

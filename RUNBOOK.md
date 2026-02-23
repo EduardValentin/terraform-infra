@@ -85,6 +85,7 @@ Tailscale change safety checklist (before merge/apply):
 - Keep `solus.assistant@gmail.com` in `tailscale_opencl_agent_tag_owners`; otherwise `tailscale up --advertise-tags=tag:solus-agent` fails.
 - Keep `tailscale_opencl_agent_sources = ["tag:solus-agent"]` so restrictions apply to the node identity.
 - Keep `tailscale_regular_member_destinations = ["*:*"]` for `eli.lungu04@gmail.com` full tailnet service reachability.
+- Ensure `TFVARS_CONTROLPLANE` uses `tailscale_regular_member_sources`; legacy `tailscale_member_sources` is only a temporary compatibility fallback and `tailscale_member_destinations` is ignored.
 - After apply, verify from admin laptop:
   - `tailscale ping susanoo.longhair-eagle.ts.net`
   - `curl -I https://susanoo.longhair-eagle.ts.net/VMs`
