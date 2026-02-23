@@ -70,8 +70,8 @@ Tailscale auth model:
 Tailscale OpenCL agent access model (control-plane tfvars):
 
 - `tailscale_opencl_agent_tag` (default: `tag:solus-agent`) is the tag used by the OpenCL agent VM.
-- `tailscale_opencl_agent_sources` -> `tailscale_opencl_agent_destinations` defines what the OpenCL account can reach (default destinations are explicit TEST/OPS service ports only; SSH port `22` is not included).
-- `tailscale_opencl_admin_sources` -> `tailscale_opencl_admin_destinations` defines who can access OpenCL VM services (default destination: `tag:solus-agent:*`).
+- `tailscale_opencl_agent_sources` -> `tailscale_opencl_agent_destinations` defines what the OpenCL agent node can reach (default source `tag:solus-agent`; destinations are explicit TEST/OPS service ports only; SSH port `22` is not included).
+- `tailscale_opencl_admin_sources` -> `tailscale_opencl_admin_destinations` defines who can access OpenCL VM services (defaults include `tag:solus-agent:*` and `solus-pc.longhair-eagle.ts.net:*`).
 - After updating these values in `TFVARS_CONTROLPLANE`, run `Terraform Apply` for `controlplane`.
 
 SSH host key pinning note:

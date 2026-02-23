@@ -153,7 +153,7 @@ variable "tailscale_opencl_agent_tag" {
 
 variable "tailscale_opencl_agent_sources" {
   type    = list(string)
-  default = ["solus.assistant@gmail.com"]
+  default = ["tag:solus-agent"]
 }
 
 variable "tailscale_opencl_agent_destinations" {
@@ -180,7 +180,7 @@ variable "tailscale_opencl_admin_sources" {
 
 variable "tailscale_opencl_admin_destinations" {
   type    = list(string)
-  default = ["tag:solus-agent:*"]
+  default = ["tag:solus-agent:*", "solus-pc.longhair-eagle.ts.net:*"]
 }
 
 variable "tailscale_regular_member_sources" {

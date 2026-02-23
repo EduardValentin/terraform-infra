@@ -71,7 +71,7 @@ tailscale_ci_secrets_destinations = ["tag:test:22", "tag:prod:22"]
 tailscale_ci_app_sources = ["tag:ci-courseplatform"]
 tailscale_ci_app_destinations = ["tag:test:22", "tag:prod:22"]
 tailscale_opencl_agent_tag = "tag:solus-agent"
-tailscale_opencl_agent_sources = ["solus.assistant@gmail.com"]
+tailscale_opencl_agent_sources = ["tag:solus-agent"]
 tailscale_opencl_agent_destinations = [
   "tag:test:443",
   "tag:test:8080",
@@ -86,7 +86,7 @@ tailscale_opencl_agent_destinations = [
   "tag:ops:19100"
 ]
 tailscale_opencl_admin_sources = ["eduard.valentin1996@gmail.com"]
-tailscale_opencl_admin_destinations = ["tag:solus-agent:*"]
+tailscale_opencl_admin_destinations = ["tag:solus-agent:*", "solus-pc.longhair-eagle.ts.net:*"]
 tailscale_regular_member_sources = ["eli.lungu04@gmail.com"]
 tailscale_regular_member_destinations = ["tag:test:*", "tag:ops:*", "tag:prod:*"]
 
