@@ -146,6 +146,31 @@ variable "tailscale_admin_destinations" {
   default = ["tag:prod:*", "tag:test:*", "tag:ops:*"]
 }
 
+variable "tailscale_opencl_agent_tag" {
+  type    = string
+  default = "tag:opencl-agent"
+}
+
+variable "tailscale_opencl_member_sources" {
+  type    = list(string)
+  default = ["solus.assistant@gmail.com"]
+}
+
+variable "tailscale_opencl_member_destinations" {
+  type    = list(string)
+  default = ["tag:test:*", "tag:ops:*"]
+}
+
+variable "tailscale_opencl_admin_sources" {
+  type    = list(string)
+  default = ["eduard.valentin1996@gmail.com"]
+}
+
+variable "tailscale_opencl_admin_destinations" {
+  type    = list(string)
+  default = ["tag:opencl-agent:*"]
+}
+
 variable "tailscale_member_sources" {
   type    = list(string)
   default = []

@@ -6,12 +6,13 @@ Adjust policy inputs through Terraform variables (`tailscale_*`) and apply from 
 ```json
 {
   "tagOwners": {
-    "tag:prod": ["autogroup:admin"],
-    "tag:test": ["autogroup:admin"],
-    "tag:ops": ["autogroup:admin"],
-    "tag:ci-courseplatform": ["autogroup:admin"],
-    "tag:ci-secrets": ["autogroup:admin"],
-    "tag:ci-terraform": ["autogroup:admin"]
+    "tag:prod": ["group:admin"],
+    "tag:test": ["group:admin"],
+    "tag:ops": ["group:admin"],
+    "tag:opencl-agent": ["group:admin"],
+    "tag:ci-courseplatform": ["group:admin"],
+    "tag:ci-secrets": ["group:admin"],
+    "tag:ci-terraform": ["group:admin"]
   },
   "acls": [
     {
@@ -31,19 +32,46 @@ Adjust policy inputs through Terraform variables (`tailscale_*`) and apply from 
     },
     {
       "action": "accept",
-      "src": ["eli.lungu04@gmail.com"],
-      "dst": ["*:*"]
+      "src": ["tag:ops"],
+      "dst": [
+        "tag:test:443",
+        "tag:test:8080",
+        "tag:test:9100",
+        "tag:prod:443",
+        "tag:prod:8080",
+        "tag:prod:9100"
+      ]
     },
     {
       "action": "accept",
-      "src": ["autogroup:admin"],
+      "src": ["tag:test", "tag:prod"],
+      "dst": ["tag:ops:3100", "tag:ops:4317", "tag:ops:4318"]
+    },
+    {
+      "action": "accept",
+      "src": ["solus.assistant@gmail.com"],
+      "dst": ["tag:test:*", "tag:ops:*"]
+    },
+    {
+      "action": "accept",
+      "src": ["eduard.valentin1996@gmail.com"],
+      "dst": ["tag:opencl-agent:*"]
+    },
+    {
+      "action": "accept",
+      "src": ["eli.lungu04@gmail.com"],
+      "dst": ["tag:test:*", "tag:ops:*", "tag:prod:*"]
+    },
+    {
+      "action": "accept",
+      "src": ["group:admin"],
       "dst": ["tag:prod:*", "tag:test:*", "tag:ops:*"]
     }
   ],
   "ssh": [
     {
       "action": "accept",
-      "src": ["autogroup:admin"],
+      "src": ["group:admin"],
       "dst": ["tag:prod", "tag:test", "tag:ops"],
       "users": ["root", "ubuntu"]
     },
@@ -62,6 +90,12 @@ Adjust policy inputs through Terraform variables (`tailscale_*`) and apply from 
   ]
 }
 ```
+
+OpenCL access model:
+
+- `tailscale_opencl_agent_tag` defaults to `tag:opencl-agent`; join the OpenCL VM with this tag.
+- `tailscale_opencl_member_sources` and `tailscale_opencl_member_destinations` control what the OpenCL account can reach (default: TEST and OPS services).
+- `tailscale_opencl_admin_sources` and `tailscale_opencl_admin_destinations` control who can reach OpenCL VM services (default: `eduard.valentin1996@gmail.com` to `tag:opencl-agent:*`).
 
 CI access model:
 

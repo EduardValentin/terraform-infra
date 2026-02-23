@@ -66,12 +66,13 @@ locals {
 
   tailscale_policy = {
     tagOwners = {
-      "tag:prod"         = [var.tailscale_admin_group]
-      "tag:test"         = [var.tailscale_admin_group]
-      "tag:ops"          = [var.tailscale_admin_group]
-      "tag:ci-courseplatform" = [var.tailscale_admin_group]
-      "tag:ci-secrets"   = [var.tailscale_admin_group]
-      "tag:ci-terraform" = [var.tailscale_admin_group]
+      "tag:prod"                          = [var.tailscale_admin_group]
+      "tag:test"                          = [var.tailscale_admin_group]
+      "tag:ops"                           = [var.tailscale_admin_group]
+      "${var.tailscale_opencl_agent_tag}" = [var.tailscale_admin_group]
+      "tag:ci-courseplatform"             = [var.tailscale_admin_group]
+      "tag:ci-secrets"                    = [var.tailscale_admin_group]
+      "tag:ci-terraform"                  = [var.tailscale_admin_group]
     }
     acls = concat(
       [
@@ -122,6 +123,20 @@ locals {
           dst    = var.tailscale_member_destinations
         }
       ] : [],
+      length(var.tailscale_opencl_member_sources) > 0 ? [
+        {
+          action = "accept"
+          src    = var.tailscale_opencl_member_sources
+          dst    = var.tailscale_opencl_member_destinations
+        }
+      ] : [],
+      length(var.tailscale_opencl_admin_sources) > 0 ? [
+        {
+          action = "accept"
+          src    = var.tailscale_opencl_admin_sources
+          dst    = var.tailscale_opencl_admin_destinations
+        }
+      ] : [],
       [
         {
           action = "accept"
@@ -167,10 +182,10 @@ locals {
     }
   }
 
-  bootstrap_test_tailscale_auth_key = var.bootstrap_tailscale_auth_key_test != "" ? nonsensitive(var.bootstrap_tailscale_auth_key_test) : "tskey-replace"
-  bootstrap_ops_tailscale_auth_key  = var.bootstrap_tailscale_auth_key_ops != "" ? nonsensitive(var.bootstrap_tailscale_auth_key_ops) : "tskey-replace"
-  bootstrap_prod_tailscale_auth_key = var.bootstrap_tailscale_auth_key_prod != "" ? nonsensitive(var.bootstrap_tailscale_auth_key_prod) : "tskey-replace"
-  bootstrap_ops_grafana_password    = var.ops_grafana_admin_password != "" ? nonsensitive(var.ops_grafana_admin_password) : "replace-with-strong-password"
+  bootstrap_test_tailscale_auth_key      = var.bootstrap_tailscale_auth_key_test != "" ? nonsensitive(var.bootstrap_tailscale_auth_key_test) : "tskey-replace"
+  bootstrap_ops_tailscale_auth_key       = var.bootstrap_tailscale_auth_key_ops != "" ? nonsensitive(var.bootstrap_tailscale_auth_key_ops) : "tskey-replace"
+  bootstrap_prod_tailscale_auth_key      = var.bootstrap_tailscale_auth_key_prod != "" ? nonsensitive(var.bootstrap_tailscale_auth_key_prod) : "tskey-replace"
+  bootstrap_ops_grafana_password         = var.ops_grafana_admin_password != "" ? nonsensitive(var.ops_grafana_admin_password) : "replace-with-strong-password"
   bootstrap_ops_terraform_backend_secret = var.ops_terraform_backend_secret_key != "" ? nonsensitive(var.ops_terraform_backend_secret_key) : "replace-with-strong-secret"
 
   bootstrap_test_env_content = templatefile("../../templates/bootstrap-test.env.tftpl", {
@@ -182,14 +197,14 @@ locals {
   })
 
   bootstrap_ops_env_content = templatefile("../../templates/bootstrap-ops.env.tftpl", {
-    hostname_override      = var.bootstrap_hostname_ops
-    tailscale_auth_key     = local.bootstrap_ops_tailscale_auth_key
-    tailscale_tags         = var.bootstrap_tailscale_tags_ops
-    app_name               = var.bootstrap_template_app_name
-    test_hosts             = join(",", local.generated_ops_test_hosts)
-    prod_hosts             = join(",", local.generated_ops_prod_hosts)
-    low_resource_mode      = var.ops_low_resource_mode ? "true" : "false"
-    grafana_admin_password = local.bootstrap_ops_grafana_password
+    hostname_override            = var.bootstrap_hostname_ops
+    tailscale_auth_key           = local.bootstrap_ops_tailscale_auth_key
+    tailscale_tags               = var.bootstrap_tailscale_tags_ops
+    app_name                     = var.bootstrap_template_app_name
+    test_hosts                   = join(",", local.generated_ops_test_hosts)
+    prod_hosts                   = join(",", local.generated_ops_prod_hosts)
+    low_resource_mode            = var.ops_low_resource_mode ? "true" : "false"
+    grafana_admin_password       = local.bootstrap_ops_grafana_password
     terraform_backend_enabled    = var.ops_terraform_backend_enabled ? "true" : "false"
     terraform_backend_bucket     = var.ops_terraform_backend_bucket
     terraform_backend_bind_ip    = var.ops_terraform_backend_bind_ip
