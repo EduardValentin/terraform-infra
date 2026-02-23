@@ -217,7 +217,7 @@ variable "tailscale_regular_member_sources" {
 
 variable "tailscale_regular_member_destinations" {
   type    = list(string)
-  default = ["tag:prod:*", "tag:test:*", "tag:ops:*"]
+  default = ["*:*"]
 }
 
 variable "tailscale_ssh_destinations" {
