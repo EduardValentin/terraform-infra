@@ -157,8 +157,20 @@ variable "tailscale_opencl_agent_sources" {
 }
 
 variable "tailscale_opencl_agent_destinations" {
-  type    = list(string)
-  default = ["tag:test:*", "tag:ops:*"]
+  type = list(string)
+  default = [
+    "tag:test:443",
+    "tag:test:8080",
+    "tag:test:9100",
+    "tag:ops:3000",
+    "tag:ops:9090",
+    "tag:ops:3100",
+    "tag:ops:3200",
+    "tag:ops:4317",
+    "tag:ops:4318",
+    "tag:ops:18080",
+    "tag:ops:19100"
+  ]
 }
 
 variable "tailscale_opencl_admin_sources" {
