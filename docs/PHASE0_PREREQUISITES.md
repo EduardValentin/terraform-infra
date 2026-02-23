@@ -17,6 +17,7 @@
   - `tag:test`
   - `tag:prod`
   - `tag:ops`
+  - `tag:solus-agent`
   - `tag:ci-courseplatform`
   - `tag:ci-secrets`
   - `tag:ci-terraform`

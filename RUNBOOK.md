@@ -67,6 +67,13 @@ Tailscale auth model:
 - Long-lived VMs (`susanoo-test`, `susanoo-ops`, future PROD) do not use OAuth for steady-state connectivity.
 - VM bootstrap auth keys (`bootstrap_tailscale_auth_key_test|ops|prod`) are only for first join/recovery and are stored in control-plane tfvars/secrets.
 
+Tailscale OpenCL agent access model (control-plane tfvars):
+
+- `tailscale_opencl_agent_tag` (default: `tag:solus-agent`) is the tag used by the OpenCL agent VM.
+- `tailscale_opencl_agent_sources` -> `tailscale_opencl_agent_destinations` defines what the OpenCL account can reach (default destinations: `tag:test:*`, `tag:ops:*`).
+- `tailscale_opencl_admin_sources` -> `tailscale_opencl_admin_destinations` defines who can access OpenCL VM services (default destination: `tag:solus-agent:*`).
+- After updating these values in `TFVARS_CONTROLPLANE`, run `Terraform Apply` for `controlplane`.
+
 SSH host key pinning note:
 
 - CI SSH jobs no longer use `accept-new`.
