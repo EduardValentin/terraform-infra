@@ -148,7 +148,7 @@ variable "tailscale_admin_destinations" {
 
 variable "tailscale_opencl_agent_tag" {
   type    = string
-  default = "tag:opencl-agent"
+  default = "tag:solus-agent"
 }
 
 variable "tailscale_opencl_member_sources" {
@@ -168,7 +168,7 @@ variable "tailscale_opencl_admin_sources" {
 
 variable "tailscale_opencl_admin_destinations" {
   type    = list(string)
-  default = ["tag:opencl-agent:*"]
+  default = ["tag:solus-agent:*"]
 }
 
 variable "tailscale_member_sources" {

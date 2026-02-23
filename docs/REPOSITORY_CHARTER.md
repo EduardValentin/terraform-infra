@@ -269,7 +269,7 @@ Key portability rule: host behavior is driven by release bundle, not git checkou
 
 ## Security Posture
 
-- Tailscale tags and ACLs for host segmentation (`tag:test`, `tag:prod`, `tag:ops`, `tag:opencl-agent`, `tag:ci-courseplatform`, `tag:ci-secrets`, `tag:ci-terraform`)
+- Tailscale tags and ACLs for host segmentation (`tag:test`, `tag:prod`, `tag:ops`, `tag:solus-agent`, `tag:ci-courseplatform`, `tag:ci-secrets`, `tag:ci-terraform`)
 - Tailscale SSH for admin access
 - no requirement for public SSH on production
 - public exposure on PROD limited to `80/443`

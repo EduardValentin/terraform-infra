@@ -70,11 +70,11 @@ tailscale_ci_secrets_sources = ["tag:ci-secrets"]
 tailscale_ci_secrets_destinations = ["tag:test:22", "tag:prod:22"]
 tailscale_ci_app_sources = ["tag:ci-courseplatform"]
 tailscale_ci_app_destinations = ["tag:test:22", "tag:prod:22"]
-tailscale_opencl_agent_tag = "tag:opencl-agent"
+tailscale_opencl_agent_tag = "tag:solus-agent"
 tailscale_opencl_member_sources = ["solus.assistant@gmail.com"]
 tailscale_opencl_member_destinations = ["tag:test:*", "tag:ops:*"]
 tailscale_opencl_admin_sources = ["eduard.valentin1996@gmail.com"]
-tailscale_opencl_admin_destinations = ["tag:opencl-agent:*"]
+tailscale_opencl_admin_destinations = ["tag:solus-agent:*"]
 tailscale_member_sources = ["eli.lungu04@gmail.com"]
 tailscale_member_destinations = ["tag:test:*", "tag:ops:*", "tag:prod:*"]
 
