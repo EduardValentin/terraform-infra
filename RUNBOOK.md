@@ -66,6 +66,7 @@ Tailscale auth model:
   - `course-platform`: `TAILSCALE_OAUTH_CLIENT_ID`, `TAILSCALE_OAUTH_SECRET`
 - Long-lived VMs (`susanoo-test`, `susanoo-ops`, future PROD) do not use OAuth for steady-state connectivity.
 - VM bootstrap auth keys (`bootstrap_tailscale_auth_key_test|ops|prod`) are only for first join/recovery and are stored in control-plane tfvars/secrets.
+- `tailscale_admin_destinations` defaults to `*:*`, so your admin identity keeps full tailnet reachability (including untagged devices like home-server nodes).
 
 Tailscale OpenCL agent access model (control-plane tfvars):
 

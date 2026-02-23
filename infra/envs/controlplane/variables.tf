@@ -143,7 +143,7 @@ variable "tailscale_ci_app_destinations" {
 
 variable "tailscale_admin_destinations" {
   type    = list(string)
-  default = ["tag:prod:*", "tag:test:*", "tag:ops:*"]
+  default = ["*:*"]
 }
 
 variable "tailscale_opencl_agent_tag" {

@@ -94,7 +94,7 @@ Adjust policy inputs through Terraform variables (`tailscale_*`) and apply from 
     {
       "action": "accept",
       "src": ["group:admin"],
-      "dst": ["tag:prod:*", "tag:test:*", "tag:ops:*"]
+      "dst": ["*:*"]
     }
   ],
   "ssh": [
