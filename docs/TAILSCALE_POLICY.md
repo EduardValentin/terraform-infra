@@ -141,8 +141,7 @@ Desired behavior invariants (do not change without explicit owner approval):
 - Regular member reachability:
   - `eli.lungu04@gmail.com` is intentionally configured for full tailnet service access (`*:*`).
   - This is network ACL access only; no dedicated `ssh` rule is granted by default.
-  - `TFVARS_CONTROLPLANE` should use `tailscale_regular_member_sources` and `tailscale_regular_member_destinations`.
-  - Legacy `tailscale_member_sources` is accepted as a temporary compatibility fallback; legacy `tailscale_member_destinations` is ignored.
+  - `TFVARS_CONTROLPLANE` must use only `tailscale_regular_member_sources` and `tailscale_regular_member_destinations`.
 - Tag assignment guard:
   - `solus.assistant@gmail.com` must remain allowed in `tailscale_opencl_agent_tag_owners` so the agent VM can join with `tag:solus-agent`.
 - Access expectations:
