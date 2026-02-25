@@ -2,10 +2,15 @@
   "id": null,
   "uid": "cp-prod-analytics-funnels",
   "title": "Course Platform PROD Analytics Funnels",
-  "tags": ["course-platform", "prod", "ops", "analytics"],
+  "tags": [
+    "course-platform",
+    "prod",
+    "ops",
+    "analytics"
+  ],
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "refresh": "30s",
   "description": "Business analytics funnels and conversion indicators for PROD.",
   "templating": {
@@ -15,27 +20,42 @@
         "label": "Environment",
         "type": "constant",
         "query": "prod",
-        "current": { "text": "prod", "value": "prod" }
+        "current": {
+          "text": "prod",
+          "value": "prod"
+        }
       },
       {
         "name": "app",
         "label": "App",
         "type": "query",
-        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
         "query": "label_values(up{env=\"test\"}, app)",
         "includeAll": true,
         "allValue": ".*",
-        "current": { "text": "All", "value": ".*" }
+        "current": {
+          "text": "All",
+          "value": ".*"
+        }
       },
       {
         "name": "host",
         "label": "Host",
         "type": "query",
-        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
         "query": "label_values(up{env=\"test\",app=~\"$app\"}, host)",
         "includeAll": true,
         "allValue": ".*",
-        "current": { "text": "All", "value": ".*" }
+        "current": {
+          "text": "All",
+          "value": ".*"
+        }
       }
     ]
   },
@@ -43,7 +63,12 @@
     {
       "type": "text",
       "title": "Analytics Scope",
-      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
       "options": {
         "mode": "html",
         "content": "<h2>ENV: PROD</h2><p>Checkout, purchase, auth and webhook analytics derived from Prometheus counters.</p>"
@@ -51,113 +76,221 @@
     },
     {
       "type": "stat",
-      "title": "Checkout Success Rate (15m)",
-      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 4 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "title": "Checkout Created Rate (15m)",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "refId": "A",
-          "expr": "100 * (sum(rate(courseplatform_checkout_flow_events_total{env=\"test\",app=~\"$app\",host=~\"$host\",outcome=\"success\"}[15m])) / clamp_min(sum(rate(courseplatform_checkout_flow_events_total{env=\"test\",app=~\"$app\",host=~\"$host\"}[15m])), 0.001))"
+          "expr": "100 * (sum(rate(courseplatform_checkout_flow_events_total{env=\"prod\",app=~\"$app\",host=~\"$host\",outcome=\"checkout_created\"}[15m])) / clamp_min(sum(rate(courseplatform_checkout_flow_events_total{env=\"prod\",app=~\"$app\",host=~\"$host\"}[15m])), 0.001))"
         }
       ],
-      "fieldConfig": { "defaults": { "unit": "percent" }, "overrides": [] }
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "description": "Ratio of checkout_created events to all checkout flow events."
     },
     {
       "type": "stat",
-      "title": "Purchase Success Rate (15m)",
-      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 4 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "title": "Purchase Fulfilled Rate (15m)",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "refId": "A",
-          "expr": "100 * (sum(rate(courseplatform_purchase_fulfillments_total{env=\"test\",app=~\"$app\",host=~\"$host\",outcome=\"success\"}[15m])) / clamp_min(sum(rate(courseplatform_purchase_fulfillments_total{env=\"test\",app=~\"$app\",host=~\"$host\"}[15m])), 0.001))"
+          "expr": "100 * (sum(rate(courseplatform_purchase_fulfillments_total{env=\"prod\",app=~\"$app\",host=~\"$host\",outcome=~\"fulfilled|already_fulfilled\"}[15m])) / clamp_min(sum(rate(courseplatform_purchase_fulfillments_total{env=\"prod\",app=~\"$app\",host=~\"$host\"}[15m])), 0.001))"
         }
       ],
-      "fieldConfig": { "defaults": { "unit": "percent" }, "overrides": [] }
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "description": "Ratio of fulfilled/already_fulfilled events to all purchase fulfillment outcomes."
     },
     {
       "type": "stat",
-      "title": "Auth Callback Success Rate (15m)",
-      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 4 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "title": "Auth Callback Success-* Rate (15m)",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "refId": "A",
-          "expr": "100 * (sum(rate(courseplatform_auth_callbacks_total{env=\"test\",app=~\"$app\",host=~\"$host\",outcome=\"success\"}[15m])) / clamp_min(sum(rate(courseplatform_auth_callbacks_total{env=\"test\",app=~\"$app\",host=~\"$host\"}[15m])), 0.001))"
+          "expr": "100 * (sum(rate(courseplatform_auth_callbacks_total{env=\"prod\",app=~\"$app\",host=~\"$host\",outcome=~\"success_.*\"}[15m])) / clamp_min(sum(rate(courseplatform_auth_callbacks_total{env=\"prod\",app=~\"$app\",host=~\"$host\"}[15m])), 0.001))"
         }
       ],
-      "fieldConfig": { "defaults": { "unit": "percent" }, "overrides": [] }
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "description": "Ratio of success_* auth callbacks to total auth callback outcomes."
     },
     {
       "type": "stat",
-      "title": "Stripe Webhook Success Rate (15m)",
-      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 4 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "title": "Stripe Webhook Fulfilled Rate (15m)",
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 4
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "refId": "A",
-          "expr": "100 * (sum(rate(courseplatform_stripe_webhook_events_total{env=\"test\",app=~\"$app\",host=~\"$host\",outcome=\"success\"}[15m])) / clamp_min(sum(rate(courseplatform_stripe_webhook_events_total{env=\"test\",app=~\"$app\",host=~\"$host\"}[15m])), 0.001))"
+          "expr": "100 * (sum(rate(courseplatform_stripe_webhook_events_total{env=\"prod\",app=~\"$app\",host=~\"$host\",outcome=~\"fulfilled|already_fulfilled\"}[15m])) / clamp_min(sum(rate(courseplatform_stripe_webhook_events_total{env=\"prod\",app=~\"$app\",host=~\"$host\"}[15m])), 0.001))"
         }
       ],
-      "fieldConfig": { "defaults": { "unit": "percent" }, "overrides": [] }
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "description": "Ratio of fulfilled/already_fulfilled webhook outcomes to total webhook events."
     },
     {
       "type": "timeseries",
       "title": "Checkout Events by Flow/Outcome",
-      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 10 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "refId": "A",
           "expr": "sum by (flow, outcome) (rate(courseplatform_checkout_flow_events_total{env=\"test\",app=~\"$app\",host=~\"$host\"}[15m]))",
           "legendFormat": "{{flow}} {{outcome}}"
         }
-      ]
+      ],
+      "description": "Checkout funnel events segmented by flow and outcome."
     },
     {
       "type": "timeseries",
       "title": "Purchase Fulfillments by Source/Outcome",
-      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 10 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "refId": "A",
           "expr": "sum by (source, outcome) (rate(courseplatform_purchase_fulfillments_total{env=\"test\",app=~\"$app\",host=~\"$host\"}[15m]))",
           "legendFormat": "{{source}} {{outcome}}"
         }
-      ]
+      ],
+      "description": "Purchase fulfillment outcomes from callback/webhook sources."
     },
     {
       "type": "timeseries",
       "title": "Auth Callback Outcomes",
-      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 20 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 20
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "refId": "A",
           "expr": "sum by (outcome) (rate(courseplatform_auth_callbacks_total{env=\"test\",app=~\"$app\",host=~\"$host\"}[15m]))",
           "legendFormat": "auth {{outcome}}"
         }
-      ]
+      ],
+      "description": "Auth callback outcomes (success_* and failure categories)."
     },
     {
       "type": "timeseries",
       "title": "Stripe Webhook Outcomes by Event Type",
-      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 20 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 20
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "refId": "A",
           "expr": "sum by (event_type, outcome) (rate(courseplatform_stripe_webhook_events_total{env=\"test\",app=~\"$app\",host=~\"$host\"}[15m]))",
           "legendFormat": "{{event_type}} {{outcome}}"
         }
-      ]
+      ],
+      "description": "Stripe webhook outcomes split by Stripe event type."
     },
     {
       "type": "timeseries",
       "title": "Exercise Submission Outcomes",
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 30 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "targets": [
         {
           "refId": "A",
