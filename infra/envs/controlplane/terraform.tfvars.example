@@ -104,7 +104,7 @@ tailscale_opencl_agent_destinations = [
 tailscale_opencl_admin_sources = ["eduard.valentin1996@gmail.com"]
 tailscale_opencl_admin_destinations = ["tag:solus-agent:*"]
 tailscale_regular_member_sources = ["eli.lungu04@gmail.com"]
-tailscale_regular_member_destinations = ["tag:test:*", "tag:ops:*", "tag:prod:*"]
+tailscale_regular_member_destinations = ["*:*"]
 
 tailnet_name            = "longhair-eagle.ts.net"
 placeholder_prod_domain = "courseplatform.com"

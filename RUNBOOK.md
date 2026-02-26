@@ -84,6 +84,8 @@ Tailscale change safety checklist (before merge/apply):
 - Do not include port `22` in `tailscale_opencl_account_destinations` or `tailscale_opencl_agent_destinations`.
 - Keep `solus.assistant@gmail.com` in `tailscale_opencl_agent_tag_owners`; otherwise `tailscale up --advertise-tags=tag:solus-agent` fails.
 - Keep `tailscale_opencl_agent_sources = ["tag:solus-agent"]` so restrictions apply to the node identity.
+- Keep `tailscale_regular_member_destinations = ["*:*"]` for `eli.lungu04@gmail.com` full tailnet service reachability.
+- Ensure `TFVARS_CONTROLPLANE` uses only `tailscale_regular_member_sources` and `tailscale_regular_member_destinations` for member ACL configuration.
 - After apply, verify from admin laptop:
   - `tailscale ping susanoo.longhair-eagle.ts.net`
   - `curl -I https://susanoo.longhair-eagle.ts.net/VMs`

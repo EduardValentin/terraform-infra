@@ -212,12 +212,12 @@ variable "tailscale_opencl_admin_destinations" {
 
 variable "tailscale_regular_member_sources" {
   type    = list(string)
-  default = []
+  default = ["eli.lungu04@gmail.com"]
 }
 
 variable "tailscale_regular_member_destinations" {
   type    = list(string)
-  default = ["tag:prod:*", "tag:test:*", "tag:ops:*"]
+  default = ["*:*"]
 }
 
 variable "tailscale_ssh_destinations" {

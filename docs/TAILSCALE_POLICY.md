@@ -89,7 +89,7 @@ Adjust policy inputs through Terraform variables (`tailscale_*`) and apply from 
     {
       "action": "accept",
       "src": ["eli.lungu04@gmail.com"],
-      "dst": ["tag:test:*", "tag:ops:*", "tag:prod:*"]
+      "dst": ["*:*"]
     },
     {
       "action": "accept",
@@ -138,6 +138,10 @@ Desired behavior invariants (do not change without explicit owner approval):
 - OpenCL node identity is scoped:
   - `tag:solus-agent` may reach only TEST/OPS service ports.
   - `tag:solus-agent` must not have SSH access to TEST/OPS nodes.
+- Regular member reachability:
+  - `eli.lungu04@gmail.com` is intentionally configured for full tailnet service access (`*:*`).
+  - This is network ACL access only; no dedicated `ssh` rule is granted by default.
+  - `TFVARS_CONTROLPLANE` must use only `tailscale_regular_member_sources` and `tailscale_regular_member_destinations`.
 - Tag assignment guard:
   - `solus.assistant@gmail.com` must remain allowed in `tailscale_opencl_agent_tag_owners` so the agent VM can join with `tag:solus-agent`.
 - Access expectations:
