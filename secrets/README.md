@@ -15,6 +15,8 @@ Example templates:
 
 - `secrets/runtime/templates/courseplatform.app.env.example`
 - `secrets/runtime/templates/courseplatform.postgres.env.example`
+- `secrets/runtime/templates/eli-coach-platform.app.env.example`
+- `secrets/runtime/templates/eli-coach-platform.postgres.env.example`
 
 ## Encrypt runtime secret files
 
