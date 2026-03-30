@@ -1,50 +1,81 @@
 # Phase 0 Prerequisites
 
-## Cloudflare
+This is the current prerequisite baseline for the infrastructure that is live today.
 
-- Create zone for placeholder root domain `courseplatform.com` or replacement domain.
-- API token permissions:
-  - Zone:DNS:Edit
-  - Zone:Zone:Read
-- Save token in GitHub secrets as `CLOUDFLARE_API_TOKEN`.
-- Save zone id in GitHub secrets as `CLOUDFLARE_ZONE_ID`.
+## Required now
 
-## Tailscale
+### Tailscale
 
-- Tailnet: `longhair-eagle.ts.net`
-- MagicDNS: enabled
-- Define tags:
+- Tailnet exists and is healthy.
+- MagicDNS is enabled.
+- Host tags exist and are assignable:
   - `tag:test`
-  - `tag:prod`
   - `tag:ops`
+  - `tag:prod`
   - `tag:solus-agent`
-  - `tag:ci-courseplatform`
+- CI tags exist and are assignable:
+  - `tag:ci-app-deploy`
   - `tag:ci-secrets`
   - `tag:ci-terraform`
-- Create one OAuth client for CI automation with `Auth Keys` write scope and allowed tags:
-  - `tag:ci-courseplatform`
+- One OAuth client exists for CI automation with `Auth Keys: Write` and allowed tags:
+  - `tag:ci-app-deploy`
   - `tag:ci-secrets`
   - `tag:ci-terraform`
-- Create reusable pre-auth keys for server bootstrap/recovery only:
+- Reusable pre-auth keys exist for long-lived host bootstrap and recovery only:
   - `tag:test`
   - `tag:ops`
   - `tag:prod`
-- Enable Tailscale SSH for admin identities.
-- Keep public SSH closed for production host.
+- Tailscale SSH is enabled for admin identities.
+- Public SSH stays closed on PROD.
 
-## GitHub
+### GitHub
 
-- Owner: `EduardValentin`
-- Repositories:
+- Repositories exist:
   - `EduardValentin/course-platform`
   - `EduardValentin/terraform-infra`
-- Environments:
+- GitHub environments exist where required:
   - `test`
-  - `production` (manual approval)
-- Configure secrets matrix from `/Users/trocaneduard/Documents/Personal/terraform-infra/docs/GITHUB_SECRETS_MATRIX.md`.
+  - `production`
+- Required repository secrets and variables are configured as described in `docs/GITHUB_SECRETS_MATRIX.md`.
+
+### Runtime secret management
+
+- Local `age` keypair is generated for SOPS.
+- `.sops.yaml` contains the correct age public key.
+- `terraform-infra` GitHub secret `SOPS_AGE_KEY` contains the matching private key.
+
+### Terraform backend
+
+- OPS VM is running and reachable over Tailscale.
+- OPS bootstrap has MinIO backend enabled.
+- `terraform-infra` repository secrets are set:
+  - `TF_BACKEND_CONFIG_CONTROLPLANE`
+  - `TF_BACKEND_CONFIG_TEST`
+  - `TF_BACKEND_CONFIG_OPS`
+  - `TF_BACKEND_CONFIG_PROD`
+  - `TFVARS_CONTROLPLANE`
+  - `TFVARS_TEST`
+  - `TFVARS_OPS`
+  - `TFVARS_PROD`
+
+## Optional later
+
+### Public DNS automation
+
+Cloudflare is supported by the repository but is not required for the current TEST and OPS setup.
+
+Only add Cloudflare prerequisites when public DNS will actually be managed from Terraform:
+
+- Create or choose the public zone.
+- Create a token with:
+  - `Zone:DNS:Edit`
+  - `Zone:Zone:Read`
+- Add the token and zone id to the relevant Terraform variable payloads.
 
 ## Done criteria
 
-- Cloudflare token tested with Terraform plan.
-- Tailscale ACL applied and tags assignable.
-- GitHub environments configured with required secrets.
+- Tailscale ACL policy applies cleanly and tags are assignable.
+- GitHub repositories have the required secrets and variables.
+- Runtime secret encryption and decryption work end to end.
+- Terraform plan can initialize against the OPS-hosted backend.
+- Cloudflare prerequisites are only required when public DNS automation is activated.

@@ -70,7 +70,7 @@ locals {
       "tag:test"                          = [var.tailscale_admin_group]
       "tag:ops"                           = [var.tailscale_admin_group]
       "${var.tailscale_opencl_agent_tag}" = distinct(concat([var.tailscale_admin_group], var.tailscale_opencl_agent_tag_owners))
-      "tag:ci-courseplatform"             = [var.tailscale_admin_group]
+      "tag:ci-app-deploy"                    = [var.tailscale_admin_group]
       "tag:ci-secrets"                    = [var.tailscale_admin_group]
       "tag:ci-terraform"                  = [var.tailscale_admin_group]
     }

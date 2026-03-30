@@ -1,25 +1,23 @@
 # Domain Mapping Strategy
 
-Current domain root is a placeholder: `courseplatform.com`.
+Current public domain is still a placeholder: `courseplatform.com`.
+Public DNS automation is supported by the repository but is not active today.
 
 ## Current usage
 
-- TEST Tailscale TLS hostname: `susanoo-test.longhair-eagle.ts.net`
-- TEST VM node hostname: `susanoo-test.longhair-eagle.ts.net`
-- OPS VM node hostname: `susanoo-ops.longhair-eagle.ts.net`
-- PROD placeholder host can be `app.courseplatform.com`
-
-In current single-node cert mode, TEST TLS hostname matches the TEST node hostname.
+- TEST node hostname: `susanoo-test.longhair-eagle.ts.net`
+- TEST TLS hostname: `susanoo-test.longhair-eagle.ts.net`
+- OPS node hostname: `susanoo-ops.longhair-eagle.ts.net`
+- Current TEST mode uses a single node-level Tailscale certificate.
 
 ## Future brand domains
 
-To map multiple user-facing brand domains to the same service:
+To map multiple public brand domains to the same production service:
 
-1. Configure `app_brand_domains` in `/Users/trocaneduard/Documents/Personal/terraform-infra/infra/envs/controlplane/terraform.tfvars`.
-2. Run `terraform output generated_app_domains` from `infra/envs/controlplane` to confirm desired hostname matrix.
-3. Add hostnames to `prod_additional_hostnames` in `/Users/trocaneduard/Documents/Personal/terraform-infra/infra/envs/prod/variables.tf` values.
-4. Keep Traefik routers matching all desired hostnames.
-5. If using Cloudflare Terraform, add A/AAAA records via `infra/modules/cloudflare_dns`.
-6. Keep deployment image unchanged; only DNS + route host rules change.
+1. Update `app_brand_domains` in `infra/envs/controlplane/terraform.tfvars`.
+2. Run `terraform output generated_app_domains` from `infra/envs/controlplane` to review the resulting hostname matrix.
+3. Ensure the PROD Traefik routers match all intended hostnames.
+4. Point DNS for those hostnames at the production edge using your chosen DNS provider.
+5. If Cloudflare is adopted later, the existing Cloudflare module can manage those records.
 
-This keeps app deploy artifacts domain-agnostic.
+This keeps deployment artifacts domain-agnostic: the image stays the same and only routing plus DNS change.
