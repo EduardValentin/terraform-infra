@@ -1,40 +1,37 @@
 # GitHub Secrets Matrix
 
 Primary management path: `infra/envs/controlplane` Terraform root.
-Use `github_repository_variables`, `github_repository_secrets`, `github_environment_variables`, and `github_environment_secrets` inputs.
+Use `github_repository_variables`, `github_repository_secrets`, `github_environment_variables`, and `github_environment_secrets` inputs there whenever possible.
 
-## Terraform automation secrets (terraform-infra repo)
+## terraform-infra repository
 
-These are consumed by:
+### Required by Terraform workflows
 
-- `.github/workflows/terraform-plan.yml` (auto checks + plan)
-- `.github/workflows/terraform-apply.yml` (manual apply button)
+Consumed by:
 
-Required multi-line secrets:
+- `.github/workflows/terraform-plan.yml`
+- `.github/workflows/terraform-apply.yml`
 
+Required GitHub secrets:
+
+- `TAILSCALE_OAUTH_CLIENT_ID`
+- `TAILSCALE_OAUTH_SECRET`
 - `TF_BACKEND_CONFIG_CONTROLPLANE`
 - `TF_BACKEND_CONFIG_TEST`
 - `TF_BACKEND_CONFIG_OPS`
 - `TF_BACKEND_CONFIG_PROD`
-
 - `TFVARS_CONTROLPLANE`
 - `TFVARS_TEST`
 - `TFVARS_OPS`
 - `TFVARS_PROD`
 
-OpenCL ACL note:
-
-- No additional GitHub secret names are required for OpenCL ACL access.
-- Configure OpenCL ACL inputs (`tailscale_opencl_agent_tag`, `tailscale_opencl_account_*`, `tailscale_opencl_agent_*`, `tailscale_opencl_admin_*`) inside `TFVARS_CONTROLPLANE`.
-- Configure regular member ACL inputs with `tailscale_regular_member_sources` and `tailscale_regular_member_destinations` inside `TFVARS_CONTROLPLANE`.
-- Do not use legacy `tailscale_member_*` keys in new `TFVARS_CONTROLPLANE` payloads.
-
-`TF_BACKEND_CONFIG_*` should contain backend configuration for the `s3` backend (MinIO on OPS).
-`TFVARS_*` should contain the full environment-specific variable payload for the corresponding root.
+`TF_BACKEND_CONFIG_*` contains the Terraform `s3` backend payload for the OPS-hosted MinIO endpoint.
+`TFVARS_*` contains the full environment-specific variable payload for the matching Terraform root.
 
 Recommended MinIO backend payloads:
 
-- `TF_BACKEND_CONFIG_CONTROLPLANE`
+### `TF_BACKEND_CONFIG_CONTROLPLANE`
+
 ```hcl
 bucket                      = "terraform-state"
 key                         = "controlplane/terraform.tfstate"
@@ -50,7 +47,8 @@ skip_metadata_api_check     = true
 use_path_style              = true
 ```
 
-- `TF_BACKEND_CONFIG_TEST`
+### `TF_BACKEND_CONFIG_TEST`
+
 ```hcl
 bucket                      = "terraform-state"
 key                         = "test/terraform.tfstate"
@@ -66,7 +64,8 @@ skip_metadata_api_check     = true
 use_path_style              = true
 ```
 
-- `TF_BACKEND_CONFIG_OPS`
+### `TF_BACKEND_CONFIG_OPS`
+
 ```hcl
 bucket                      = "terraform-state"
 key                         = "ops/terraform.tfstate"
@@ -82,7 +81,8 @@ skip_metadata_api_check     = true
 use_path_style              = true
 ```
 
-- `TF_BACKEND_CONFIG_PROD`
+### `TF_BACKEND_CONFIG_PROD`
+
 ```hcl
 bucket                      = "terraform-state"
 key                         = "prod/terraform.tfstate"
@@ -98,9 +98,13 @@ skip_metadata_api_check     = true
 use_path_style              = true
 ```
 
-## terraform-infra repository
+### Required by runtime secret sync
 
-Required by runtime secret sync workflow (`.github/workflows/sync-runtime-secrets.yml`):
+Consumed by:
+
+- `.github/workflows/sync-runtime-secrets.yml`
+
+Required GitHub secrets:
 
 - `SOPS_AGE_KEY`
 - `TAILSCALE_OAUTH_CLIENT_ID`
@@ -110,31 +114,31 @@ Required by runtime secret sync workflow (`.github/workflows/sync-runtime-secret
 - `TEST_SSH_KNOWN_HOSTS`
 - `PROD_SSH_KNOWN_HOSTS`
 
-Required by Terraform workflows (`.github/workflows/terraform-plan.yml`, `.github/workflows/terraform-apply.yml`):
+## Provider and control-plane values
 
-- `TAILSCALE_OAUTH_CLIENT_ID`
-- `TAILSCALE_OAUTH_SECRET`
-- `TF_BACKEND_CONFIG_CONTROLPLANE`
-- `TF_BACKEND_CONFIG_TEST`
-- `TF_BACKEND_CONFIG_OPS`
-- `TF_BACKEND_CONFIG_PROD`
-- `TFVARS_CONTROLPLANE`
-- `TFVARS_TEST`
-- `TFVARS_OPS`
-- `TFVARS_PROD`
+These are typically carried inside `TFVARS_*`, not as separate GitHub Actions secrets:
 
-Provider/API secrets used by Terraform roots (depending on enabled modules):
+- GitHub owner and PAT for control-plane management
+- Tailscale tailnet name
+- Tailscale OAuth client credentials used by Terraform provider
+- bootstrap host pre-auth keys
+- OPS Grafana admin password
+- OPS Terraform backend credentials
+- Hetzner token when PROD provisioning is enabled
+- Cloudflare token and zone id only if public DNS is managed through Terraform
 
-- `HCLOUD_TOKEN`
-- `CLOUDFLARE_API_TOKEN`
-- `CLOUDFLARE_ZONE_ID`
-- `TAILSCALE_TAILNET`
-- `TAILSCALE_OAUTH_CLIENT_ID`
-- `TAILSCALE_OAUTH_SECRET`
+OpenCL and regular-member ACL inputs are also configured in `TFVARS_CONTROLPLANE`:
+
+- `tailscale_opencl_agent_tag`
+- `tailscale_opencl_account_*`
+- `tailscale_opencl_agent_*`
+- `tailscale_opencl_admin_*`
+- `tailscale_regular_member_sources`
+- `tailscale_regular_member_destinations`
 
 ## course-platform repository
 
-Deployment/build secrets (current workflows):
+Deployment/build secrets currently required:
 
 - `TAILSCALE_OAUTH_CLIENT_ID`
 - `TAILSCALE_OAUTH_SECRET`
@@ -147,8 +151,8 @@ Deployment/build secrets (current workflows):
 
 Notes:
 
-- `course-platform` CI and manual deploy workflows use OAuth-based Tailscale auth.
-- Do not set `TAILSCALE_AUTHKEY_CI_COURSEPLATFORM`; it is legacy and no longer consumed.
+- `course-platform` deploy workflows use OAuth-based Tailscale auth.
+- `TAILSCALE_AUTHKEY_CI_COURSEPLATFORM` is legacy and is no longer used.
 
 Optional:
 
@@ -156,14 +160,14 @@ Optional:
 
 ## Pinned SSH host key secrets
 
-Use host key pinning secrets (not `accept-new`) for CI SSH:
+Use host key pinning secrets, not `StrictHostKeyChecking=accept-new`:
 
 ```bash
 ssh-keyscan -H susanoo-test.longhair-eagle.ts.net 2>/dev/null
 ssh-keyscan -H <prod-hostname-or-ip> 2>/dev/null
 ```
 
-Copy the full output line(s) into:
+Copy the full output into:
 
 - `TEST_SSH_KNOWN_HOSTS`
 - `PROD_SSH_KNOWN_HOSTS`
