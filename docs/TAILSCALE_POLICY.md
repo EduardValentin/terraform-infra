@@ -150,4 +150,5 @@ Actual identities and destinations come from `TFVARS_CONTROLPLANE`.
 - CI workflows mint ephemeral Tailscale auth through OAuth client credentials.
 - Long-lived VMs do not use OAuth for steady-state connectivity.
 - `tag:ci-app-deploy` is the current deploy tag for the existing app deployment path.
+- CI SSH workflows resolve the current target IP from `tailscale status --json`; ACL reachability is still governed by the stable node hostname/tag pair, not by a static SSH target secret.
 - If multiple app repos later share the same host model, either keep a shared deploy tag intentionally or redesign host-side permissions before splitting per-app tags.

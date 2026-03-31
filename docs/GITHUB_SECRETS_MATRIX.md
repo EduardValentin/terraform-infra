@@ -109,10 +109,13 @@ Required GitHub secrets:
 - `SOPS_AGE_KEY`
 - `TAILSCALE_OAUTH_CLIENT_ID`
 - `TAILSCALE_OAUTH_SECRET`
-- `TEST_SSH_TARGET`
-- `PROD_SSH_TARGET`
 - `TEST_SSH_KNOWN_HOSTS`
 - `PROD_SSH_KNOWN_HOSTS`
+
+Required GitHub repository variables:
+
+- `TEST_NODE_HOSTNAME`
+- `PROD_NODE_HOSTNAME`
 
 ## Provider and control-plane values
 
@@ -142,12 +145,15 @@ Deployment/build secrets currently required:
 
 - `TAILSCALE_OAUTH_CLIENT_ID`
 - `TAILSCALE_OAUTH_SECRET`
-- `TEST_SSH_TARGET`
-- `PROD_SSH_TARGET`
 - `TEST_SSH_KNOWN_HOSTS`
 - `PROD_SSH_KNOWN_HOSTS`
 - `GHCR_PULL_USERNAME`
 - `GHCR_PULL_TOKEN`
+
+Deployment/build repository variables:
+
+- `TEST_NODE_HOSTNAME`
+- `PROD_NODE_HOSTNAME`
 
 Notes:
 
@@ -164,7 +170,7 @@ Use host key pinning secrets, not `StrictHostKeyChecking=accept-new`:
 
 ```bash
 ssh-keyscan -H susanoo-test.longhair-eagle.ts.net 2>/dev/null
-ssh-keyscan -H <prod-hostname-or-ip> 2>/dev/null
+ssh-keyscan -H courseplatform-prod.longhair-eagle.ts.net 2>/dev/null
 ```
 
 Copy the full output into:

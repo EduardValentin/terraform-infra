@@ -37,6 +37,9 @@ This is the current prerequisite baseline for the infrastructure that is live to
   - `test`
   - `production`
 - Required repository secrets and variables are configured as described in `docs/GITHUB_SECRETS_MATRIX.md`.
+- Repository variables should include stable node hostnames for CI SSH target resolution:
+  - `TEST_NODE_HOSTNAME`
+  - `PROD_NODE_HOSTNAME`
 
 ### Runtime secret management
 

@@ -56,10 +56,10 @@ In `terraform-infra`, set:
 - `SOPS_AGE_KEY`: the full private key content from `$HOME/.config/sops/age/keys.txt`
 - `TAILSCALE_OAUTH_CLIENT_ID`
 - `TAILSCALE_OAUTH_SECRET`
-- `TEST_SSH_TARGET`
-- `PROD_SSH_TARGET`
 - `TEST_SSH_KNOWN_HOSTS`
 - `PROD_SSH_KNOWN_HOSTS`
+- repository variable `TEST_NODE_HOSTNAME`
+- repository variable `PROD_NODE_HOSTNAME`
 
 ## Standard editing cycle
 
@@ -109,9 +109,10 @@ Behavior:
 
 1. Detects exactly which `environment/app` pairs changed.
 2. Decrypts only those files with `SOPS_AGE_KEY`.
-3. Syncs them to the matching host over Tailscale SSH.
-4. If `*.app.env.enc` changed, performs a rolling app container reload.
-5. If `*.postgres.env.enc` changed, updates the file only and does not restart Postgres automatically.
+3. Resolves the matching host's current Tailscale IP from `tailscale status --json`.
+4. Syncs them to the matching host over Tailscale SSH with strict host key checking.
+5. If `*.app.env.enc` changed, performs a rolling app container reload.
+6. If `*.postgres.env.enc` changed, updates the file only and does not restart Postgres automatically.
 
 You can also run the workflow manually with `workflow_dispatch`.
 
