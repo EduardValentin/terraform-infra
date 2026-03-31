@@ -8,10 +8,16 @@ github_repository_environments = {
 
 github_repository_variables = {
   "course-platform" = {
+    TEST_NODE_HOSTNAME = "susanoo-test.longhair-eagle.ts.net"
+    PROD_NODE_HOSTNAME = "courseplatform-prod.longhair-eagle.ts.net"
     TEST_APP_HOSTNAME = "susanoo-test.longhair-eagle.ts.net"
     TEST_APP_BASE_PATH = "/courseplatform"
     PROD_APP_HOSTNAME = "courseplatform.com"
     PROD_APP_BASE_PATH = "/"
+  }
+  "terraform-infra" = {
+    TEST_NODE_HOSTNAME = "susanoo-test.longhair-eagle.ts.net"
+    PROD_NODE_HOSTNAME = "courseplatform-prod.longhair-eagle.ts.net"
   }
 }
 
@@ -19,8 +25,6 @@ github_repository_secrets = {
   "course-platform" = {
     TAILSCALE_OAUTH_CLIENT_ID = "oauth-client-id-replace"
     TAILSCALE_OAUTH_SECRET    = "oauth-client-secret-replace"
-    TEST_SSH_TARGET          = "root@test-host.tailnet.ts.net."
-    PROD_SSH_TARGET          = "root@prod-host.tailnet.ts.net."
     TEST_SSH_KNOWN_HOSTS     = "test-host.tailnet.ts.net ssh-ed25519 AAAA..."
     PROD_SSH_KNOWN_HOSTS     = "prod-host.tailnet.ts.net ssh-ed25519 AAAA..."
     GHCR_PULL_USERNAME       = "EduardValentin"
@@ -29,8 +33,6 @@ github_repository_secrets = {
   "terraform-infra" = {
     TAILSCALE_OAUTH_CLIENT_ID      = "oauth-client-id-replace"
     TAILSCALE_OAUTH_SECRET         = "oauth-client-secret-replace"
-    TEST_SSH_TARGET                = "root@test-host.tailnet.ts.net."
-    PROD_SSH_TARGET                = "root@prod-host.tailnet.ts.net."
     TEST_SSH_KNOWN_HOSTS           = "test-host.tailnet.ts.net ssh-ed25519 AAAA..."
     PROD_SSH_KNOWN_HOSTS           = "prod-host.tailnet.ts.net ssh-ed25519 AAAA..."
     SOPS_AGE_KEY                   = "AGE-SECRET-KEY-1..."

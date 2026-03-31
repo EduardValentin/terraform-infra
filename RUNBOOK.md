@@ -55,7 +55,7 @@ Manual apply:
 Backend connectivity note:
 
 - Terraform plan/apply workflows join Tailscale as `tag:ci-terraform` before `terraform init`.
-- Runtime secret sync workflow joins as `tag:ci-secrets`.
+- Runtime secret sync workflow joins as `tag:ci-secrets`, pings the configured node hostname, resolves the current Tailscale IP from `tailscale status --json`, and then SSHes with pinned host keys.
 - Remote state backend is expected at OPS MinIO endpoint (`susanoo-ops.longhair-eagle.ts.net:9000`).
 - If OPS VM is down, Terraform plan/apply workflows fail, but application CI/CD in `course-platform` still works.
 
@@ -94,9 +94,13 @@ Tailscale change safety checklist (before merge/apply):
 SSH host key pinning note:
 
 - CI SSH jobs no longer use `accept-new`.
+- CI SSH jobs resolve the current apphost IP dynamically from the configured node hostname.
 - Set pinned host key secrets:
   - `TEST_SSH_KNOWN_HOSTS`
   - `PROD_SSH_KNOWN_HOSTS`
+- Set repository variables:
+  - `TEST_NODE_HOSTNAME`
+  - `PROD_NODE_HOSTNAME`
 - Generate values from a trusted admin machine:
 ```bash
 ssh-keyscan -H susanoo-test.longhair-eagle.ts.net 2>/dev/null
