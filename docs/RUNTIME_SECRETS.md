@@ -98,6 +98,90 @@ Remove the local plaintext work files when done:
 ./scripts/secrets/edit_runtime_secret_set.sh cleanup test courseplatform
 ```
 
+## Eli Coach Platform TEST secret set
+
+For `eli-coach-platform`, the runtime contract is split across two files:
+
+- `/srv/apps/eli-coach-platform/.env`
+- `/srv/postgres/eli-coach-platform.env`
+
+The app env must expose database connection pieces, not `DATABASE_URL`.
+
+### Create or update the TEST secret pair
+
+Prepare the plaintext workspace:
+
+```bash
+./scripts/secrets/edit_runtime_secret_set.sh prepare test eli-coach-platform
+```
+
+Edit these files:
+
+- `secrets/runtime/work/test-eli-coach-platform/eli-coach-platform.app.env`
+- `secrets/runtime/work/test-eli-coach-platform/eli-coach-platform.postgres.env`
+
+Use this shape for the app runtime file:
+
+```dotenv
+APP_NAME=eli-coach-platform
+ENVIRONMENT=test
+NODE_ENV=production
+PUBLIC_APP_URL=https://<test-edge-hostname>
+API_PUBLIC_URL=https://<test-edge-hostname>/eli-coach-platform
+DATABASE_HOST=eli-coach-platform-test-postgres
+DATABASE_PORT=5432
+DATABASE_NAME=eli_coach_platform
+DATABASE_USER=eli_coach_platform_app
+DATABASE_PASSWORD=<app-db-password>
+SESSION_SECRET=<session-secret>
+CLERK_PUBLISHABLE_KEY=<clerk-publishable-key>
+CLERK_SECRET_KEY=<clerk-secret-key>
+STRIPE_SECRET_KEY=<stripe-secret-key>
+STRIPE_WEBHOOK_SECRET=<stripe-webhook-secret>
+RESEND_API_KEY=<resend-api-key>
+```
+
+Use this shape for the Postgres runtime file:
+
+```dotenv
+POSTGRES_DB=eli_coach_platform
+POSTGRES_USER=eli_coach_platform_bootstrap
+POSTGRES_PASSWORD=<bootstrap-db-password>
+APP_DB_SCHEMA=app
+APP_DB_APP_USER=eli_coach_platform_app
+APP_DB_APP_PASSWORD=<app-db-password>
+APP_DB_MIGRATION_USER=eli_coach_platform_migration
+APP_DB_MIGRATION_PASSWORD=<migration-db-password>
+```
+
+Apply the encrypted update:
+
+```bash
+./scripts/secrets/edit_runtime_secret_set.sh apply test eli-coach-platform
+```
+
+Commit and push the encrypted files:
+
+```bash
+git add \
+  secrets/runtime/test/eli-coach-platform.app.env.enc \
+  secrets/runtime/test/eli-coach-platform.postgres.env.enc
+git commit -m "Update TEST runtime secrets for eli-coach-platform"
+git push
+```
+
+Optional: trigger an immediate sync instead of waiting for the push automation:
+
+```bash
+gh workflow run sync-runtime-secrets.yml -f environment=test -f app_name=eli-coach-platform
+```
+
+Clean up the local plaintext workspace:
+
+```bash
+./scripts/secrets/edit_runtime_secret_set.sh cleanup test eli-coach-platform
+```
+
 ## Automatic sync on push
 
 `.github/workflows/sync-runtime-secrets.yml` runs automatically on pushes to `main` when encrypted runtime files change under:
@@ -141,3 +225,9 @@ Safe rule:
 
 - keep Postgres credentials stable once initialized
 - if rotation is needed, run an explicit SQL credential rotation procedure first, then update encrypted env files and redeploy
+
+For `eli-coach-platform`, keep these roles stable after initialization:
+
+- `eli_coach_platform_bootstrap`
+- `eli_coach_platform_app`
+- `eli_coach_platform_migration`

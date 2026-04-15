@@ -18,6 +18,12 @@ Example templates:
 - `secrets/runtime/templates/eli-coach-platform.app.env.example`
 - `secrets/runtime/templates/eli-coach-platform.postgres.env.example`
 
+For `eli-coach-platform`:
+
+- the app env uses split database connection pieces (`DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD`)
+- the Postgres env carries bootstrap and role-provisioning inputs (`APP_DB_SCHEMA`, `APP_DB_APP_USER`, `APP_DB_APP_PASSWORD`, `APP_DB_MIGRATION_USER`, `APP_DB_MIGRATION_PASSWORD`)
+- do not use `DATABASE_URL` for this app
+
 ## Encrypt runtime secret files
 
 1. Create plaintext files in gitignored workspace `secrets/runtime/work/`.
