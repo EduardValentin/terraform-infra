@@ -106,6 +106,8 @@ For `eli-coach-platform`, the runtime contract is split across two files:
 - `/srv/postgres/eli-coach-platform.env`
 
 The app env must expose database connection pieces, not `DATABASE_URL`.
+The external TEST URL is not part of this secret contract. The app is published at
+`https://susanoo-test.longhair-eagle.ts.net/eli-coach-platform` via deploy-time host and base-path configuration.
 
 ### Create or update the TEST secret pair
 
@@ -126,8 +128,6 @@ Use this shape for the app runtime file:
 APP_NAME=eli-coach-platform
 ENVIRONMENT=test
 NODE_ENV=production
-PUBLIC_APP_URL=https://<test-edge-hostname>
-API_PUBLIC_URL=https://<test-edge-hostname>/eli-coach-platform
 DATABASE_HOST=eli-coach-platform-test-postgres
 DATABASE_PORT=5432
 DATABASE_NAME=eli_coach_platform
