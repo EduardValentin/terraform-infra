@@ -35,8 +35,13 @@ assert_file "bootstrap/systemd/docker-image-cleanup.timer"
 assert_contains "bootstrap/systemd/docker-image-cleanup.timer" "OnCalendar=\\*-\\*-\\*"
 assert_contains "bootstrap/systemd/docker-image-cleanup.timer" "Persistent=true"
 
+assert_file "bootstrap/systemd/edge-compose.service"
+assert_contains "bootstrap/systemd/edge-compose.service" "docker compose --env-file /srv/edge/.env -f /srv/edge/docker-compose.yml up -d"
+
 assert_contains "bootstrap/scripts/setup_apphost.sh" "configure_test_docker_cleanup"
 assert_contains "bootstrap/scripts/setup_apphost.sh" "docker-image-cleanup.timer"
+assert_contains "bootstrap/scripts/setup_apphost.sh" "configure_edge_compose_service"
+assert_contains "bootstrap/scripts/setup_apphost.sh" "edge-compose.service"
 assert_contains "AGENTS.md" "Linear project.*Infrastructure"
 
 printf 'PASS: TEST Docker cleanup bootstrap contract is present\n'

@@ -178,6 +178,13 @@ __DOCKER_CLEANUP_ENV__
   log "docker image cleanup timer enabled image_until=$DOCKER_IMAGE_PRUNE_UNTIL_VALUE builder_until=$DOCKER_BUILDER_PRUNE_UNTIL_VALUE"
 }
 
+configure_edge_compose_service() {
+  cp "$SCRIPT_DIR/../systemd/edge-compose.service" /etc/systemd/system/edge-compose.service
+  systemctl daemon-reload
+  systemctl enable edge-compose.service
+  log "edge compose service enabled"
+}
+
 copy_prod_files() {
   cp "$SCRIPT_DIR/../compose/traefik/prod/docker-compose.yml" /srv/edge/docker-compose.yml
   cp "$SCRIPT_DIR/../compose/traefik/prod/traefik.yml" /srv/edge/traefik.yml
@@ -276,6 +283,7 @@ main() {
       ;;
   esac
 
+  configure_edge_compose_service
   start_traefik
   start_observability_agents
 }
