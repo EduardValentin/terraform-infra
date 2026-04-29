@@ -1,0 +1,9 @@
+[Unit]
+Description=Prune stale Docker images and build cache
+After=docker.service
+Wants=docker.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=-/etc/docker-image-cleanup.env
+ExecStart=/usr/local/bin/docker_image_cleanup.sh

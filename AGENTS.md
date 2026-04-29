@@ -12,18 +12,28 @@ The charter contains architecture intent, constraints, environment model, portab
 
 If this file and the charter conflict, follow the charter and update this file in the same PR.
 
+## Ticket system and project
+
+Use Linear for infrastructure repository work.
+
+- Team: `General Hub`
+- Linear project: `Infrastructure`
+- Ticket key format follows the Linear issue identifier, for example `GEN-107`.
+
+Do not file infrastructure, bootstrap, operations, Terraform, Tailscale, CI/CD, secret-sync, observability, backup, or host-maintenance work under application projects such as `Course Platform`.
+
 ## Mandatory delivery workflow
 
-Every unit of work must be tied to a Jira ticket.
+Every unit of work must be tied to a Linear issue in the `Infrastructure` project.
 
-1. Pick a ticket key (example: `CP-123`).
+1. Pick a ticket key (example: `GEN-107`).
 2. Move ticket to `In Progress`.
-3. Add a short Jira comment describing planned approach.
+3. Add a short Linear comment describing planned approach.
 4. Create a branch from `main`.
 5. Implement changes with tests/validation.
 6. Commit with one-line messages.
 7. Push branch and create a PR.
-8. Add a Jira comment with PR link, what changed, validation, and remaining work.
+8. Add a Linear comment with PR link, what changed, validation, and remaining work.
 9. Keep ticket status aligned with reality.
 
 No ticket means no code changes.
@@ -32,9 +42,9 @@ No ticket means no code changes.
 
 - Branch name format:
   - `codex/<ticket-key>-<short-slug>`
-  - Example: `codex/cp-123-ops-retention-tuning`
+  - Example: `codex/gen-107-test-docker-cleanup`
 - PR title must include ticket key.
-  - Example: `[CP-123] Tune Loki and Tempo retention settings`
+  - Example: `[GEN-107] Add TEST Docker image cleanup`
 
 ## PR requirements
 
@@ -62,8 +72,8 @@ If scope changed from ticket intent, explain why and update Jira comment.
 
 Examples:
 
-- `CP-123 add ops low-resource tempo config`
-- `CP-123 generate traefik tls dynamic file from tailscale hostnames`
+- `GEN-107 add test docker image cleanup timer`
+- `GEN-108 generate traefik tls dynamic file from tailscale hostnames`
 
 ## Validation rules
 
@@ -113,11 +123,11 @@ This repo is for infrastructure and operations delivery only.
 
 Do not put application business logic here.
 
-When app changes are needed, create or reference the corresponding ticket in the application repository and link both tickets in Jira comments.
+When app changes are needed, create or reference the corresponding ticket in the application repository and link both tickets in Linear comments.
 
 ## Ticket communication checklist
 
-At minimum, leave these Jira comments:
+At minimum, leave these Linear comments:
 
 1. Start comment:
    - plan
@@ -137,6 +147,6 @@ A task is done only when all are true:
 
 - code is pushed in a ticket-linked branch
 - PR is open with required sections
-- Jira contains status and comments
+- Linear contains status and comments
 - validation evidence is included
 - remaining work is explicitly listed

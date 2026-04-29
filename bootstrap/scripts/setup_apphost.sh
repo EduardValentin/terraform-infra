@@ -18,6 +18,10 @@ set_app_context() {
   PROD_PG_BACKUP_LOCAL_RETENTION_DAYS_VALUE=${PROD_PG_BACKUP_LOCAL_RETENTION_DAYS:-14}
   PROD_PG_BACKUP_NAS_DIR_VALUE=${PROD_PG_BACKUP_NAS_DIR:-}
   PROD_PG_BACKUP_NAS_RETENTION_DAYS_VALUE=${PROD_PG_BACKUP_NAS_RETENTION_DAYS:-14}
+  DOCKER_IMAGE_PRUNE_UNTIL_VALUE=${DOCKER_IMAGE_PRUNE_UNTIL:-168h}
+  DOCKER_BUILDER_PRUNE_UNTIL_VALUE=${DOCKER_BUILDER_PRUNE_UNTIL:-168h}
+  DOCKER_CLEANUP_DF_TIMEOUT_VALUE=${DOCKER_CLEANUP_DF_TIMEOUT:-60s}
+  DOCKER_CLEANUP_PRUNE_TIMEOUT_VALUE=${DOCKER_CLEANUP_PRUNE_TIMEOUT:-300s}
 
   if [ -z "$TAILSCALE_BIND_IP_VALUE" ] && command -v tailscale >/dev/null 2>&1; then
     TAILSCALE_BIND_IP_VALUE=$(tailscale ip -4 2>/dev/null | head -n 1 || true)
@@ -156,6 +160,24 @@ copy_test_files() {
   /usr/local/bin/setup_traefik_test_certs.sh
 }
 
+configure_test_docker_cleanup() {
+  install -m 0755 "$SCRIPT_DIR/docker_image_cleanup.sh" /usr/local/bin/docker_image_cleanup.sh
+  cp "$SCRIPT_DIR/../systemd/docker-image-cleanup.service" /etc/systemd/system/docker-image-cleanup.service
+  cp "$SCRIPT_DIR/../systemd/docker-image-cleanup.timer" /etc/systemd/system/docker-image-cleanup.timer
+
+  cat > /etc/docker-image-cleanup.env <<__DOCKER_CLEANUP_ENV__
+DOCKER_IMAGE_PRUNE_UNTIL=${DOCKER_IMAGE_PRUNE_UNTIL_VALUE}
+DOCKER_BUILDER_PRUNE_UNTIL=${DOCKER_BUILDER_PRUNE_UNTIL_VALUE}
+DOCKER_CLEANUP_DF_TIMEOUT=${DOCKER_CLEANUP_DF_TIMEOUT_VALUE}
+DOCKER_CLEANUP_PRUNE_TIMEOUT=${DOCKER_CLEANUP_PRUNE_TIMEOUT_VALUE}
+__DOCKER_CLEANUP_ENV__
+  chmod 0644 /etc/docker-image-cleanup.env
+
+  systemctl daemon-reload
+  systemctl enable --now docker-image-cleanup.timer
+  log "docker image cleanup timer enabled image_until=$DOCKER_IMAGE_PRUNE_UNTIL_VALUE builder_until=$DOCKER_BUILDER_PRUNE_UNTIL_VALUE"
+}
+
 copy_prod_files() {
   cp "$SCRIPT_DIR/../compose/traefik/prod/docker-compose.yml" /srv/edge/docker-compose.yml
   cp "$SCRIPT_DIR/../compose/traefik/prod/traefik.yml" /srv/edge/traefik.yml
@@ -242,6 +264,7 @@ main() {
   case "${ENVIRONMENT:-}" in
     test)
       copy_test_files
+      configure_test_docker_cleanup
       ;;
     prod)
       copy_prod_files
