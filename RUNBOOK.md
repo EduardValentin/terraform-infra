@@ -291,6 +291,9 @@ Notes:
 - For TEST, Traefik and exporter ports bind to the Tailscale IPv4 only.
 - TEST VM node hostname should be `susanoo-test`.
 - TEST TLS hostname defaults to `susanoo-test.longhair-eagle.ts.net`.
+- TEST apphost bootstrap enables `docker-image-cleanup.timer`, which runs daily and prunes unused Docker images and build cache older than 168 hours by default.
+- TEST apphost bootstrap enables `edge-compose.service`, which runs the edge compose stack at VM boot so `traefik-test` is recreated if it is missing.
+- To tune TEST cleanup retention before bootstrap, set `DOCKER_IMAGE_PRUNE_UNTIL` and `DOCKER_BUILDER_PRUNE_UNTIL` in the bootstrap environment.
 
 ## OPS host bootstrap
 
@@ -360,8 +363,13 @@ ls -la /srv/edge/certs/susanoo-test.longhair-eagle.ts.net
 cat /srv/edge/dynamic/tls-certs.yml
 curl -kI https://susanoo-test.longhair-eagle.ts.net
 systemctl status tailscale-cert-renew.timer --no-pager
+systemctl status edge-compose.service --no-pager
 systemctl start tailscale-cert-renew.service
 journalctl -u tailscale-cert-renew.service -n 20 --no-pager
+systemctl status docker-image-cleanup.timer --no-pager
+sudo systemctl start docker-image-cleanup.service
+journalctl -u docker-image-cleanup.service -n 50 --no-pager
+docker system df
 stat -c '%y %n' /srv/edge/dynamic/tls-certs.yml /srv/edge/certs/susanoo-test.longhair-eagle.ts.net/cert.pem /srv/edge/certs/susanoo-test.longhair-eagle.ts.net/key.pem
 echo | openssl s_client -connect susanoo-test.longhair-eagle.ts.net:443 -servername susanoo-test.longhair-eagle.ts.net 2>/dev/null | openssl x509 -noout -subject -issuer -enddate
 tailscale ip -4
@@ -374,6 +382,8 @@ Expected:
 - `/srv/apps/observability/.env` contains `METRICS_BIND_IP=<tailscale-ipv4>`.
 - `/srv/apps/observability/promtail.yml` contains label keep rule `logging=promtail`.
 - `tailscale-cert-renew.timer` is active and `tailscale-cert-renew.service` runs without errors.
+- `edge-compose.service` is enabled and can run the edge compose stack.
+- `docker-image-cleanup.timer` is active and `docker-image-cleanup.service` runs without errors.
 - `tls-certs.yml`, `cert.pem`, and `key.pem` update timestamps after a manual renewal run.
 - `openssl s_client` returns the renewed certificate for `susanoo-test.longhair-eagle.ts.net`.
 - `ss -ltnp` shows `80/443/9100/8080` bound to the Tailscale IPv4, not `0.0.0.0`.
