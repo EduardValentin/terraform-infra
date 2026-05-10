@@ -78,31 +78,6 @@ Edit the resulting plaintext files in:
 
 If encrypted files do not exist yet, `prepare` seeds the work directory from templates.
 
-Use the app name in the encrypted filename when working on another app, for example:
-
-```bash
-./scripts/secrets/edit_runtime_secret_set.sh prepare test eli-coach-platform
-```
-
-For `eli-coach-platform`, the app env file must use discrete runtime database connection pieces:
-
-- `DATABASE_HOST`
-- `DATABASE_PORT`
-- `DATABASE_NAME`
-- `DATABASE_USER`
-- `DATABASE_PASSWORD`
-
-Its Postgres env file must also define the bootstrap, app, and migration role inputs:
-
-- `POSTGRES_DB`
-- `POSTGRES_USER`
-- `POSTGRES_PASSWORD`
-- `APP_DB_SCHEMA`
-- `APP_DB_APP_USER`
-- `APP_DB_APP_PASSWORD`
-- `APP_DB_MIGRATION_USER`
-- `APP_DB_MIGRATION_PASSWORD`
-
 Encrypt the updated files back into the repository:
 
 ```bash

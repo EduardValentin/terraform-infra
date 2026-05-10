@@ -250,8 +250,6 @@ git push
 ./scripts/secrets/edit_runtime_secret_set.sh cleanup test courseplatform
 ```
 
-Replace `courseplatform` with the target app name, such as `eli-coach-platform`, when syncing another app's runtime env files.
-
 If encrypted files do not exist yet, `prepare` seeds work files from templates automatically.
 
 Then run GitHub Actions workflow:
