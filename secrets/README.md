@@ -38,6 +38,8 @@ Example templates:
 ./scripts/secrets/edit_runtime_secret_set.sh cleanup test courseplatform
 ```
 
+Replace `courseplatform` with another app name, for example `eli-coach-platform`, to edit that app's secret set.
+
 `prepare` behavior:
 
 - decrypts existing encrypted files when present
