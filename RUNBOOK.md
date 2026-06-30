@@ -67,6 +67,7 @@ Tailscale auth model:
 - Long-lived VMs (`susanoo-test`, `susanoo-ops`, future PROD) do not use OAuth for steady-state connectivity.
 - VM bootstrap auth keys (`bootstrap_tailscale_auth_key_test|ops|prod`) are only for first join/recovery and are stored in control-plane tfvars/secrets.
 - `tailscale_admin_destinations` defaults to `*:*`, so your admin identity keeps full tailnet reachability (including untagged devices like home-server nodes).
+- `tailscale_ssh_destinations` includes `autogroup:self`, so admins can use Tailscale SSH for their own user-owned devices once the host has run `tailscale set --ssh`.
 
 Tailscale OpenCL agent access model (control-plane tfvars):
 
@@ -80,6 +81,7 @@ Tailscale OpenCL agent access model (control-plane tfvars):
 Tailscale change safety checklist (before merge/apply):
 
 - Keep `tailscale_admin_destinations = ["*:*"]` unless you intentionally want to block admin access to untagged devices.
+- Keep `autogroup:self` in `tailscale_ssh_destinations` if admins should retain Tailscale SSH to their own untagged machines.
 - Keep `tailscale_opencl_account_destinations` limited to explicit TEST/OPS service ports only (never wildcard `tag:test:*` / `tag:ops:*`).
 - Do not include port `22` in `tailscale_opencl_account_destinations` or `tailscale_opencl_agent_destinations`.
 - Keep `solus.assistant@gmail.com` in `tailscale_opencl_agent_tag_owners`; otherwise `tailscale up --advertise-tags=tag:solus-agent` fails.

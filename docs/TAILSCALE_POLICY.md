@@ -104,7 +104,7 @@ Actual identities and destinations come from `TFVARS_CONTROLPLANE`.
     {
       "action": "accept",
       "src": ["group:admin"],
-      "dst": ["tag:prod", "tag:test", "tag:ops"],
+      "dst": ["tag:prod", "tag:test", "tag:ops", "autogroup:self"],
       "users": ["root", "ubuntu"]
     },
     {
@@ -127,6 +127,7 @@ Actual identities and destinations come from `TFVARS_CONTROLPLANE`.
 
 - Admin reachability remains global:
   - `tailscale_admin_destinations` should stay `[*:*]` so admins can still reach untagged devices.
+- Admin Tailscale SSH includes `autogroup:self` so an admin can SSH to their own user-owned, untagged devices after those devices advertise Tailscale SSH locally.
 - OpenCL account remains scoped:
   - it is limited to explicit TEST and OPS service ports
   - it must not receive SSH access

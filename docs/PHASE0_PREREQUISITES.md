@@ -25,7 +25,7 @@ This is the current prerequisite baseline for the infrastructure that is live to
   - `tag:test`
   - `tag:ops`
   - `tag:prod`
-- Tailscale SSH is enabled for admin identities.
+- Tailscale SSH is enabled for admin identities, including `autogroup:self` access to admin-owned untagged machines.
 - Public SSH stays closed on PROD.
 
 ### GitHub

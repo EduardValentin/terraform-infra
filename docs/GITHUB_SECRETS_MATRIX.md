@@ -138,6 +138,7 @@ OpenCL and regular-member ACL inputs are also configured in `TFVARS_CONTROLPLANE
 - `tailscale_opencl_admin_*`
 - `tailscale_regular_member_sources`
 - `tailscale_regular_member_destinations`
+- `tailscale_ssh_destinations`
 
 ## course-platform repository
 
