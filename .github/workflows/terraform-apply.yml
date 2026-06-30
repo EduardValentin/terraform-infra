@@ -166,7 +166,7 @@ jobs:
               if not host or not host.endswith(".longhair-eagle.ts.net"):
                   return endpoint
 
-              status = json.loads(subprocess.check_output(["tailscale", "status", "--json"], text=True))
+              status = json.loads(subprocess.check_output(["tailscale", "status", "--json", "--peers=true"], text=True))
               nodes = [status.get("Self", {})] + list(status.get("Peer", {}).values())
               for node in nodes:
                   dns_name = node.get("DNSName", "").rstrip(".").lower()
