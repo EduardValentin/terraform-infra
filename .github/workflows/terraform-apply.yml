@@ -182,7 +182,13 @@ jobs:
                       netloc = f"{netloc}:{parsed.port}"
                   return urlunsplit((parsed.scheme, netloc, parsed.path, parsed.query, parsed.fragment))
 
-              raise SystemExit(f"Tailscale peer {host} was not found in tailscale status.")
+              tailscale_ip = subprocess.check_output(["tailscale", "ip", "-4", host], text=True).splitlines()[0].strip()
+              if not tailscale_ip:
+                  raise SystemExit(f"Tailscale peer {host} did not return a Tailscale IPv4 address.")
+              netloc = tailscale_ip
+              if parsed.port:
+                  netloc = f"{netloc}:{parsed.port}"
+              return urlunsplit((parsed.scheme, netloc, parsed.path, parsed.query, parsed.fragment))
 
           backend_file = Path(os.environ["BACKEND_FILE"])
           lines = backend_file.read_text().splitlines()
