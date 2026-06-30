@@ -140,11 +140,20 @@ jobs:
         run: |
           set -euo pipefail
 
-          terraform -chdir="${{ matrix.dir }}" init -input=false -backend=false
-          terraform -chdir="${{ matrix.dir }}" import -input=false -var-file=terraform.auto.tfvars 'tailscale_acl.policy[0]' acl || true
-          terraform -chdir="${{ matrix.dir }}" apply -input=false -auto-approve -var-file=terraform.auto.tfvars -target='tailscale_acl.policy[0]'
-          rm -f "${{ matrix.dir }}/terraform.tfstate" "${{ matrix.dir }}/terraform.tfstate.backup"
-          rm -rf "${{ matrix.dir }}/.terraform" "${{ matrix.dir }}/.terraform.lock.hcl"
+          bootstrap_dir="$(mktemp -d)"
+          trap 'rm -rf "$bootstrap_dir"' EXIT
+          cp -R "${{ matrix.dir }}/." "$bootstrap_dir/"
+          BOOTSTRAP_DIR="$bootstrap_dir" python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          versions_file = Path(os.environ["BOOTSTRAP_DIR"]) / "versions.tf"
+          versions_file.write_text(versions_file.read_text().replace('  backend "s3" {}\n\n', ""))
+          PY
+
+          terraform -chdir="$bootstrap_dir" init -input=false
+          terraform -chdir="$bootstrap_dir" import -input=false -var-file=terraform.auto.tfvars 'tailscale_acl.policy[0]' acl || true
+          terraform -chdir="$bootstrap_dir" apply -input=false -auto-approve -var-file=terraform.auto.tfvars -target='tailscale_acl.policy[0]'
 
       - name: Connect to Tailscale for backend access (OAuth)
         uses: tailscale/github-action@6cae46e2d796f265265cfcf628b72a32b4d7cade
