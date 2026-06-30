@@ -124,6 +124,28 @@ jobs:
             exit 1
           fi
 
+      - name: Write tfvars
+        env:
+          TFVARS_CONTENT: ${{ secrets[matrix.tfvars_secret] }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${TFVARS_CONTENT}" ]]; then
+            echo "Missing required secret: ${{ matrix.tfvars_secret }}"
+            exit 1
+          fi
+          printf '%s' "${TFVARS_CONTENT}" > "${{ matrix.dir }}/terraform.auto.tfvars"
+
+      - name: Bootstrap Tailscale ACL before backend init
+        if: matrix.environment == 'controlplane'
+        run: |
+          set -euo pipefail
+
+          terraform -chdir="${{ matrix.dir }}" init -input=false -backend=false
+          terraform -chdir="${{ matrix.dir }}" import -input=false -var-file=terraform.auto.tfvars 'tailscale_acl.policy[0]' acl || true
+          terraform -chdir="${{ matrix.dir }}" apply -input=false -auto-approve -var-file=terraform.auto.tfvars -target='tailscale_acl.policy[0]'
+          rm -f "${{ matrix.dir }}/terraform.tfstate" "${{ matrix.dir }}/terraform.tfstate.backup"
+          rm -rf "${{ matrix.dir }}/.terraform" "${{ matrix.dir }}/.terraform.lock.hcl"
+
       - name: Connect to Tailscale for backend access (OAuth)
         uses: tailscale/github-action@6cae46e2d796f265265cfcf628b72a32b4d7cade
         with:
@@ -238,17 +260,6 @@ jobs:
 
           backend_file.write_text("\n".join(normalized) + "\n")
           PY
-
-      - name: Write tfvars
-        env:
-          TFVARS_CONTENT: ${{ secrets[matrix.tfvars_secret] }}
-        run: |
-          set -euo pipefail
-          if [[ -z "${TFVARS_CONTENT}" ]]; then
-            echo "Missing required secret: ${{ matrix.tfvars_secret }}"
-            exit 1
-          fi
-          printf '%s' "${TFVARS_CONTENT}" > "${{ matrix.dir }}/terraform.auto.tfvars"
 
       - name: Terraform init
         run: terraform -chdir="${{ matrix.dir }}" init -input=false -backend-config=backend.hcl
