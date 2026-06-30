@@ -175,26 +175,6 @@ jobs:
             exit 1
           fi
 
-      - name: Diagnose Tailscale backend visibility
-        run: |
-          set -euo pipefail
-
-          tailscale status --json --peers=true | jq '{
-            self: {
-              HostName: .Self.HostName,
-              DNSName: .Self.DNSName,
-              TailscaleIPs: .Self.TailscaleIPs,
-              Tags: .Self.Tags,
-              UserID: .Self.UserID
-            },
-            peerCount: (.Peer | length),
-            backendPeer: (
-              [.Peer[] | select(.DNSName == "susanoo-ops.longhair-eagle.ts.net.")]
-              | map({HostName, DNSName, TailscaleIPs, Tags, UserID, Online})
-            )
-          }'
-          tailscale ping --timeout=5s --c=1 100.121.159.108 || true
-
       - name: Write backend config
         env:
           BACKEND_CONFIG: ${{ secrets[matrix.backend_secret] }}
