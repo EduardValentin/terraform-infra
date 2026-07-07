@@ -222,7 +222,7 @@ variable "tailscale_regular_member_destinations" {
 
 variable "tailscale_ssh_destinations" {
   type    = list(string)
-  default = ["tag:prod", "tag:test", "tag:ops"]
+  default = ["tag:prod", "tag:test", "tag:ops", "autogroup:self"]
 }
 
 variable "tailscale_ssh_users" {

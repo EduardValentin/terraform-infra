@@ -29,7 +29,7 @@ It is meant to be usable by both human operators and coding agents.
 - TEST TLS: Tailscale certificates managed from `/srv/edge/hostnames.txt`
 - PROD TLS: Let's Encrypt ACME HTTP-01 with persistent `acme.json`
 - Public DNS automation is optional and not active yet
-- Placeholder public domain remains `courseplatform.com` until a real production domain is chosen
+- Placeholder public domain remains controlled by the control-plane Terraform variables until a real production domain is chosen
 - Observability in OPS: Grafana + Prometheus + Loki + Tempo
   - Loki retention: 30 days
   - Tempo retention: 7 days
@@ -50,13 +50,12 @@ It is meant to be usable by both human operators and coding agents.
   - purpose: pre-production validation
   - host type: home server VM
   - access: Tailscale only
-  - VM node hostname: `susanoo-test`
-  - current TLS hostname: `susanoo-test.longhair-eagle.ts.net`
+  - node and TLS hostnames come from control-plane Terraform variables and the rendered bootstrap env
 - OPS:
   - purpose: centralized business observability and Terraform backend
   - host type: dedicated home server VM
   - access: Tailscale only
-  - VM node hostname: `susanoo-ops`
+  - node hostname comes from control-plane Terraform variables and the rendered bootstrap env
 - PROD:
   - purpose: public production delivery
   - host type: Hetzner VPS

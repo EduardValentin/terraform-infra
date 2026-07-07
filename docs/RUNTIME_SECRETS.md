@@ -51,15 +51,8 @@ Set the real age public key in `.sops.yaml`.
 
 ### 4) Configure GitHub secrets
 
-In `terraform-infra`, set:
-
-- `SOPS_AGE_KEY`: the full private key content from `$HOME/.config/sops/age/keys.txt`
-- `TAILSCALE_OAUTH_CLIENT_ID`
-- `TAILSCALE_OAUTH_SECRET`
-- `TEST_SSH_KNOWN_HOSTS`
-- `PROD_SSH_KNOWN_HOSTS`
-- repository variable `TEST_NODE_HOSTNAME`
-- repository variable `PROD_NODE_HOSTNAME`
+In `terraform-infra`, set the secrets and repository variables consumed by `.github/workflows/sync-runtime-secrets.yml`.
+The SOPS age key secret should contain the full private key content from `$HOME/.config/sops/age/keys.txt`.
 
 ## Standard editing cycle
 
@@ -100,10 +93,7 @@ Remove the local plaintext work files when done:
 
 ## Automatic sync on push
 
-`.github/workflows/sync-runtime-secrets.yml` runs automatically on pushes to `main` when encrypted runtime files change under:
-
-- `secrets/runtime/test/*.enc`
-- `secrets/runtime/prod/*.enc`
+`.github/workflows/sync-runtime-secrets.yml` is the source of truth for automatic triggers, manual inputs, target resolution, and required secrets.
 
 Behavior:
 
@@ -125,13 +115,13 @@ Merge guard:
 ## Verification
 
 ```bash
-ssh -o ProxyCommand='tailscale nc %h %p' root@susanoo-test "sudo stat -c '%a %n' /srv/apps/courseplatform/.env /srv/postgres/courseplatform.env"
+ssh -o ProxyCommand='tailscale nc %h %p' root@<target-node-hostname> "sudo stat -c '%a %n' /srv/apps/<app>/.env /srv/postgres/<app>.env"
 ```
 
 Expected permissions:
 
-- `600 /srv/apps/courseplatform/.env`
-- `600 /srv/postgres/courseplatform.env`
+- `600 /srv/apps/<app>/.env`
+- `600 /srv/postgres/<app>.env`
 
 ## Postgres credential caveat
 
