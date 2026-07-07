@@ -205,42 +205,8 @@ jobs:
           backend_file="${{ matrix.dir }}/backend.hcl"
           printf '%s' "${BACKEND_CONFIG}" > "${backend_file}"
           BACKEND_FILE="${backend_file}" python3 - <<'PY'
-          import json
           import os
-          import subprocess
           from pathlib import Path
-          from urllib.parse import urlsplit, urlunsplit
-
-
-          def resolve_tailscale_endpoint(endpoint):
-              parsed = urlsplit(endpoint)
-              host = parsed.hostname
-              if not host or not host.endswith(".longhair-eagle.ts.net"):
-                  return endpoint
-
-              status = json.loads(subprocess.check_output(["tailscale", "status", "--json", "--peers=true"], text=True))
-              nodes = [status.get("Self", {})] + list(status.get("Peer", {}).values())
-              for node in nodes:
-                  dns_name = node.get("DNSName", "").rstrip(".").lower()
-                  if dns_name != host.lower():
-                      continue
-
-                  tailscale_ip = (node.get("TailscaleIPs") or [None])[0]
-                  if not tailscale_ip:
-                      break
-
-                  netloc = f"[{tailscale_ip}]" if ":" in tailscale_ip else tailscale_ip
-                  if parsed.port:
-                      netloc = f"{netloc}:{parsed.port}"
-                  return urlunsplit((parsed.scheme, netloc, parsed.path, parsed.query, parsed.fragment))
-
-              tailscale_ip = subprocess.check_output(["tailscale", "ip", "-4", host], text=True).splitlines()[0].strip()
-              if not tailscale_ip:
-                  raise SystemExit(f"Tailscale peer {host} did not return a Tailscale IPv4 address.")
-              netloc = tailscale_ip
-              if parsed.port:
-                  netloc = f"{netloc}:{parsed.port}"
-              return urlunsplit((parsed.scheme, netloc, parsed.path, parsed.query, parsed.fragment))
 
           backend_file = Path(os.environ["BACKEND_FILE"])
           lines = backend_file.read_text().splitlines()
@@ -258,9 +224,6 @@ jobs:
                   force_path_style_value = line.split("=", 1)[1].strip()
                   continue
               normalized.append(line)
-
-          if endpoint_value:
-              endpoint_value = resolve_tailscale_endpoint(endpoint_value)
 
           if endpoint_value and not any(line.strip().startswith("endpoints") for line in normalized):
               normalized.extend(["", "endpoints = {", f'  s3 = "{endpoint_value}"', "}"])
