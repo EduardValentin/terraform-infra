@@ -1,14 +1,13 @@
 # Domain Mapping Strategy
 
-Current public domain is still a placeholder: `courseplatform.com`.
+Current public domain is still a placeholder. The default comes from `placeholder_prod_domain` in `infra/envs/controlplane/variables.tf`.
 Public DNS automation is supported by the repository but is not active today.
 
 ## Current usage
 
-- TEST node hostname: `susanoo-test.longhair-eagle.ts.net`
-- TEST TLS hostname: `susanoo-test.longhair-eagle.ts.net`
-- OPS node hostname: `susanoo-ops.longhair-eagle.ts.net`
-- Current TEST mode uses a single node-level Tailscale certificate.
+- Control-plane hostname and domain defaults live in `infra/envs/controlplane/variables.tf`.
+- Generated app hostnames are exposed by `terraform -chdir=infra/envs/controlplane output generated_app_domains`.
+- Current TEST mode uses the hostnames rendered into the bootstrap env and the host's `/srv/edge/hostnames.txt`.
 
 ## Future brand domains
 

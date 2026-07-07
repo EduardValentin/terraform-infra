@@ -7,14 +7,12 @@ Store Terraform state on your home server (OPS VM) so state is centralized and n
 ## Design
 
 - Backend type: Terraform `s3` backend
-- S3 endpoint: MinIO running on `susanoo-ops`
+- S3 endpoint: MinIO running on the OPS host
 - Network path: Tailscale-only
-- Bucket: `terraform-state`
-- State keys:
-  - `controlplane/terraform.tfstate`
-  - `test/terraform.tfstate`
-  - `ops/terraform.tfstate`
-  - `prod/terraform.tfstate`
+- Backend defaults and generated state keys are sourced from:
+  - `infra/envs/controlplane/variables.tf`
+  - `infra/templates/bootstrap-ops.env.tftpl`
+  - `scripts/terraform/render_minio_backend_configs.sh`
 
 ## Why this design
 
@@ -26,18 +24,9 @@ Store Terraform state on your home server (OPS VM) so state is centralized and n
 
 ## Bootstrap-driven provisioning on OPS
 
-OPS bootstrap now provisions MinIO backend when these vars are set in `bootstrap-ops.env`:
-
-```dotenv
-TERRAFORM_BACKEND_ENABLED=true
-TERRAFORM_BACKEND_BUCKET=terraform-state
-TERRAFORM_BACKEND_BIND_IP=
-TERRAFORM_BACKEND_PORT=9000
-TERRAFORM_BACKEND_ACCESS_KEY=terraform-state
-TERRAFORM_BACKEND_SECRET_KEY=replace-with-strong-secret
-```
-
-`TERRAFORM_BACKEND_BIND_IP` can be left empty to auto-use OPS Tailscale IPv4.
+OPS bootstrap provisions MinIO from the Terraform-rendered bootstrap payload.
+The source template is `infra/templates/bootstrap-ops.env.tftpl`; defaults and overrides are in `infra/envs/controlplane/variables.tf`.
+`TERRAFORM_BACKEND_BIND_IP` can be left empty in the rendered env to auto-use the OPS Tailscale IPv4.
 
 ## GitHub Secrets values
 
@@ -45,19 +34,14 @@ Generate backend config payloads:
 
 ```bash
 ./scripts/terraform/render_minio_backend_configs.sh \
-  http://susanoo-ops.longhair-eagle.ts.net:9000 \
-  terraform-state \
-  terraform-state \
+  <endpoint> \
+  <bucket> \
+  <access-key> \
   '<strong-random-secret>' \
   ./dist/backend-config
 ```
 
-Set repo secrets in `terraform-infra`:
-
-- `TF_BACKEND_CONFIG_CONTROLPLANE` <- `./dist/backend-config/controlplane.backend.hcl`
-- `TF_BACKEND_CONFIG_TEST` <- `./dist/backend-config/test.backend.hcl`
-- `TF_BACKEND_CONFIG_OPS` <- `./dist/backend-config/ops.backend.hcl`
-- `TF_BACKEND_CONFIG_PROD` <- `./dist/backend-config/prod.backend.hcl`
+The generated files are named after each Terraform environment. The matching GitHub secret names are defined in `.github/workflows/terraform-plan.yml` and `.github/workflows/terraform-apply.yml`.
 
 ## Verification
 
@@ -65,7 +49,7 @@ On OPS VM:
 
 ```bash
 docker compose --profile tfstate --env-file /srv/ops/.env -f /srv/ops/docker-compose.yml ps
-curl -fsS "http://$(awk -F= '$1==\"OPS_TAILSCALE_IPV4\"{print $2}' /srv/ops/.env):9000/minio/health/live" && echo
+curl -fsS "http://$(awk -F= '$1=="OPS_TAILSCALE_IPV4"{ip=$2} $1=="TERRAFORM_BACKEND_PORT"{port=$2} END{print ip":"port}' /srv/ops/.env)/minio/health/live" && echo
 docker logs --tail 50 ops-terraform-state-init
 ```
 
@@ -78,8 +62,7 @@ In GitHub Actions (`terraform-infra`):
 
 Rotate backend credentials by:
 
-1. Updating `TERRAFORM_BACKEND_ACCESS_KEY`/`TERRAFORM_BACKEND_SECRET_KEY` in OPS bootstrap env.
+1. Updating the backend access-key/secret-key values in the control-plane tfvars payload.
 2. Re-running OPS bootstrap.
 3. Re-generating backend HCL payloads.
-4. Updating all four `TF_BACKEND_CONFIG_*` GitHub secrets.
-
+4. Updating the Terraform backend GitHub secrets consumed by the Terraform workflows.

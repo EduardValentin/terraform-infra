@@ -23,24 +23,12 @@ This Terraform root manages:
 ```bash
 cd infra/envs/controlplane
 cp terraform.tfvars.example terraform.tfvars
-cat > backend.hcl <<'EOF'
-bucket                      = "terraform-state"
-key                         = "controlplane/terraform.tfstate"
-region                      = "us-east-1"
-endpoints = {
-  s3 = "http://susanoo-ops.longhair-eagle.ts.net:9000"
-}
-access_key                  = "terraform-state"
-secret_key                  = "replace-with-strong-secret"
-skip_credentials_validation = true
-skip_region_validation      = true
-skip_metadata_api_check     = true
-use_path_style              = true
-EOF
 terraform init -backend-config=backend.hcl
 terraform plan -var-file=terraform.tfvars
 terraform apply -var-file=terraform.tfvars
 ```
+
+Generate `backend.hcl` with `scripts/terraform/render_minio_backend_configs.sh`, or copy the matching backend payload from the GitHub secret. Backend details live in `docs/TERRAFORM_BACKEND.md`.
 
 ## Render bootstrap env outputs
 
