@@ -58,6 +58,8 @@ Tailscale auth model:
 Tailscale OpenCL agent access model (control-plane tfvars):
 
 - `tailscale_opencl_*` variables define the OpenCL account, agent, tag-owner, and admin reachability model.
+- Native Tailscale SSH to the OpenCL agent is limited to `root` for `eduard.valentin1996@gmail.com` and `autogroup:owner`; the VM does not rely on Ubuntu OpenSSH for remote administration.
+- Policy `sshTests` verify the allowed identities and deny root and non-root SSH for the known regular member before Tailscale accepts an update.
 - Defaults and override knobs live in `infra/envs/controlplane/variables.tf`; current applied values come from `TFVARS_CONTROLPLANE`.
 - After updating these values in `TFVARS_CONTROLPLANE`, run `Terraform Apply` for `controlplane`.
 
@@ -69,6 +71,8 @@ Tailscale change safety checklist (before merge/apply):
 - Do not include port `22` in `tailscale_opencl_account_destinations` or `tailscale_opencl_agent_destinations`.
 - Keep required OpenCL tag owners in `tailscale_opencl_agent_tag_owners`; otherwise the agent cannot advertise its tag.
 - Keep the OpenCL agent source aligned with the advertised agent tag so restrictions apply to the node identity.
+- Keep `tailscale_opencl_ssh_sources` restricted to `eduard.valentin1996@gmail.com` and `autogroup:owner`.
+- Keep native SSH to the OpenCL agent restricted to `root`, and preserve the corresponding positive and negative `sshTests`.
 - Keep regular-member source/destination variables as the only member ACL configuration path.
 - Ensure `TFVARS_CONTROLPLANE` uses only `tailscale_regular_member_sources` and `tailscale_regular_member_destinations` for member ACL configuration.
 - After apply, verify from admin laptop:

@@ -70,7 +70,7 @@ locals {
       "tag:test"                          = [var.tailscale_admin_group]
       "tag:ops"                           = [var.tailscale_admin_group]
       "${var.tailscale_opencl_agent_tag}" = distinct(concat([var.tailscale_admin_group], var.tailscale_opencl_agent_tag_owners))
-      "tag:ci-app-deploy"                    = [var.tailscale_admin_group]
+      "tag:ci-app-deploy"                 = [var.tailscale_admin_group]
       "tag:ci-secrets"                    = [var.tailscale_admin_group]
       "tag:ci-terraform"                  = [var.tailscale_admin_group]
     }
@@ -155,6 +155,12 @@ locals {
     ssh = [
       {
         action = "accept"
+        src    = sort(tolist(var.tailscale_opencl_ssh_sources))
+        dst    = [var.tailscale_opencl_agent_tag]
+        users  = ["root"]
+      },
+      {
+        action = "accept"
         src    = [var.tailscale_admin_group]
         dst    = var.tailscale_ssh_destinations
         users  = var.tailscale_ssh_users
@@ -172,6 +178,22 @@ locals {
         users  = ["root"]
       }
     ]
+    sshTests = concat(
+      [
+        for source in sort(tolist(var.tailscale_opencl_ssh_sources)) : {
+          src    = source
+          dst    = [var.tailscale_opencl_agent_tag]
+          accept = ["root"]
+        }
+      ],
+      [
+        for source in sort(tolist(var.tailscale_opencl_ssh_denied_test_sources)) : {
+          src  = source
+          dst  = [var.tailscale_opencl_agent_tag]
+          deny = ["root", "autogroup:nonroot"]
+        }
+      ]
+    )
   }
 
   tailscale_policy_json = jsonencode(local.tailscale_policy)

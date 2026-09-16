@@ -30,6 +30,10 @@ Actual identities and destinations come from `TFVARS_CONTROLPLANE` at apply time
 - OpenCL node identity remains scoped:
   - the OpenCL agent tag may reach only explicit TEST and OPS service ports
   - it must not receive SSH access to TEST or OPS nodes
+- Native SSH to the OpenCL agent remains scoped:
+  - only `eduard.valentin1996@gmail.com` and `autogroup:owner` may connect
+  - the only permitted Unix account is `root`
+  - policy tests prove those grants and deny root and non-root access to the known regular member
 - Regular member reachability is controlled only by:
   - `tailscale_regular_member_sources`
   - `tailscale_regular_member_destinations`
