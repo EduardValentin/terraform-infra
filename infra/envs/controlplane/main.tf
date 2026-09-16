@@ -64,6 +64,8 @@ locals {
     replace(destination, ":22", "")
   ])
 
+  tailscale_opencl_ssh_named_sources = setsubtract(var.tailscale_opencl_ssh_sources, toset(["autogroup:owner"]))
+
   tailscale_policy = {
     tagOwners = {
       "tag:prod"                          = [var.tailscale_admin_group]
@@ -180,7 +182,7 @@ locals {
     ]
     sshTests = concat(
       [
-        for source in sort(tolist(var.tailscale_opencl_ssh_sources)) : {
+        for source in sort(tolist(local.tailscale_opencl_ssh_named_sources)) : {
           src    = source
           dst    = [var.tailscale_opencl_agent_tag]
           accept = ["root"]

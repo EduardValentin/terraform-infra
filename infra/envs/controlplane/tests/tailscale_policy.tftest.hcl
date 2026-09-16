@@ -33,13 +33,13 @@ run "opencl_native_ssh_is_owner_only" {
   }
 
   assert {
-    condition = alltrue([
-      for source in ["eduard.valentin1996@gmail.com", "autogroup:owner"] : anytrue([
-        for test in jsondecode(output.tailscale_policy_json).sshTests :
-        test.src == source && test.dst == ["tag:solus-agent"] && try(test.accept, []) == ["root"]
-      ])
+    condition = anytrue([
+      for test in jsondecode(output.tailscale_policy_json).sshTests :
+      test.src == "eduard.valentin1996@gmail.com" &&
+      test.dst == ["tag:solus-agent"] &&
+      try(test.accept, []) == ["root"]
     ])
-    error_message = "SSH policy tests must prove root access for Eduard and tailnet owners."
+    error_message = "SSH policy tests must prove root access for Eduard."
   }
 
   assert {

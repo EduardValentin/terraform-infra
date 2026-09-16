@@ -59,7 +59,7 @@ Tailscale OpenCL agent access model (control-plane tfvars):
 
 - `tailscale_opencl_*` variables define the OpenCL account, agent, tag-owner, and admin reachability model.
 - Native Tailscale SSH to the OpenCL agent is limited to `root` for `eduard.valentin1996@gmail.com` and `autogroup:owner`; the VM does not rely on Ubuntu OpenSSH for remote administration.
-- Policy `sshTests` verify the allowed identities and deny root and non-root SSH for the known regular member before Tailscale accepts an update.
+- Policy `sshTests` verify the named-user grant and deny root and non-root SSH for the known regular member before Tailscale accepts an update; Terraform tests separately preserve the `autogroup:owner` grant because role autogroups are not valid SSH test sources.
 - Defaults and override knobs live in `infra/envs/controlplane/variables.tf`; current applied values come from `TFVARS_CONTROLPLANE`.
 - After updating these values in `TFVARS_CONTROLPLANE`, run `Terraform Apply` for `controlplane`.
 
