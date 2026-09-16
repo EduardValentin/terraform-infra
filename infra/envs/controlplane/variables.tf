@@ -149,6 +149,11 @@ variable "tailscale_admin_destinations" {
 variable "tailscale_opencl_agent_tag" {
   type    = string
   default = "tag:solus-agent"
+
+  validation {
+    condition     = var.tailscale_opencl_agent_tag == "tag:solus-agent"
+    error_message = "The remote desktop agent must retain the tag:solus-agent identity."
+  }
 }
 
 variable "tailscale_opencl_agent_tag_owners" {
@@ -210,6 +215,34 @@ variable "tailscale_opencl_admin_destinations" {
   default = ["tag:solus-agent:*"]
 }
 
+variable "tailscale_opencl_ssh_sources" {
+  type        = set(string)
+  description = "Identities allowed to use native Tailscale SSH as root on the OpenCL agent node."
+  default = [
+    "eduard.valentin1996@gmail.com",
+    "autogroup:owner"
+  ]
+
+  validation {
+    condition = var.tailscale_opencl_ssh_sources == toset([
+      "eduard.valentin1996@gmail.com",
+      "autogroup:owner"
+    ])
+    error_message = "OpenCL native SSH must remain restricted to eduard.valentin1996@gmail.com and autogroup:owner."
+  }
+}
+
+variable "tailscale_opencl_ssh_denied_test_sources" {
+  type        = set(string)
+  description = "Tailnet members that must remain unable to use native Tailscale SSH on the OpenCL agent node."
+  default     = ["eli.lungu04@gmail.com"]
+
+  validation {
+    condition     = var.tailscale_opencl_ssh_denied_test_sources == toset(["eli.lungu04@gmail.com"])
+    error_message = "The OpenCL native SSH denial test must cover eli.lungu04@gmail.com."
+  }
+}
+
 variable "tailscale_regular_member_sources" {
   type    = list(string)
   default = ["eli.lungu04@gmail.com"]
@@ -223,6 +256,11 @@ variable "tailscale_regular_member_destinations" {
 variable "tailscale_ssh_destinations" {
   type    = list(string)
   default = ["tag:prod", "tag:test", "tag:ops", "autogroup:self"]
+
+  validation {
+    condition     = !contains(var.tailscale_ssh_destinations, "tag:solus-agent")
+    error_message = "General admin SSH destinations must not include tag:solus-agent; use the owner-only OpenCL SSH rule."
+  }
 }
 
 variable "tailscale_ssh_users" {
